@@ -16,7 +16,7 @@ export default function PrivacyPage() {
         </article>
         <article className="rounded-3xl bg-sage p-5">
           <h2 className="font-bold text-forest">Future scope</h2>
-          <p className="mt-2 leading-7 text-stone-700">Later phases may add Supabase and account data only after privacy requirements and security rules are defined.</p>
+          <p className="mt-2 leading-7 text-stone-700">Supabase authentication is available when configured. Later phases may add database-backed account data only after privacy requirements and security rules are defined.</p>
         </article>
         <article className="rounded-3xl bg-sage p-5">
           <h2 className="font-bold text-forest">Sensitive information</h2>

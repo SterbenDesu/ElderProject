@@ -8,7 +8,7 @@ Recommended provider: **Vercel** for the Next.js web app.
 
 ## Current deployment status
 
-Not deployed yet. The repository contains the first static, deployable Next.js app shell for review and preview deployment.
+Not deployed yet. The repository now contains a Next.js app shell with Supabase email/password authentication UI when Supabase public environment variables are configured.
 
 ## Current stack
 
@@ -16,25 +16,24 @@ Not deployed yet. The repository contains the first static, deployable Next.js a
 - TypeScript
 - Tailwind CSS
 - npm
+- Supabase Auth through `@supabase/supabase-js`
 
 ## Required services
 
 - Vercel for hosting the web app.
-- Supabase is planned for the next authentication and database implementation phase.
+- Supabase for email/password authentication.
 - Stripe or another marketplace payment provider is not required for this phase and must not be added until a later payment-specific task.
 
 ## Required environment variables
 
-No real Supabase credentials have been added yet.
-
-Future Supabase variable names:
+No real Supabase credentials are committed. Configure these names locally and in Vercel:
 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 ```
 
-These names are also listed in `.env.example` with empty values. Do not commit `.env.local`, service role keys, or secret values.
+These are public browser variables. Do not commit `.env.local`, service role keys, or secret values. Do not use service role keys in browser code.
 
 ## Development command
 
@@ -54,18 +53,35 @@ npm run build
 npm run start
 ```
 
+## Local setup
+
+1. Run `npm install` to install dependencies, including `@supabase/supabase-js`.
+2. Create a local `.env.local` file. Never commit it.
+3. Add:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+4. In Supabase, enable the Email provider.
+5. In Supabase, set the Site URL to `http://localhost:3000` for local testing.
+6. Run `npm run dev`.
+7. Test `/signup`, `/login`, header auth state, sign out, and `/dashboard`.
+
 ## Database setup
 
-Supabase setup is planned for the next implementation phase. No Supabase project credentials, database tables, row-level security policies, or SQL migrations are active in the app yet.
+No database SQL setup, profile tables, row-level security policies, or migrations are required for this auth-only phase.
 
-Before real user data is stored:
+Current auth metadata saved during signup when Supabase accepts it:
 
-1. Create a Supabase project.
-2. Add local values to `.env.local` using the names from `.env.example`.
-3. Add the same variables to Vercel after the Supabase project exists.
-4. Create reviewed database migrations.
-5. Enable and test row-level security for every user-data table.
-6. Verify role-based access for visitors, clients/caregivers, helper applicants, verified helpers, and admins.
+- `account_type`
+- `terms_accepted`
+- `terms_version`
+- `privacy_version`
+
+Before real user data is stored in database tables:
+
+1. Create reviewed database migrations.
+2. Enable and test row-level security for every user-data table.
+3. Verify role-based access for visitors, clients/caregivers, helper applicants, verified helpers, and admins.
+4. Decide how auth metadata will be synchronized with future profile tables.
 
 See `docs/supabase-setup.md`, `docs/auth-and-roles-plan.md`, and `docs/database-schema-draft.md` for the current planning documents.
 
@@ -73,18 +89,19 @@ See `docs/supabase-setup.md`, `docs/auth-and-roles-plan.md`, and `docs/database-
 
 None for this phase. Database schema planning is documented, but no migrations have been created yet.
 
-## Deployment steps
+## Vercel deployment steps
 
 1. Create or connect a Vercel project to this repository.
 2. Use npm as the package manager.
 3. Use `npm run build` as the build command.
 4. Use Vercel's default Next.js output handling.
-5. For the current static app shell, Supabase environment variables are not required to run the app.
-6. After creating a Supabase project in the next phase, configure these Vercel environment variables:
+5. Configure these Vercel environment variables:
    - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-7. Redeploy after adding environment variables in Vercel.
-8. Deploy a preview and review all required public and placeholder routes.
+   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+6. In Supabase Authentication settings, enable the Email provider.
+7. In Supabase Authentication URL settings, set the Site URL to the deployed Vercel URL and add any preview URLs as allowed redirect URLs.
+8. Redeploy after adding environment variables in Vercel.
+9. Deploy a preview and review all required public and auth routes.
 
 ## Verification checklist
 
@@ -92,13 +109,20 @@ None for this phase. Database schema planning is documented, but no migrations h
 - Lint succeeds with `npm run lint`.
 - Homepage loads at `/`.
 - Static public pages load: `/services`, `/safety`, `/allowed-services`, `/prohibited-services`, `/terms`, and `/privacy`.
-- Placeholder pages load: `/login`, `/signup`, `/dashboard`, `/helper/apply`, `/helpers`, and `/admin`.
-- Placeholder pages clearly state that real authentication, database storage, payment processing, and admin logic are not active yet.
+- Auth pages load: `/login` and `/signup`.
+- Signup requires Terms and Privacy acceptance before submission.
+- Signup stores selected `account_type` in auth metadata when Supabase accepts the signup.
+- Signed-out users see Login and Sign up in the header.
+- Signed-in users see Dashboard and Sign out in the header.
+- Sign out works.
+- `/dashboard` asks signed-out users to log in and shows signed-in users their email and account type.
 - Terms and Privacy pages clearly state they are draft placeholders requiring legal review before launch.
 - No secrets are committed or documented.
-- No real Supabase connection is active yet.
-- No Stripe, live payment, or medical-service functionality is active.
+- No `.env.local` file is committed.
+- No service role key is used in the browser.
+- No database profile tables are implemented yet.
+- No Stripe, live payment, booking payment, native mobile, Bulgarian localization, or medical-service functionality is active.
 
 ## Deployment issues
 
-None known for the static scaffold.
+None known for the current auth UI phase.

@@ -9,10 +9,10 @@ export default function AdminPage() {
         <div className="rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200">
           <h2 className="text-2xl font-bold text-forest">Static placeholder only</h2>
           <p className="mt-4 text-lg leading-8">
-            Future admin tools may review verification, complaints, and safety issues. This placeholder has no admin authentication, permissions, database access, or moderation actions.
+            Future admin tools may review verification, complaints, and safety issues. This placeholder has no admin role enforcement, permissions, database access, or moderation actions.
           </p>
           <p className="mt-4 leading-7">
-            Real authentication, storage, booking, payment processing, and admin functionality are not active yet. Supabase, Stripe, database logic, payment logic, and admin actions have not been added.
+            Supabase authentication is available when configured, but storage, booking, payment processing, and admin functionality are not active yet. Stripe, database logic, payment logic, and admin actions have not been added.
           </p>
           <Link href="/prohibited-services" className="mt-6 inline-flex min-h-12 items-center rounded-full bg-forest px-5 py-3 font-semibold text-white transition hover:bg-stone-800">
             Review boundaries

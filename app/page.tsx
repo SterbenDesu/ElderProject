@@ -46,7 +46,7 @@ export default function Home() {
               </Link>
             </div>
             <p className="mt-5 max-w-2xl text-sm leading-6 text-stone-600">
-              Not active yet: no real authentication, booking, storage, payment processing, or admin tools are enabled in this static shell.
+              Not active yet: booking, database storage, payment processing, and admin tools are not enabled in this early shell. Supabase authentication works when configured.
             </p>
           </div>
 
@@ -142,7 +142,7 @@ export default function Home() {
               <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">Current status</p>
               <h2 className="mt-3 text-3xl font-bold text-forest">Static MVP shell for review</h2>
               <p className="mt-3 max-w-3xl leading-7 text-stone-700">
-                Review the public pages, service boundaries, and placeholders before any authentication, Supabase, Stripe, database, payment, or admin functionality is added.
+                Review the public pages, service boundaries, and placeholders before any database, Stripe, payment, or admin functionality is added.
               </p>
             </div>
             <div className="grid gap-3 sm:flex lg:grid">

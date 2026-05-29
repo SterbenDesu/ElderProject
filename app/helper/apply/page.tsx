@@ -12,7 +12,7 @@ export default function ApplyPage() {
             Future helper applications may include verification review, but this page does not submit forms, store documents, approve helpers, or create employment relationships.
           </p>
           <p className="mt-4 leading-7">
-            Real authentication, storage, booking, payment processing, and admin functionality are not active yet. Supabase, Stripe, database logic, payment logic, and admin actions have not been added.
+            Supabase authentication is available when configured, but storage, booking, payment processing, and admin functionality are not active yet. Stripe, database logic, payment logic, and admin actions have not been added.
           </p>
           <Link href="/allowed-services" className="mt-6 inline-flex min-h-12 items-center rounded-full bg-forest px-5 py-3 font-semibold text-white transition hover:bg-stone-800">
             See allowed services
