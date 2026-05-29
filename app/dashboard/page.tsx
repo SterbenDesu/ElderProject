@@ -2,27 +2,153 @@
 
 import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+import {
+  createSignupDatabaseRecords,
+  getSignupAccountTypeFromUser,
+  loadProfile,
+  type Profile,
+  type ProfileRole,
+} from "@/lib/supabase/profiles";
 
 type DashboardStatus = "loading" | "signed-out" | "signed-in" | "unconfigured";
+type ProfileStatus = "idle" | "loading" | "loaded" | "missing" | "error";
 
-function formatAccountType(value: unknown) {
-  if (value === "client_caregiver") {
-    return "Client/caregiver";
+type DashboardSection = {
+  title: string;
+  description: string;
+};
+
+function formatRole(role: ProfileRole) {
+  const labels: Record<ProfileRole, string> = {
+    client: "Client/caregiver",
+    helper_applicant: "Helper applicant",
+    verified_helper: "Verified helper",
+    admin: "Admin",
+  };
+
+  return labels[role];
+}
+
+function formatDate(value: string | null) {
+  if (!value) {
+    return "Not available";
   }
 
-  if (value === "helper_applicant") {
-    return "Helper applicant";
+  return new Intl.DateTimeFormat("en", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(new Date(value));
+}
+
+function getRoleSections(role: ProfileRole): DashboardSection[] {
+  if (role === "helper_applicant") {
+    return [
+      { title: "Helper application", description: "Placeholder for the future helper application form and submitted application details." },
+      { title: "Verification status", description: "Placeholder for review status after the admin workflow is implemented." },
+      { title: "Service boundaries", description: "Reminder that VnukPodNaem covers non-medical support and helpers are independent marketplace participants." },
+    ];
   }
 
-  return "Not set yet";
+  if (role === "verified_helper") {
+    return [
+      { title: "Assigned bookings placeholder", description: "Future area for accepted non-medical support bookings assigned through the marketplace." },
+      { title: "Helper profile placeholder", description: "Future area for helper profile details after admin verification exists." },
+    ];
+  }
+
+  if (role === "admin") {
+    return [
+      { title: "Admin overview placeholder", description: "Future area for operational summaries after protected admin permissions are implemented." },
+      { title: "Helper applications placeholder", description: "Future area for reviewing helper applications and verification decisions." },
+      { title: "Disputes placeholder", description: "Future area for admin-reviewed complaints and booking disputes." },
+      { title: "Audit logs placeholder", description: "Future area for viewing important safety and moderation actions." },
+    ];
+  }
+
+  return [
+    { title: "Elderly profiles", description: "Future area for client/caregiver elderly profile management." },
+    { title: "Booking requests", description: "Future area for non-medical service requests and booking status." },
+    { title: "Safety and service boundaries", description: "Reminder that the platform supports non-medical help only and does not guarantee absolute safety." },
+  ];
 }
 
 export default function DashboardPage() {
   const [status, setStatus] = useState<DashboardStatus>("loading");
+  const [profileStatus, setProfileStatus] = useState<ProfileStatus>("idle");
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [profileMessage, setProfileMessage] = useState<string | null>(null);
+  const [isRetryingProfileSetup, setIsRetryingProfileSetup] = useState(false);
+
+  const fetchProfile = useCallback(async (currentUser: User) => {
+    const { supabase, envError } = getSupabaseBrowserClient();
+
+    if (envError || !supabase) {
+      setProfileStatus("error");
+      setProfileMessage(envError);
+      return;
+    }
+
+    setProfileStatus("loading");
+    setProfileMessage(null);
+
+    const result = await loadProfile(supabase, currentUser.id);
+
+    if (result.errorMessage) {
+      setProfile(null);
+      setProfileStatus("error");
+      setProfileMessage(result.errorMessage);
+      return;
+    }
+
+    if (!result.profile) {
+      setProfile(null);
+      setProfileStatus("missing");
+      setProfileMessage("Your auth account exists, but profile setup is incomplete. Use the retry button below after the database schema and RLS policies are applied.");
+      return;
+    }
+
+    setProfile(result.profile);
+    setProfileStatus("loaded");
+    setProfileMessage(null);
+  }, []);
+
+  async function retryProfileSetup() {
+    if (!user?.email) {
+      setProfileMessage("Cannot retry profile setup because the signed-in user email is unavailable.");
+      return;
+    }
+
+    const { supabase, envError } = getSupabaseBrowserClient();
+
+    if (envError || !supabase) {
+      setProfileMessage(envError);
+      return;
+    }
+
+    setIsRetryingProfileSetup(true);
+    setProfileMessage(null);
+
+    const result = await createSignupDatabaseRecords(supabase, {
+      userId: user.id,
+      email: user.email,
+      accountType: getSignupAccountTypeFromUser(user),
+    });
+
+    if (result.errorMessage) {
+      setProfileStatus("error");
+      setProfileMessage(result.errorMessage);
+      setIsRetryingProfileSetup(false);
+      return;
+    }
+
+    await fetchProfile(user);
+    setIsRetryingProfileSetup(false);
+  }
 
   useEffect(() => {
     const { supabase, envError } = getSupabaseBrowserClient();
@@ -44,18 +170,23 @@ export default function DashboardPage() {
         setStatus("signed-out");
         setMessage(error.message);
         setUser(null);
+        setProfile(null);
+        setProfileStatus("idle");
         return;
       }
 
       if (!data.user) {
         setStatus("signed-out");
         setUser(null);
+        setProfile(null);
+        setProfileStatus("idle");
         return;
       }
 
       setStatus("signed-in");
       setUser(data.user);
       setMessage(null);
+      void fetchProfile(data.user);
     });
 
     const {
@@ -64,19 +195,24 @@ export default function DashboardPage() {
       if (!session?.user) {
         setStatus("signed-out");
         setUser(null);
+        setProfile(null);
+        setProfileStatus("idle");
         return;
       }
 
       setStatus("signed-in");
       setUser(session.user);
       setMessage(null);
+      void fetchProfile(session.user);
     });
 
     return () => {
       isMounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [fetchProfile]);
+
+  const roleSections = profile ? getRoleSections(profile.role) : [];
 
   return (
     <section className="mx-auto max-w-5xl px-5 py-12 lg:px-8 lg:py-16">
@@ -101,7 +237,7 @@ export default function DashboardPage() {
           <div className="rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200">
             <h2 className="text-2xl font-bold text-forest">Please log in</h2>
             <p className="mt-4 text-lg leading-8">
-              You need to log in before viewing the dashboard shell. Protected middleware and database-backed profiles are not implemented in this phase.
+              You need to log in before viewing your database-backed dashboard profile. Protected middleware is intentionally deferred.
             </p>
             {message ? <p className="mt-4 rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{message}</p> : null}
             <div className="mt-6 flex flex-wrap gap-3">
@@ -114,11 +250,11 @@ export default function DashboardPage() {
             </div>
           </div>
           <aside className="rounded-[2rem] bg-sage p-6 text-stone-700">
-            <h2 className="text-xl font-bold text-forest">Not active yet</h2>
+            <h2 className="text-xl font-bold text-forest">Dashboard access</h2>
             <ul className="mt-4 space-y-3 leading-7">
-              <li>• No database profile records are created in this phase.</li>
-              <li>• No bookings, payments, helper approvals, or admin workflows are active.</li>
-              <li>• Route protection middleware is intentionally deferred.</li>
+              <li>• Signed-in users load their profile from the Supabase `profiles` table.</li>
+              <li>• No bookings, payments, helper approvals, or admin management workflows are active.</li>
+              <li>• Route protection middleware is still intentionally deferred.</li>
             </ul>
           </aside>
         </div>
@@ -128,37 +264,62 @@ export default function DashboardPage() {
         <div className="mt-8 grid gap-5 lg:grid-cols-[1fr_0.72fr]">
           <div className="rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200">
             <h2 className="text-2xl font-bold text-forest">Welcome</h2>
-            <dl className="mt-5 grid gap-4 rounded-3xl bg-cream p-5 text-sm">
-              <div>
-                <dt className="font-bold text-forest">Email</dt>
-                <dd className="mt-1 break-words">{user.email ?? "Not available"}</dd>
-              </div>
-              <div>
-                <dt className="font-bold text-forest">Account type</dt>
-                <dd className="mt-1">{formatAccountType(user.user_metadata?.account_type)}</dd>
-              </div>
-            </dl>
 
-            <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              {[
-                ["Elderly profiles", "Future area for client/caregiver profile management."],
-                ["Bookings", "Future area for non-medical service requests and booking status."],
-                ["Helper workflows", "Future area for helper applications and review status."],
-                ["Admin workflows", "Future area for carefully protected moderation and support tools."],
-              ].map(([title, description]) => (
-                <section key={title} className="rounded-3xl border border-stone-200 p-4">
-                  <h3 className="font-bold text-forest">{title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-stone-600">{description}</p>
-                </section>
-              ))}
-            </div>
+            {profileStatus === "loading" ? <p className="mt-5 rounded-3xl bg-cream p-5 text-sm font-semibold text-stone-700">Loading your profile from Supabase…</p> : null}
+
+            {(profileStatus === "missing" || profileStatus === "error") && profileMessage ? (
+              <div className="mt-5 rounded-3xl border border-amber-200 bg-amber-50 p-5 text-amber-900" role="alert">
+                <h3 className="font-bold">Profile setup needs attention</h3>
+                <p className="mt-2 text-sm leading-6">{profileMessage}</p>
+                <button
+                  type="button"
+                  onClick={retryProfileSetup}
+                  disabled={isRetryingProfileSetup}
+                  className="mt-4 inline-flex min-h-11 items-center justify-center rounded-full bg-forest px-5 py-2 text-sm font-semibold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  {isRetryingProfileSetup ? "Retrying profile setup…" : "Retry profile setup"}
+                </button>
+              </div>
+            ) : null}
+
+            {profile ? (
+              <>
+                <dl className="mt-5 grid gap-4 rounded-3xl bg-cream p-5 text-sm">
+                  <div>
+                    <dt className="font-bold text-forest">Email</dt>
+                    <dd className="mt-1 break-words">{profile.email}</dd>
+                  </div>
+                  <div>
+                    <dt className="font-bold text-forest">Role</dt>
+                    <dd className="mt-1">{formatRole(profile.role)}</dd>
+                  </div>
+                  <div>
+                    <dt className="font-bold text-forest">Display name</dt>
+                    <dd className="mt-1">{profile.display_name || "Not set yet"}</dd>
+                  </div>
+                  <div>
+                    <dt className="font-bold text-forest">Created date</dt>
+                    <dd className="mt-1">{formatDate(profile.created_at)}</dd>
+                  </div>
+                </dl>
+
+                <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                  {roleSections.map((section) => (
+                    <section key={section.title} className="rounded-3xl border border-stone-200 p-4">
+                      <h3 className="font-bold text-forest">{section.title}</h3>
+                      <p className="mt-2 text-sm leading-6 text-stone-600">{section.description}</p>
+                    </section>
+                  ))}
+                </div>
+              </>
+            ) : null}
           </div>
           <aside className="rounded-[2rem] bg-sage p-6 text-stone-700">
             <h2 className="text-xl font-bold text-forest">Current dashboard scope</h2>
             <ul className="mt-4 space-y-3 leading-7">
-              <li>• Auth session display is active when Supabase is configured.</li>
-              <li>• Full role-based routing and database profile tables are not implemented yet.</li>
-              <li>• No payment processing, booking payments, or Stripe logic has been added.</li>
+              <li>• Profile data now comes from the Supabase `profiles` table.</li>
+              <li>• Dashboard placeholders change by database role.</li>
+              <li>• No payment processing, booking payments, Stripe logic, or admin database management has been added.</li>
             </ul>
           </aside>
         </div>

@@ -80,7 +80,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
           <div>
             <p className="text-lg font-bold text-forest">VnukPodNaem</p>
             <p className="mt-3 max-w-2xl leading-7">
-              A planned marketplace for non-medical everyday support. Helpers are independent marketplace participants, not employees of the platform. Real account authentication is available when Supabase is configured. Live booking, payment, database-backed profiles, and admin workflows are not active yet.
+              A planned marketplace for non-medical everyday support. Helpers are independent marketplace participants, not employees of the platform. Real account authentication is available when Supabase is configured. Live booking, payment processing, helper workflows, and admin management are not active yet; signed-in profiles are database-backed when Supabase is configured.
             </p>
           </div>
           <div className="flex flex-wrap gap-2 sm:justify-end">

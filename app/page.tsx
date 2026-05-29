@@ -46,7 +46,7 @@ export default function Home() {
               </Link>
             </div>
             <p className="mt-5 max-w-2xl text-sm leading-6 text-stone-600">
-              Not active yet: booking, database storage, payment processing, and admin tools are not enabled in this early shell. Supabase authentication works when configured.
+              Not active yet: booking, payment processing, helper workflows, and admin tools are not enabled in this early shell. Supabase authentication and basic profile storage work when configured.
             </p>
           </div>
 
