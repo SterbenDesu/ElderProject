@@ -1,8 +1,6 @@
 # Auth and Roles Plan
 
-This document describes the planned VnukPodNaem authentication and role model for the next Supabase implementation phase.
-
-No live authentication behavior is active yet. This plan is documentation-only and should guide the later Supabase Auth, route protection, database policy, and admin workflow implementation.
+This document describes the VnukPodNaem authentication and role model. Supabase email/password authentication is now implemented for the browser UI, while database-backed profiles, protected middleware, and full role enforcement remain planned work.
 
 ## Product boundaries
 
@@ -11,6 +9,28 @@ No live authentication behavior is active yet. This plan is documentation-only a
 - The app must not imply guaranteed safety.
 - Real payments, Stripe, live booking payments, and payment processing are out of scope for this phase.
 - Bulgarian localization, native mobile apps, and medical-service functionality are out of scope for this phase.
+
+## Current auth implementation
+
+Current behavior:
+
+- The app uses `@supabase/supabase-js` for browser-side email/password authentication.
+- Required public environment variables are `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
+- The Supabase Email provider must be enabled in the Supabase dashboard.
+- The Supabase Site URL must be configured for local and deployed URLs.
+- Signup collects an account type and stores it in auth user metadata as `account_type` when Supabase accepts the signup.
+- Signup also sends `terms_accepted`, `terms_version`, and `privacy_version` auth metadata.
+- The header shows Login/Sign up for signed-out users and Dashboard/Sign out for signed-in users.
+- `/dashboard` shows a login prompt for signed-out users and a basic signed-in shell with email and metadata account type.
+
+Current limitations:
+
+- Database profile tables are not implemented yet.
+- Role-based routing and protected middleware are not implemented yet.
+- Admin roles must not be self-assignable from browser metadata.
+- Do not use a Supabase service role key in the browser.
+- Do not commit `.env.local` or secret values.
+- Payments, Stripe, booking payments, medical-service functionality, Bulgarian localization, and native mobile apps remain out of scope.
 
 ## Planned roles
 
@@ -76,7 +96,7 @@ Purpose:
 
 ## Route protection plan
 
-Future route protection should be simple and explicit:
+Route protection is not implemented in this auth-only phase. Future route protection should be simple and explicit:
 
 - Public pages stay accessible to visitors.
 - `/dashboard` and nested client pages require a signed-in client/caregiver or admin as appropriate.
@@ -88,7 +108,7 @@ Future route protection should be simple and explicit:
 
 ## Database authorization plan
 
-Supabase row-level security should be enabled for all application tables that contain user or operational data.
+Database profile tables are not implemented yet, and no database SQL setup is required for this phase. Supabase row-level security should be enabled for all future application tables that contain user or operational data.
 
 High-level policy direction:
 
@@ -108,9 +128,10 @@ High-level policy direction:
 - Suspended or banned accounts should lose access to protected marketplace actions.
 - Role changes and important safety decisions should create audit logs later.
 
-## Open questions for the Supabase phase
+## Open questions for the next Supabase phase
 
-- Whether role should live only in `profiles.role`, in Supabase Auth app metadata, or both.
+- Whether long-term role should live only in `profiles.role`, in Supabase Auth app metadata, or both.
+- How auth metadata should be synchronized into future database-backed profile tables.
 - Which admin actions require server-only logic instead of direct client updates.
 - What minimum profile data is required at signup before protected features are available.
 - How terms and privacy version acceptance should be enforced before booking or helper application actions.

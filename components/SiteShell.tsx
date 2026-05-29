@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { AuthNav } from "@/components/AuthNav";
 
 const navigationLinks = [
   { href: "/services", label: "Services" },
@@ -52,15 +53,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
           </div>
 
           <div className="hidden items-center gap-2 md:flex">
-            <Link href="/login" className="rounded-full px-4 py-2.5 text-sm font-semibold text-stone-700 transition hover:bg-sage hover:text-forest">
-              Login
-            </Link>
-            <Link
-              href="/signup"
-              className="rounded-full bg-forest px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-stone-800"
-            >
-              Sign up
-            </Link>
+            <AuthNav />
           </div>
 
           <details className="group relative md:hidden">
@@ -74,13 +67,8 @@ export function SiteShell({ children }: { children: ReactNode }) {
                   <NavLink key={link.href} {...link} />
                 ))}
               </div>
-              <div className="mt-3 grid grid-cols-2 gap-2 border-t border-stone-100 pt-3">
-                <Link href="/login" className="rounded-full border border-stone-200 px-4 py-3 text-center text-sm font-semibold text-forest transition hover:bg-sage">
-                  Login
-                </Link>
-                <Link href="/signup" className="rounded-full bg-forest px-4 py-3 text-center text-sm font-semibold text-white shadow-sm transition hover:bg-stone-800">
-                  Sign up
-                </Link>
+              <div className="mt-3 border-t border-stone-100 pt-3">
+                <AuthNav variant="mobile" />
               </div>
             </div>
           </details>
@@ -92,7 +80,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
           <div>
             <p className="text-lg font-bold text-forest">VnukPodNaem</p>
             <p className="mt-3 max-w-2xl leading-7">
-              A planned marketplace for non-medical everyday support. Helpers are independent marketplace participants, not employees of the platform. No live booking, payment, authentication, database, or admin functionality is active yet.
+              A planned marketplace for non-medical everyday support. Helpers are independent marketplace participants, not employees of the platform. Real account authentication is available when Supabase is configured. Live booking, payment, database-backed profiles, and admin workflows are not active yet.
             </p>
           </div>
           <div className="flex flex-wrap gap-2 sm:justify-end">
