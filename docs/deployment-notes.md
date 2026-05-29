@@ -8,7 +8,7 @@ Recommended provider: **Vercel** for the Next.js web app.
 
 ## Current deployment status
 
-Not deployed yet. The repository now contains a Next.js app shell with Supabase email/password authentication UI when Supabase public environment variables are configured. The initial Supabase SQL schema exists in the repository but must be applied manually in the Supabase dashboard before database-backed features are added.
+Not deployed yet. The repository now contains a Next.js app shell with Supabase email/password authentication UI and first database-backed profile writes/reads when Supabase public environment variables are configured. The initial Supabase SQL schema must be applied manually in the Supabase dashboard before signup database writes and dashboard profile reads work.
 
 ## Current stack
 
@@ -22,7 +22,7 @@ Not deployed yet. The repository now contains a Next.js app shell with Supabase 
 
 - Vercel for hosting the web app.
 - Supabase for email/password authentication and the PostgreSQL database schema.
-- Stripe or another marketplace payment provider is not required for this phase and must not be added until a later payment-specific task.
+- Stripe or another marketplace payment provider is not required for this phase and must not be added until a later payment-specific task. No payment logic or live booking payments exist yet.
 
 ## Required environment variables
 
@@ -63,7 +63,7 @@ npm run start
 4. In Supabase, enable the Email provider.
 5. In Supabase, set the Site URL to `http://localhost:3000` for local testing.
 6. Run `npm run dev`.
-7. Test `/signup`, `/login`, header auth state, sign out, and `/dashboard`.
+7. Test `/signup`, `/login`, header auth state, sign out, `/dashboard`, profile creation, terms acceptance creation, and missing-profile handling.
 
 ## Database setup
 
@@ -75,7 +75,7 @@ supabase/migrations/20260529120000_initial_schema.sql
 
 This migration creates the starter `profiles`, elderly profile, helper application/profile, service category, booking, complaint, payment-status, audit log, and terms acceptance tables. It also enables row-level security on all app tables and adds conservative starter policies.
 
-The schema must be applied manually before database-backed features are added to the app. Codex does not need direct Supabase access for this step. Follow `docs/supabase-schema-apply.md`.
+The schema must be applied manually before signup database writes and dashboard profile reads work. Codex does not need direct Supabase access for this step. Follow `docs/supabase-schema-apply.md`.
 
 Current auth metadata saved during signup when Supabase accepts it:
 
@@ -84,13 +84,20 @@ Current auth metadata saved during signup when Supabase accepts it:
 - `terms_version`
 - `privacy_version`
 
+Current database rows created during signup when the schema and RLS policies allow it:
+
+- `profiles` with the auth user id, email, safe role mapping, and simple display-name fallback.
+- `terms_acceptances` with the auth user id and placeholder Terms/Privacy versions.
+
+`/dashboard` now reads the signed-in user's `profiles` row and shows role-aware placeholders. It does not include admin database management, helper application forms, elderly profile CRUD, bookings, Stripe, payment processing, or live booking payments.
+
 Before real user data is used in production:
 
 1. Apply the SQL migration in a development Supabase project first.
 2. Confirm all app tables exist.
 3. Confirm row-level security is enabled on every app table.
 4. Test role-based access for visitors, clients/caregivers, helper applicants, verified helpers, and admins.
-5. Decide how auth metadata will be synchronized with the new `profiles` table.
+5. Confirm signup creates `profiles` and `terms_acceptances` rows with only the publishable key and authenticated user session.
 6. Review any policy TODO comments before allowing browser writes for sensitive workflows.
 
 See `docs/supabase-setup.md`, `docs/auth-and-roles-plan.md`, `docs/database-schema-draft.md`, and `docs/supabase-schema-apply.md` for the current planning and apply documents.
@@ -129,10 +136,13 @@ Do not paste service role keys, `.env.local` values, provider secrets, or databa
 - Auth pages load: `/login` and `/signup`.
 - Signup requires Terms and Privacy acceptance before submission.
 - Signup stores selected `account_type` in auth metadata when Supabase accepts the signup.
+- Signup creates a `profiles` row and a `terms_acceptances` row after auth signup when the schema and RLS policies allow it.
 - Signed-out users see Login and Sign up in the header.
 - Signed-in users see Dashboard and Sign out in the header.
 - Sign out works.
-- `/dashboard` asks signed-out users to log in and shows signed-in users their email and account type.
+- `/dashboard` asks signed-out users to log in and shows signed-in users profile email, role, display name, and created date from the `profiles` table.
+- `/dashboard` shows a clear incomplete-profile message and retry action if the profile row is missing.
+- `/dashboard` shows different placeholders for `client`, `helper_applicant`, `verified_helper`, and `admin` profile roles.
 - Terms and Privacy pages clearly state they are draft placeholders requiring legal review before launch.
 - No secrets are committed or documented.
 - No `.env.local` file is committed.

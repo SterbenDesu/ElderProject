@@ -51,7 +51,7 @@ export default function LoginPage() {
         <div className="rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200">
           <h2 className="text-2xl font-bold text-forest">Sign in with email</h2>
           <p className="mt-4 text-lg leading-8">
-            Use your Supabase email and password account to access the early dashboard shell. Booking, payments, and database-backed profiles are not active yet.
+            Use your Supabase email and password account to access the early dashboard. Booking, payments, and admin management are not active yet.
           </p>
 
           <form onSubmit={handleSubmit} className="mt-6 grid gap-5">

@@ -12,7 +12,7 @@ export default function HelpersPage() {
             Future helper profiles may appear only after verification and marketplace rules are implemented. This placeholder does not list real helpers or imply anyone is approved.
           </p>
           <p className="mt-4 leading-7">
-            Supabase authentication is available when configured, but storage, booking, payment processing, and admin functionality are not active yet. Stripe, database logic, payment logic, and admin actions have not been added.
+            Supabase authentication and basic profile storage are available when configured, but helper listings, booking, payment processing, and admin functionality are not active yet. Stripe, payment logic, and admin actions have not been added.
           </p>
           <Link href="/prohibited-services" className="mt-6 inline-flex min-h-12 items-center rounded-full bg-forest px-5 py-3 font-semibold text-white transition hover:bg-stone-800">
             See prohibited services

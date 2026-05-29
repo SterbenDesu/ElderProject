@@ -4,11 +4,9 @@ import Link from "next/link";
 import type { FormEvent } from "react";
 import { useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { createSignupDatabaseRecords, currentPrivacyVersion, currentTermsVersion, type SignupAccountType } from "@/lib/supabase/profiles";
 
-type AccountType = "client_caregiver" | "helper_applicant";
-
-const termsVersion = "2026-05-29-draft";
-const privacyVersion = "2026-05-29-draft";
+type AccountType = SignupAccountType;
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
@@ -40,15 +38,15 @@ export default function SignupPage() {
     setErrorMessage(null);
     setSuccessMessage(null);
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
           account_type: accountType,
           terms_accepted: true,
-          terms_version: termsVersion,
-          privacy_version: privacyVersion,
+          terms_version: currentTermsVersion,
+          privacy_version: currentPrivacyVersion,
         },
       },
     });
@@ -59,7 +57,29 @@ export default function SignupPage() {
       return;
     }
 
-    setSuccessMessage("Signup submitted. Check your email if Supabase email confirmation is enabled, then log in.");
+    if (!data.user?.id || !data.user.email) {
+      setErrorMessage(
+        "Signup may have succeeded, but Supabase did not return the user details needed to create the database profile. Please log in and use the dashboard retry path, or contact support.",
+      );
+      setPassword("");
+      setIsSubmitting(false);
+      return;
+    }
+
+    const databaseResult = await createSignupDatabaseRecords(supabase, {
+      userId: data.user.id,
+      email: data.user.email,
+      accountType,
+    });
+
+    if (databaseResult.errorMessage) {
+      setErrorMessage(`${databaseResult.errorMessage}. Please log in after confirming your email, then open the dashboard to retry profile setup.`);
+      setPassword("");
+      setIsSubmitting(false);
+      return;
+    }
+
+    setSuccessMessage("Signup complete. Your auth account, profile, and Terms/Privacy acceptance were saved. Check your email if Supabase email confirmation is enabled, then log in.");
     setPassword("");
     setIsSubmitting(false);
   }
@@ -72,7 +92,7 @@ export default function SignupPage() {
         <div className="rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200">
           <h2 className="text-2xl font-bold text-forest">Create an email account</h2>
           <p className="mt-4 text-lg leading-8">
-            Choose whether you are joining as a client/caregiver or as a helper applicant. This stores a basic account type in Supabase auth metadata only.
+            Choose whether you are joining as a client/caregiver or as a helper applicant. This creates your Supabase auth account and a matching database profile when the database schema is applied.
           </p>
 
           <form onSubmit={handleSubmit} className="mt-6 grid gap-5">
@@ -174,8 +194,8 @@ export default function SignupPage() {
         <aside className="rounded-[2rem] bg-sage p-6 text-stone-700">
           <h2 className="text-xl font-bold text-forest">Current signup scope</h2>
           <ul className="mt-4 space-y-3 leading-7">
-            <li>• Account type and terms acceptance are saved in auth metadata where Supabase allows it.</li>
-            <li>• Database profile tables and role-based routing are not implemented yet.</li>
+            <li>• Account type and Terms/Privacy acceptance are saved to Supabase auth metadata and app database tables when allowed by RLS.</li>
+            <li>• Helper approvals, bookings, payments, and full role-based routing are not implemented yet.</li>
             <li>• No payments, medical services, or helper employment relationship are added.</li>
           </ul>
         </aside>

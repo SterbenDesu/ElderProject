@@ -1,6 +1,6 @@
 # Auth and Roles Plan
 
-This document describes the VnukPodNaem authentication and role model. Supabase email/password authentication is now implemented for the browser UI, while database-backed profiles, protected middleware, and full role enforcement remain planned work.
+This document describes the VnukPodNaem authentication and role model. Supabase email/password authentication is implemented for the browser UI, and signup now attempts to create database-backed `profiles` and `terms_acceptances` records after auth signup succeeds. Protected middleware and full role enforcement remain planned work.
 
 ## Product boundaries
 
@@ -19,14 +19,19 @@ Current behavior:
 - The Supabase Email provider must be enabled in the Supabase dashboard.
 - The Supabase Site URL must be configured for local and deployed URLs.
 - Signup collects an account type and stores it in auth user metadata as `account_type` when Supabase accepts the signup.
+- Signup maps the client/caregiver UI option to `profiles.role = client` and the helper applicant UI option to `profiles.role = helper_applicant`.
 - Signup also sends `terms_accepted`, `terms_version`, and `privacy_version` auth metadata.
+- After auth signup succeeds, the browser client attempts to insert the user's `profiles` row and a `terms_acceptances` row using only `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
+- Duplicate profile creation is handled safely so an existing profile does not crash signup or the dashboard retry path.
+- The current Terms and Privacy placeholder versions are stored as `v0.1-placeholder`.
 - The header shows Login/Sign up for signed-out users and Dashboard/Sign out for signed-in users.
-- `/dashboard` shows a login prompt for signed-out users and a basic signed-in shell with email and metadata account type.
+- `/dashboard` shows a login prompt for signed-out users, loads signed-in profile data from the `profiles` table, and shows a clear incomplete-profile message if the database row is missing.
 
 Current limitations:
 
-- Database profile tables are not implemented yet.
+- The Supabase schema must be applied manually before signup database writes and dashboard profile reads work.
 - Role-based routing and protected middleware are not implemented yet.
+- No admin database management UI or admin permission enforcement is implemented yet.
 - Admin roles must not be self-assignable from browser metadata.
 - Do not use a Supabase service role key in the browser.
 - Do not commit `.env.local` or secret values.
@@ -108,7 +113,7 @@ Route protection is not implemented in this auth-only phase. Future route protec
 
 ## Database authorization plan
 
-Database profile tables are not implemented yet, and no database SQL setup is required for this phase. Supabase row-level security should be enabled for all future application tables that contain user or operational data.
+The initial database schema has been drafted and must be applied manually before database-backed auth features work. Supabase row-level security is expected to be enabled for all application tables that contain user or operational data.
 
 High-level policy direction:
 
@@ -128,10 +133,18 @@ High-level policy direction:
 - Suspended or banned accounts should lose access to protected marketplace actions.
 - Role changes and important safety decisions should create audit logs later.
 
+## Current database-backed auth behavior
+
+- Tables now used by the app: `profiles` and `terms_acceptances`.
+- Signup creates the Supabase Auth user first, then inserts `profiles.id`, `profiles.email`, `profiles.role`, and a simple email-derived `profiles.display_name`. Database defaults handle `created_at` and `updated_at`.
+- Signup inserts `terms_acceptances.profile_id`, `terms_acceptances.terms_version`, and `terms_acceptances.privacy_version`. The database default handles `accepted_at`.
+- If auth succeeds but profile or terms storage fails, the UI reports that account creation succeeded but profile setup did not fully complete. The dashboard provides a safe retry path for signed-in users.
+- `/dashboard` reads `email`, `role`, `display_name`, and `created_at` from `profiles`. It shows role-aware placeholder sections for `client`, `helper_applicant`, `verified_helper`, and `admin`.
+- This phase does not add Stripe, live payment collection, booking payment processing, admin database management, helper application forms, elderly profile CRUD, bookings, Bulgarian localization, native mobile apps, or medical-service functionality.
+
 ## Open questions for the next Supabase phase
 
 - Whether long-term role should live only in `profiles.role`, in Supabase Auth app metadata, or both.
-- How auth metadata should be synchronized into future database-backed profile tables.
 - Which admin actions require server-only logic instead of direct client updates.
-- What minimum profile data is required at signup before protected features are available.
+- What minimum profile data is required before protected features are available.
 - How terms and privacy version acceptance should be enforced before booking or helper application actions.
