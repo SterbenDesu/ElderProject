@@ -8,7 +8,7 @@ Recommended provider: **Vercel** for the Next.js web app.
 
 ## Current deployment status
 
-Not deployed yet. The repository now contains a Next.js app shell with Supabase email/password authentication UI when Supabase public environment variables are configured.
+Not deployed yet. The repository now contains a Next.js app shell with Supabase email/password authentication UI when Supabase public environment variables are configured. The initial Supabase SQL schema exists in the repository but must be applied manually in the Supabase dashboard before database-backed features are added.
 
 ## Current stack
 
@@ -21,7 +21,7 @@ Not deployed yet. The repository now contains a Next.js app shell with Supabase 
 ## Required services
 
 - Vercel for hosting the web app.
-- Supabase for email/password authentication.
+- Supabase for email/password authentication and the PostgreSQL database schema.
 - Stripe or another marketplace payment provider is not required for this phase and must not be added until a later payment-specific task.
 
 ## Required environment variables
@@ -67,7 +67,15 @@ npm run start
 
 ## Database setup
 
-No database SQL setup, profile tables, row-level security policies, or migrations are required for this auth-only phase.
+The initial database schema is now represented in:
+
+```bash
+supabase/migrations/20260529120000_initial_schema.sql
+```
+
+This migration creates the starter `profiles`, elderly profile, helper application/profile, service category, booking, complaint, payment-status, audit log, and terms acceptance tables. It also enables row-level security on all app tables and adds conservative starter policies.
+
+The schema must be applied manually before database-backed features are added to the app. Codex does not need direct Supabase access for this step. Follow `docs/supabase-schema-apply.md`.
 
 Current auth metadata saved during signup when Supabase accepts it:
 
@@ -76,18 +84,27 @@ Current auth metadata saved during signup when Supabase accepts it:
 - `terms_version`
 - `privacy_version`
 
-Before real user data is stored in database tables:
+Before real user data is used in production:
 
-1. Create reviewed database migrations.
-2. Enable and test row-level security for every user-data table.
-3. Verify role-based access for visitors, clients/caregivers, helper applicants, verified helpers, and admins.
-4. Decide how auth metadata will be synchronized with future profile tables.
+1. Apply the SQL migration in a development Supabase project first.
+2. Confirm all app tables exist.
+3. Confirm row-level security is enabled on every app table.
+4. Test role-based access for visitors, clients/caregivers, helper applicants, verified helpers, and admins.
+5. Decide how auth metadata will be synchronized with the new `profiles` table.
+6. Review any policy TODO comments before allowing browser writes for sensitive workflows.
 
-See `docs/supabase-setup.md`, `docs/auth-and-roles-plan.md`, and `docs/database-schema-draft.md` for the current planning documents.
+See `docs/supabase-setup.md`, `docs/auth-and-roles-plan.md`, `docs/database-schema-draft.md`, and `docs/supabase-schema-apply.md` for the current planning and apply documents.
 
 ## Migration steps
 
-None for this phase. Database schema planning is documented, but no migrations have been created yet.
+1. Open the Supabase dashboard.
+2. Open **SQL Editor**.
+3. Create a new query.
+4. Paste the contents of `supabase/migrations/20260529120000_initial_schema.sql`.
+5. Run the query.
+6. Verify tables and RLS policies in Supabase.
+
+Do not paste service role keys, `.env.local` values, provider secrets, or database passwords into the SQL Editor.
 
 ## Vercel deployment steps
 
@@ -120,7 +137,8 @@ None for this phase. Database schema planning is documented, but no migrations h
 - No secrets are committed or documented.
 - No `.env.local` file is committed.
 - No service role key is used in the browser.
-- No database profile tables are implemented yet.
+- Initial database schema migration exists and has been manually applied in Supabase before database-backed features are used.
+- RLS is enabled and reviewed on every app table.
 - No Stripe, live payment, booking payment, native mobile, Bulgarian localization, or medical-service functionality is active.
 
 ## Deployment issues

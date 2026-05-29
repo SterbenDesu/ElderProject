@@ -11,7 +11,7 @@ This repository does **not** contain real Supabase credentials. Do not commit `.
 - `/signup` supports Supabase email/password signup with account-type metadata and Terms/Privacy acceptance metadata.
 - The header can show signed-out versus signed-in auth state, and signed-in users can sign out.
 - `/dashboard` shows a signed-out prompt or a basic signed-in dashboard shell.
-- Database profile tables, SQL migrations, row-level security policies, protected middleware, helper approval workflows, bookings, and payments are **not** implemented yet.
+- An initial SQL migration with profile, helper, booking, complaint, payment-status, audit, terms acceptance, and row-level security tables exists at `supabase/migrations/20260529120000_initial_schema.sql`, but it must be applied manually in Supabase before database-backed features are built. Protected middleware, helper approval workflows, bookings UI, and payment processing are **not** implemented yet.
 
 ## Required package
 
@@ -133,13 +133,19 @@ After the Supabase project exists:
 6. Choose the appropriate Vercel environments, usually **Preview** first and **Production** only after testing.
 7. Redeploy the Vercel project so the app receives the new environment variables.
 
-## 9. What is not implemented yet
+## 9. Database schema status
 
-No database SQL setup is required for this auth-only phase.
+The repository now includes an initial SQL schema migration for the database-backed MVP foundation:
+
+```bash
+supabase/migrations/20260529120000_initial_schema.sql
+```
+
+Apply it manually by following `docs/supabase-schema-apply.md`. Do not paste service role keys or `.env.local` values into the SQL Editor.
 
 Before storing real user profile, booking, helper, complaint, or admin data:
 
-- Create and review the final database schema.
+- Apply and review the initial database migration in a development Supabase project.
 - Enable and test row-level security for every user-data table.
 - Confirm that visitors cannot access private dashboards, profiles, bookings, complaints, or admin records.
 - Confirm that helper applicants cannot appear as verified helpers until admin approval exists.

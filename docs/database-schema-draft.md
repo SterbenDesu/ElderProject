@@ -1,8 +1,17 @@
 # Database Schema Draft
 
-This is a planning draft for the future Supabase database. Do not treat it as a migration file.
+This document began as the planning draft for the future Supabase database. The initial MVP schema is now represented by `supabase/migrations/20260529120000_initial_schema.sql`.
 
-No SQL migrations have been created yet, and no live database connection is active in the app. The goal is to prepare a beginner-maintainable schema direction for the next authentication and database implementation phase.
+Use the migration file as the source of truth for the current implemented SQL schema. Keep this draft as background planning context for later iterations and review it before adding new database-backed features.
+
+
+## Current migration status
+
+- Initial SQL migration created: `supabase/migrations/20260529120000_initial_schema.sql`.
+- Manual dashboard apply instructions created: `docs/supabase-schema-apply.md`.
+- The migration creates the starter app tables, constraints, seed service categories, `updated_at` triggers, and conservative row-level security policies.
+- Codex does not connect to Supabase directly for this setup. Apply and test the SQL manually in a development Supabase project before relying on it for real users.
+- Payment-related data remains provider-status metadata only. No Stripe, live payment processing, full card data, card PINs, cash handling, or provider secrets are implemented.
 
 ## General schema principles
 
