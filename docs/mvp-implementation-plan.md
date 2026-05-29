@@ -23,6 +23,8 @@ Each phase should be implemented as a small Codex task. Do not start a later pha
 
 ### Phase 1: Project scaffold and static app shell
 
+**Status:** Completed in the first static Next.js scaffold.
+
 **Goal:** Create the smallest deployable web app shell without database, authentication, payment logic, or complex state.
 
 **Scope:**
