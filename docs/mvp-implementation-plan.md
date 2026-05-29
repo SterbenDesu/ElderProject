@@ -23,7 +23,7 @@ Each phase should be implemented as a small Codex task. Do not start a later pha
 
 ### Phase 1: Project scaffold and static app shell
 
-**Status:** Completed in the first static Next.js scaffold.
+**Status:** Completed in the first static Next.js scaffold. Visual/mobile polish pass completed for the static shell: stronger homepage structure, responsive navigation, clearer public pages, and more explicit placeholder messaging while keeping authentication, Supabase, Stripe, database, payment, and admin logic inactive.
 
 **Goal:** Create the smallest deployable web app shell without database, authentication, payment logic, or complex state.
 

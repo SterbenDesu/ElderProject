@@ -14,10 +14,16 @@ html {
   scroll-behavior: smooth;
 }
 
+
 body {
   margin: 0;
   background: #fbf7ef;
   color: #24332f;
+  text-rendering: optimizeLegibility;
+}
+
+p {
+  max-width: 70ch;
 }
 
 a {
