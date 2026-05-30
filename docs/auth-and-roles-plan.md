@@ -25,17 +25,26 @@ Current behavior:
 - Duplicate profile creation is handled safely so an existing profile does not crash signup or the dashboard retry path.
 - The current Terms and Privacy placeholder versions are stored as `v0.1-placeholder`.
 - The header shows Login/Sign up for signed-out users and Dashboard/Sign out for signed-in users.
-- `/dashboard` shows a login prompt for signed-out users, loads signed-in profile data from the `profiles` table, and shows a clear incomplete-profile message if the database row is missing.
+- `/dashboard` shows a login prompt for signed-out users, loads signed-in profile data from the `profiles` table, shows a clear incomplete-profile message if the database row is missing, and shows helper application status for `helper_applicant` users when an application exists.
+- `/helper/apply` now lets signed-in users create or update their own `helper_applications` row as `draft` or `submitted`; signed-out users see a login/signup prompt.
+- `/helpers` only reads visible verified `helper_profiles` and does not expose submitted `helper_applications` or unverified applicants publicly.
 
 Current limitations:
 
 - The Supabase schema must be applied manually before signup database writes and dashboard profile reads work.
 - Role-based routing and protected middleware are not implemented yet.
-- No admin database management UI or admin permission enforcement is implemented yet.
+- No admin database management UI, admin review workflow, or helper approval UI is implemented yet.
 - Admin roles must not be self-assignable from browser metadata.
 - Do not use a Supabase service role key in the browser.
 - Do not commit `.env.local` or secret values.
 - Payments, Stripe, booking payments, medical-service functionality, Bulgarian localization, and native mobile apps remain out of scope.
+
+
+## Implemented helper application flow
+
+The helper application flow now uses the `helper_applications` table directly from the authenticated browser session with the public Supabase publishable key. Applicants can save a draft or submit an application with `full_name`, `city`, `motivation`, `experience_summary`, and `availability_summary`. Saving sets `status = draft`; submitting sets `status = submitted`.
+
+Applications with `under_review`, `approved`, or `rejected` status are shown as read-only in the applicant UI. Applicants cannot approve themselves, cannot create public helper marketplace profiles from `/helper/apply`, and cannot make themselves visible in `/helpers`. Admin review and public helper visibility workflows remain planned work and are not implemented yet.
 
 ## Planned roles
 
@@ -107,8 +116,8 @@ Route protection is not implemented in this auth-only phase. Future route protec
 - `/dashboard` and nested client pages require a signed-in client/caregiver or admin as appropriate.
 - `/dashboard/elderly-profiles` requires the signed-in client/caregiver to own the elderly profile records being viewed or edited.
 - `/dashboard/bookings` requires the signed-in user to be connected to the booking as the client/caregiver, assigned verified helper, or admin.
-- `/helper/apply` requires a signed-in helper applicant, verified helper, or admin depending on the workflow step.
-- `/helpers` should show only active public verified helper profiles once real data exists.
+- `/helper/apply` currently prompts signed-out visitors to log in or sign up, then lets the signed-in application owner save `draft` or `submitted` application data. Future route protection should narrow this to helper-applicant workflows as protected routing is added.
+- `/helpers` shows only active public verified helper profiles when they exist; unverified applicants and submitted applications remain private.
 - `/admin` and nested admin routes require the admin role.
 
 ## Database authorization plan
@@ -135,12 +144,12 @@ High-level policy direction:
 
 ## Current database-backed auth behavior
 
-- Tables now used by the app: `profiles` and `terms_acceptances`.
+- Tables now used by the app: `profiles`, `terms_acceptances`, `helper_applications`, and public reads from verified visible `helper_profiles`.
 - Signup creates the Supabase Auth user first, then inserts `profiles.id`, `profiles.email`, `profiles.role`, and a simple email-derived `profiles.display_name`. Database defaults handle `created_at` and `updated_at`.
 - Signup inserts `terms_acceptances.profile_id`, `terms_acceptances.terms_version`, and `terms_acceptances.privacy_version`. The database default handles `accepted_at`.
 - If auth succeeds but profile or terms storage fails, the UI reports that account creation succeeded but profile setup did not fully complete. The dashboard provides a safe retry path for signed-in users.
-- `/dashboard` reads `email`, `role`, `display_name`, and `created_at` from `profiles`. It shows role-aware placeholder sections for `client`, `helper_applicant`, `verified_helper`, and `admin`.
-- This phase does not add Stripe, live payment collection, booking payment processing, admin database management, helper application forms, elderly profile CRUD, bookings, Bulgarian localization, native mobile apps, or medical-service functionality.
+- `/dashboard` reads `email`, `role`, `display_name`, and `created_at` from `profiles`. It shows role-aware placeholder sections for `client`, `helper_applicant`, `verified_helper`, and `admin`, and shows helper application status for helper applicants when available.
+- This phase adds the applicant-owned helper application draft/submission form only. It does not add Stripe, live payment collection, booking payment processing, admin database management or approval, elderly profile CRUD, bookings, Bulgarian localization, native mobile apps, medical-service functionality, or automatic public helper visibility.
 
 ## Open questions for the next Supabase phase
 

@@ -63,7 +63,7 @@ npm run start
 4. In Supabase, enable the Email provider.
 5. In Supabase, set the Site URL to `http://localhost:3000` for local testing.
 6. Run `npm run dev`.
-7. Test `/signup`, `/login`, header auth state, sign out, `/dashboard`, profile creation, terms acceptance creation, and missing-profile handling.
+7. Test `/signup`, `/login`, header auth state, sign out, `/dashboard`, profile creation, terms acceptance creation, missing-profile handling, `/helper/apply` draft/submission behavior, and `/helpers` public verified listing behavior.
 
 ## Database setup
 
@@ -89,7 +89,16 @@ Current database rows created during signup when the schema and RLS policies all
 - `profiles` with the auth user id, email, safe role mapping, and simple display-name fallback.
 - `terms_acceptances` with the auth user id and placeholder Terms/Privacy versions.
 
-`/dashboard` now reads the signed-in user's `profiles` row and shows role-aware placeholders. It does not include admin database management, helper application forms, elderly profile CRUD, bookings, Stripe, payment processing, or live booking payments.
+`/dashboard` now reads the signed-in user's `profiles` row and shows role-aware placeholders. For `helper_applicant` users, it also shows the current helper application status when a `helper_applications` row exists and links to `/helper/apply`. It does not include admin database management, elderly profile CRUD, bookings, Stripe, payment processing, or live booking payments.
+
+Current helper application behavior:
+
+- `/helper/apply` uses `helper_applications` for signed-in applicants.
+- Applicants can save a draft (`status = draft`) or submit (`status = submitted`).
+- `under_review`, `approved`, and `rejected` applications are read-only in the applicant UI.
+- Admin review and approval tooling is not implemented yet.
+- Public helper marketplace visibility is not implemented from the application page.
+- Unverified helpers and submitted applications are not shown publicly; `/helpers` only reads visible verified `helper_profiles` rows.
 
 Before real user data is used in production:
 
@@ -143,6 +152,10 @@ Do not paste service role keys, `.env.local` values, provider secrets, or databa
 - `/dashboard` asks signed-out users to log in and shows signed-in users profile email, role, display name, and created date from the `profiles` table.
 - `/dashboard` shows a clear incomplete-profile message and retry action if the profile row is missing.
 - `/dashboard` shows different placeholders for `client`, `helper_applicant`, `verified_helper`, and `admin` profile roles.
+- `/dashboard` shows helper application status for helper applicants when available and links to `/helper/apply`.
+- `/helper/apply` lets signed-in users save a helper application draft or submit it using `helper_applications`.
+- `/helper/apply` shows `under_review`, `approved`, and `rejected` applications as read-only for applicants.
+- `/helpers` does not show unverified applicants or submitted helper applications publicly.
 - Terms and Privacy pages clearly state they are draft placeholders requiring legal review before launch.
 - No secrets are committed or documented.
 - No `.env.local` file is committed.

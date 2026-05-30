@@ -116,9 +116,17 @@ Owner/access concept:
 High-level RLS notes:
 
 - Helper applicants can create and read their own application.
-- Helper applicants can update their own application only while status permits edits.
-- Applicants cannot modify review fields or approval status.
+- Helper applicant inserts and updates are constrained to `draft` or `submitted` in the starter RLS policy so applicants cannot set `under_review`, `approved`, or `rejected` themselves.
+- Helper applicants can create or update their own application from `/helper/apply` while the application is in an applicant-editable status.
+- The current UI supports applicant actions that set status to `draft` or `submitted` only.
+- Applications with `under_review`, `approved`, or `rejected` are shown read-only in the applicant UI.
+- Applicants cannot modify review fields, approve themselves, create public helper profiles, or make themselves visible from the application page.
 - Admin review decisions should create audit logs later.
+
+
+### Current implementation note
+
+`/helper/apply` now reads and writes the signed-in user's own `helper_applications` row using the existing authenticated RLS policies and only the public Supabase browser variables. The applicant form stores `full_name`, `city`, `motivation`, `experience_summary`, and `availability_summary`. Admin review, helper approval, and public helper visibility are not implemented yet. `/helpers` reads only `helper_profiles` rows where the profile is public and verified; it does not read or expose `helper_applications`.
 
 ## `helper_profiles`
 
