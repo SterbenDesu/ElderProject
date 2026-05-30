@@ -108,3 +108,18 @@ Apply `supabase/migrations/20260530120000_admin_helper_review_rpc.sql` manually 
 The RPC intentionally performs helper approval role changes inside the database instead of directly from browser table updates. It verifies the current `auth.uid()` has `profiles.role = 'admin'`, updates `helper_applications.status`, updates the applicant `profiles.role` to `verified_helper` on approval, creates or updates the related `helper_profiles` row with `verification_status = verified_basic`, and keeps `helper_profiles.is_visible = false`. Approved helpers therefore remain hidden from `/helpers` until a separate admin visibility process explicitly sets `is_visible = true`.
 
 Do not use service role keys in the browser, do not disable RLS, and do not add broad public update policies to support helper approval.
+
+## Apply verified helper profile management RPC migration
+
+After applying the initial schema and the admin helper review RPC migration, also apply:
+
+```text
+supabase/migrations/20260530130000_helper_profile_management.sql
+```
+
+This migration creates two authenticated RPC functions:
+
+1. `public.update_own_helper_profile(p_bio text, p_city text, p_service_radius_km integer)` lets a signed-in `verified_helper` update only safe public helper profile fields: `bio`, `city`, and `service_radius_km`.
+2. `public.set_helper_profile_visibility(p_helper_profile_id uuid, p_is_visible boolean)` lets a signed-in `admin` toggle `helper_profiles.is_visible` for approved helper profiles and attempts to insert an `audit_logs` row containing the old and new visibility values.
+
+The migration does not disable RLS, does not weaken public helper policies, and does not require service role keys in the browser. Public `/helpers` listings still show only `helper_profiles` rows where `is_visible = true` and `verification_status` is `verified_basic` or `trusted`. Unverified helpers remain hidden. Booking assignment and payment logic are still not implemented.

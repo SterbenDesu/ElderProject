@@ -227,3 +227,36 @@ Approval behavior inside the RPC:
 6. Attempts to insert an `audit_logs` row for the status change.
 
 Full booking management, helper assignment, helper acceptance, booking payments, Stripe/payment processing, native mobile apps, Bulgarian localization, and medical-service functionality are still not implemented. To verify deployment, sign in as an admin profile, open `/admin`, confirm non-admin accounts are denied, review a test helper application, and confirm `/helpers` only shows verified helper profiles that are explicitly visible.
+
+## Verified helper profile management and admin helper visibility deployment note
+
+`/dashboard/helper-profile` is now a database-backed route for approved helpers to manage safe public helper profile fields. It requires Supabase Auth, the `profiles` table, the `helper_profiles` table, and the RPC migration in `supabase/migrations/20260530130000_helper_profile_management.sql`.
+
+Required environment variables remain name-only and public-client safe:
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+
+No service role key is used by the browser app, and no `.env.local` file should be committed. Verified helpers can edit only `helper_profiles.bio`, `helper_profiles.city`, and `helper_profiles.service_radius_km`. Helpers cannot edit `verification_status`, `is_visible`, `profile_id`, role values, or admin-only fields, and they cannot make themselves public.
+
+`/admin` now includes approved helper profile visibility controls. Admins can see approved helper profiles and toggle `helper_profiles.is_visible` through the admin-only `public.set_helper_profile_visibility(p_helper_profile_id uuid, p_is_visible boolean)` RPC. The RPC attempts to insert an `audit_logs` row with the actor, action, `target_table = helper_profiles`, target id, and metadata containing old and new visibility values. If audit insertion fails, the UI reports a warning without weakening RLS.
+
+`/helpers` shows only safe fields from visible verified helper profiles: `bio`, `city`, `service_radius_km`, and verification label. Hidden helpers, unverified helpers, helper applications, and email addresses are not public. The empty state explains that verified helper listings are not public yet when no visible rows exist.
+
+Manual deployment steps:
+
+1. Apply `supabase/migrations/20260529120000_initial_schema.sql` if it has not already been applied.
+2. Apply `supabase/migrations/20260530120000_admin_helper_review_rpc.sql` if it has not already been applied.
+3. Apply `supabase/migrations/20260530130000_helper_profile_management.sql`.
+4. Redeploy the Next.js app with `npm run build` as the build command and `npm run start` as the start command.
+5. Verify with a client, helper applicant, verified helper, and admin account.
+
+Manual verification:
+
+- As a verified helper, open `/dashboard/helper-profile`, edit `bio`, `city`, and `service_radius_km`, and confirm visibility cannot be changed there.
+- As a helper applicant, open `/dashboard/helper-profile` and confirm the page links to `/helper/apply`.
+- As a client, open `/dashboard/helper-profile` and confirm the page says helper profile management is only for approved helpers.
+- As an admin, open `/admin`, toggle an approved helper visible, then confirm that helper appears on `/helpers` without an email address.
+- Toggle the helper hidden again and confirm the helper no longer appears on `/helpers`.
+
+No booking assignment exists yet. Payment logic, Stripe/payment processing, live booking payments, card collection, native mobile apps, Bulgarian localization, and medical-service functionality are still not implemented.
