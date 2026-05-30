@@ -117,6 +117,7 @@ export default function HelperDetailPage() {
       return;
     }
 
+    const activeSupabase = supabase;
     let isMounted = true;
 
     async function loadPage() {
@@ -125,7 +126,7 @@ export default function HelperDetailPage() {
       setMessage(null);
       setSuccessMessage(null);
 
-      const helperResult = await loadVisibleVerifiedHelperProfileById(supabase, helperProfileId);
+      const helperResult = await loadVisibleVerifiedHelperProfileById(activeSupabase, helperProfileId);
 
       if (!isMounted) {
         return;
@@ -148,7 +149,7 @@ export default function HelperDetailPage() {
       setPageStatus("loaded");
       setForm((current) => ({ ...current, city: current.city || helperResult.helperProfile?.city || "" }));
 
-      const { data: userData, error: userError } = await supabase.auth.getUser();
+      const { data: userData, error: userError } = await activeSupabase.auth.getUser();
 
       if (!isMounted) {
         return;
@@ -167,7 +168,7 @@ export default function HelperDetailPage() {
       setAuthStatus("signed-in");
       setUser(userData.user);
 
-      const profileResult = await loadProfile(supabase, userData.user.id);
+      const profileResult = await loadProfile(activeSupabase, userData.user.id);
 
       if (!isMounted) {
         return;
