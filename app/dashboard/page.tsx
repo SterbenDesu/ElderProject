@@ -4,6 +4,7 @@ import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { countOwnElderlyProfiles } from "@/lib/supabase/elderlyProfiles";
 import {
   formatHelperApplicationStatus,
   loadOwnHelperApplication,
@@ -74,8 +75,8 @@ function getRoleSections(role: ProfileRole): DashboardSection[] {
   }
 
   return [
-    { title: "Elderly profiles", description: "Future area for client/caregiver elderly profile management." },
-    { title: "Booking requests", description: "Future area for non-medical service requests and booking status." },
+    { title: "Elderly profiles", description: "Create and manage non-medical elderly profiles connected to your client/caregiver account." },
+    { title: "Booking requests", description: "Future area for non-medical service requests and booking status. Booking flow is not implemented yet." },
     { title: "Safety and service boundaries", description: "Reminder that the platform supports non-medical help only and does not guarantee absolute safety." },
   ];
 }
@@ -87,6 +88,8 @@ export default function DashboardPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [helperApplication, setHelperApplication] = useState<HelperApplication | null>(null);
   const [helperApplicationMessage, setHelperApplicationMessage] = useState<string | null>(null);
+  const [elderlyProfileCount, setElderlyProfileCount] = useState<number | null>(null);
+  const [elderlyProfileMessage, setElderlyProfileMessage] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [profileMessage, setProfileMessage] = useState<string | null>(null);
   const [isRetryingProfileSetup, setIsRetryingProfileSetup] = useState(false);
@@ -109,6 +112,8 @@ export default function DashboardPage() {
       setProfile(null);
       setHelperApplication(null);
       setHelperApplicationMessage(null);
+      setElderlyProfileCount(null);
+      setElderlyProfileMessage(null);
       setProfileStatus("error");
       setProfileMessage(result.errorMessage);
       return;
@@ -118,6 +123,8 @@ export default function DashboardPage() {
       setProfile(null);
       setHelperApplication(null);
       setHelperApplicationMessage(null);
+      setElderlyProfileCount(null);
+      setElderlyProfileMessage(null);
       setProfileStatus("missing");
       setProfileMessage("Your auth account exists, but profile setup is incomplete. Use the retry button below after the database schema and RLS policies are applied.");
       return;
@@ -126,6 +133,21 @@ export default function DashboardPage() {
     setProfile(result.profile);
     setProfileStatus("loaded");
     setProfileMessage(null);
+
+    if (result.profile.role === "client") {
+      const elderlyProfileResult = await countOwnElderlyProfiles(supabase, result.profile.id);
+
+      if (elderlyProfileResult.errorMessage) {
+        setElderlyProfileCount(null);
+        setElderlyProfileMessage(`Could not load elderly profile count: ${elderlyProfileResult.errorMessage}. If this is an RLS error, confirm the elderly_profiles policies are applied.`);
+      } else {
+        setElderlyProfileCount(elderlyProfileResult.count);
+        setElderlyProfileMessage(null);
+      }
+    } else {
+      setElderlyProfileCount(null);
+      setElderlyProfileMessage(null);
+    }
 
     if (result.profile.role === "helper_applicant") {
       const helperApplicationResult = await loadOwnHelperApplication(supabase, result.profile.id);
@@ -201,6 +223,8 @@ export default function DashboardPage() {
         setProfile(null);
         setHelperApplication(null);
         setHelperApplicationMessage(null);
+        setElderlyProfileCount(null);
+        setElderlyProfileMessage(null);
         setProfileStatus("idle");
         return;
       }
@@ -211,6 +235,8 @@ export default function DashboardPage() {
         setProfile(null);
         setHelperApplication(null);
         setHelperApplicationMessage(null);
+        setElderlyProfileCount(null);
+        setElderlyProfileMessage(null);
         setProfileStatus("idle");
         return;
       }
@@ -230,6 +256,8 @@ export default function DashboardPage() {
         setProfile(null);
         setHelperApplication(null);
         setHelperApplicationMessage(null);
+        setElderlyProfileCount(null);
+        setElderlyProfileMessage(null);
         setProfileStatus("idle");
         return;
       }
@@ -336,6 +364,27 @@ export default function DashboardPage() {
                     <dd className="mt-1">{formatDate(profile.created_at)}</dd>
                   </div>
                 </dl>
+
+                {profile.role === "client" ? (
+                  <section className="mt-6 rounded-3xl border border-stone-200 bg-white p-5">
+                    <h3 className="font-bold text-forest">Elderly profiles</h3>
+                    {elderlyProfileMessage ? (
+                      <p className="mt-2 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm font-semibold leading-6 text-amber-900">{elderlyProfileMessage}</p>
+                    ) : (
+                      <p className="mt-2 text-sm leading-6 text-stone-600">
+                        {elderlyProfileCount === null
+                          ? "Elderly profile count is not loaded yet."
+                          : `You have ${elderlyProfileCount} elderly ${elderlyProfileCount === 1 ? "profile" : "profiles"} saved.`}
+                      </p>
+                    )}
+                    <p className="mt-2 text-sm leading-6 text-stone-600">
+                      Manage simple, non-medical elderly profiles now. Booking requests are a future placeholder and the booking flow is not implemented yet.
+                    </p>
+                    <Link href="/dashboard/elderly-profiles" className="mt-4 inline-flex min-h-11 items-center rounded-full bg-forest px-5 py-2 text-sm font-semibold text-white transition hover:bg-stone-800">
+                      Manage elderly profiles
+                    </Link>
+                  </section>
+                ) : null}
 
                 {profile.role === "helper_applicant" ? (
                   <section className="mt-6 rounded-3xl border border-stone-200 bg-white p-5">

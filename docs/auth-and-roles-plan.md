@@ -25,7 +25,8 @@ Current behavior:
 - Duplicate profile creation is handled safely so an existing profile does not crash signup or the dashboard retry path.
 - The current Terms and Privacy placeholder versions are stored as `v0.1-placeholder`.
 - The header shows Login/Sign up for signed-out users and Dashboard/Sign out for signed-in users.
-- `/dashboard` shows a login prompt for signed-out users, loads signed-in profile data from the `profiles` table, shows a clear incomplete-profile message if the database row is missing, and shows helper application status for `helper_applicant` users when an application exists.
+- `/dashboard` shows a login prompt for signed-out users, loads signed-in profile data from the `profiles` table, shows a clear incomplete-profile message if the database row is missing, shows helper application status for `helper_applicant` users when an application exists, and links client/caregiver users to elderly profile management with an elderly profile count when RLS allows it.
+- `/dashboard/elderly-profiles` now lets signed-in client/caregiver users create, view, update, and delete their own non-medical `elderly_profiles` rows using their normal authenticated browser session. Signed-out users see a login prompt, missing profile rows show a setup error, and helper/admin/non-client roles see an access-boundary message instead of management controls.
 - `/helper/apply` now lets signed-in users create or update their own `helper_applications` row as `draft` or `submitted`; signed-out users see a login/signup prompt.
 - `/helpers` only reads visible verified `helper_profiles` and does not expose submitted `helper_applications` or unverified applicants publicly.
 
@@ -39,6 +40,16 @@ Current limitations:
 - Do not commit `.env.local` or secret values.
 - Payments, Stripe, booking payments, medical-service functionality, Bulgarian localization, and native mobile apps remain out of scope.
 
+
+## Implemented client/caregiver elderly profile flow
+
+Client/caregiver users can now open `/dashboard/elderly-profiles` to manage elderly profiles connected to their account. The page uses the `elderly_profiles` table and the signed-in user's normal Supabase session with only `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. No service role key is used.
+
+The form intentionally collects only `full_name`, `city`, and `notes`. The notes field is labeled for non-medical support planning and warns users not to enter sensitive medical details, diagnoses, medication instructions, card PINs, passwords, cash-handling requests, or access-to-valuables requests. Medication, diagnosis, disability, and clinical care fields are intentionally not part of this flow.
+
+The current starter schema includes owner-scoped select, insert, update, and delete RLS policies for `elderly_profiles`. Delete can still be blocked later if related booking records exist because bookings reference elderly profiles with restrictive foreign keys. The UI reports that limitation instead of bypassing RLS or using privileged keys.
+
+Booking requests remain a placeholder. Booking flow, payment flow, Stripe, live booking payments, and medical-service functionality are not implemented.
 
 ## Implemented helper application flow
 
