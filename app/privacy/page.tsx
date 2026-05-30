@@ -12,11 +12,11 @@ export default function PrivacyPage() {
       <div className="mt-8 grid gap-4 md:grid-cols-3">
         <article className="rounded-3xl bg-sage p-5">
           <h2 className="font-bold text-forest">Current data storage</h2>
-          <p className="mt-2 leading-7 text-stone-700">This static shell does not collect, store, authenticate, or process real user data.</p>
+          <p className="mt-2 leading-7 text-stone-700">When Supabase is configured, this database-backed shell may store test account, profile, booking, helper application, and helper profile data through Supabase Auth and database workflows.</p>
         </article>
         <article className="rounded-3xl bg-sage p-5">
           <h2 className="font-bold text-forest">Future scope</h2>
-          <p className="mt-2 leading-7 text-stone-700">Supabase authentication is available when configured. Later phases may add database-backed account data only after privacy requirements and security rules are defined.</p>
+          <p className="mt-2 leading-7 text-stone-700">Terms and Privacy content is placeholder text for review; it should not be treated as final legal, privacy, retention, security, user-rights, or compliance guidance before launch.</p>
         </article>
         <article className="rounded-3xl bg-sage p-5">
           <h2 className="font-bold text-forest">Sensitive information</h2>

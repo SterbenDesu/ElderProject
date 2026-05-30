@@ -1,6 +1,6 @@
 # Auth and Roles Plan
 
-This document describes the VnukPodNaem authentication and role model. Supabase email/password authentication is implemented for the browser UI, and signup now attempts to create database-backed `profiles` and `terms_acceptances` records after auth signup succeeds. Protected middleware and full role enforcement remain planned work.
+This document describes the VnukPodNaem authentication and role model. Supabase email/password authentication is implemented for the browser UI, and signup now attempts to create database-backed `profiles` and `terms_acceptances` records after auth signup succeeds. Protected middleware and full role enforcement remain planned work. The current shell is database-backed when Supabase is configured, but it is still not launched or a full MVP.
 
 ## Product boundaries
 
@@ -8,7 +8,7 @@ This document describes the VnukPodNaem authentication and role model. Supabase 
 - Helpers are independent marketplace participants, not employees of the platform.
 - The app must not imply guaranteed safety.
 - Real payments, Stripe, live booking payments, and payment processing are out of scope for this phase.
-- Bulgarian localization, native mobile apps, and medical-service functionality are out of scope for this phase.
+- Helper acceptance, full booking lifecycle, disputes/complaints UI, chat, notifications, ratings/reviews, subscriptions, advanced admin workflows, Bulgarian localization, native mobile apps, and medical-service functionality are out of scope for this phase.
 
 ## Current auth implementation
 
@@ -23,7 +23,7 @@ Current behavior:
 - Signup also sends `terms_accepted`, `terms_version`, and `privacy_version` auth metadata.
 - After auth signup succeeds, the browser client attempts to insert the user's `profiles` row and a `terms_acceptances` row using only `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
 - Duplicate profile creation is handled safely so an existing profile does not crash signup or the dashboard retry path.
-- The current Terms and Privacy placeholder versions are stored as `v0.1-placeholder`.
+- The current Terms and Privacy placeholder versions are stored as `v0.1-placeholder`. Repeated signup or retry edge cases may create multiple `terms_acceptances` rows for the same user/version; keep this as a future cleanup decision until a safe uniqueness/idempotency change is designed and tested.
 - The header shows Login/Sign up for signed-out users and Dashboard/Sign out for signed-in users.
 - `/dashboard` shows a login prompt for signed-out users, loads signed-in profile data from the `profiles` table, shows a clear incomplete-profile message if the database row is missing, shows helper application status for `helper_applicant` users when an application exists, and links client/caregiver users to elderly profile management and booking request management with counts when RLS allows them.
 - `/dashboard/elderly-profiles` now lets signed-in client/caregiver users create, view, update, and delete their own non-medical `elderly_profiles` rows using their normal authenticated browser session. Signed-out users see a login prompt, missing profile rows show a setup error, and helper/admin/non-client roles see an access-boundary message instead of management controls.
@@ -39,7 +39,7 @@ Current limitations:
 - Admin roles must not be self-assignable from browser metadata.
 - Do not use a Supabase service role key in the browser.
 - Do not commit `.env.local` or secret values.
-- Payments, Stripe, booking payments, helper assignment, helper acceptance, matching, helper notifications, medical-service functionality, Bulgarian localization, and native mobile apps remain out of scope.
+- Payments, Stripe, booking payments, helper assignment, helper acceptance, matching, helper notifications, disputes/complaints UI, chat, ratings/reviews, subscriptions, advanced admin workflows, medical-service functionality, Bulgarian localization, and native mobile apps remain out of scope.
 
 
 ## Implemented client/caregiver elderly profile flow
@@ -167,12 +167,12 @@ High-level policy direction:
 
 ## Current database-backed auth behavior
 
-- Tables now used by the app: `profiles`, `terms_acceptances`, `helper_applications`, and public reads from verified visible `helper_profiles`.
+- Tables now used by the app: `profiles`, `terms_acceptances`, `elderly_profiles`, `bookings`, `service_categories`, `helper_applications`, and `helper_profiles` for public visible helper reads plus helper profile editing/admin visibility controls.
 - Signup creates the Supabase Auth user first, then inserts `profiles.id`, `profiles.email`, `profiles.role`, and a simple email-derived `profiles.display_name`. Database defaults handle `created_at` and `updated_at`.
 - Signup inserts `terms_acceptances.profile_id`, `terms_acceptances.terms_version`, and `terms_acceptances.privacy_version`. The database default handles `accepted_at`.
 - If auth succeeds but profile or terms storage fails, the UI reports that account creation succeeded but profile setup did not fully complete. The dashboard provides a safe retry path for signed-in users.
 - `/dashboard` reads `email`, `role`, `display_name`, and `created_at` from `profiles`. It shows role-aware placeholder sections for `client`, `helper_applicant`, `verified_helper`, and `admin`, and shows helper application status for helper applicants when available.
-- This phase includes the applicant-owned helper application draft/submission form and a basic admin review foundation. It does not add Stripe, live payment collection, booking payment processing, broad admin database management, elderly profile CRUD, bookings, Bulgarian localization, native mobile apps, medical-service functionality, or automatic public helper visibility.
+- This phase includes database-backed auth/profile setup, client elderly profile CRUD, basic client booking requests, applicant-owned helper application draft/submission, verified helper profile editing, admin-controlled public helper visibility, and a basic admin helper review foundation. It does not add Stripe, live payment collection, booking payment processing, helper acceptance, full booking lifecycle, disputes/complaints UI, chat, notifications, ratings/reviews, subscriptions, broad admin database management, Bulgarian localization, native mobile apps, medical-service functionality, or automatic helper acceptance.
 
 ## Open questions for the next Supabase phase
 
@@ -225,6 +225,6 @@ Booking assignment, helper acceptance, payment processing, Stripe, live booking 
 
 Signed-out visitors on `/helpers/[id]` see a prompt to log in or sign up as a client/caregiver. Signed-in users with roles `helper_applicant`, `verified_helper`, or `admin` see an access-boundary message explaining that booking requests are for client/caregiver accounts. Signed-in `client` users can create a booking request for the visible helper.
 
-Specific-helper requests still use the same owner-scoped browser Supabase session and public environment variables only. The app inserts a `bookings` row with `status = requested` and stores the selected visible helper in `bookings.helper_profile_id`. Helper acceptance, helper notifications, final confirmation, payment collection, Stripe/payment processing, and live booking payments are not implemented yet.
+Specific-helper requests still use the same owner-scoped browser Supabase session and public environment variables only. The app inserts a `bookings` row with `status = requested` and stores the selected visible helper in `bookings.helper_profile_id`. The `20260530140000_tighten_booking_helper_rls.sql` migration tightens the client booking insert/update policies so a non-null `helper_profile_id` must reference a `helper_profiles` row where `is_visible = true` and `verification_status` is `verified_basic` or `trusted`, while preserving client ownership, elderly-profile ownership, and allowed service-category checks. Helper acceptance, helper notifications, final confirmation, payment collection, Stripe/payment processing, disputes, Bulgarian localization, and live booking payments are not implemented yet.
 
 `/dashboard/bookings` now labels each booking as either a general/unassigned request or a request for a specific helper. When `helper_profile_id` is present, it attempts to show only safe public helper details from visible verified helper profiles. If that helper is later hidden or cannot be read under RLS, the client list keeps the booking visible but does not expose private helper data.

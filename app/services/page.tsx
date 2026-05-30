@@ -24,7 +24,7 @@ export default function ServicesPage() {
         <aside className="rounded-3xl bg-sage p-6 text-stone-700">
           <h2 className="text-xl font-bold text-forest">Not active yet</h2>
           <p className="mt-3 leading-7">
-            These are static categories for MVP review. Basic client booking requests are available for signed-in client accounts, while real search, helper matching, payment, and advanced marketplace features are not implemented.
+            These categories support the current testable shell. Basic database-backed client booking requests are available for signed-in client accounts, while search, helper acceptance, payments, disputes, chat, notifications, ratings, subscriptions, Bulgarian localization, and advanced marketplace workflows are not implemented.
           </p>
         </aside>
       </div>
@@ -40,7 +40,7 @@ export default function ServicesPage() {
 
       <div className="mt-10 grid gap-4 rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-stone-200 md:grid-cols-2">
         <div>
-          <h2 className="text-2xl font-bold text-forest">Before any future request</h2>
+          <h2 className="text-2xl font-bold text-forest">Before any request</h2>
           <p className="mt-3 leading-7 text-stone-700">
             Families and helpers should check whether the request is allowed, safe, practical, and non-medical.
           </p>

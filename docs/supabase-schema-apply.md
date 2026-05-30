@@ -1,6 +1,6 @@
 # Apply the Supabase database schema manually
 
-Use this guide to apply the initial VnukPodNaem database schema in a Supabase project. Codex does **not** need direct access to Supabase for this step.
+Use this guide to apply the VnukPodNaem database schema migrations in a Supabase project. Codex does **not** need direct access to Supabase for this step. The current shell is database-backed when Supabase is configured, but it is still not launched or a full MVP.
 
 ## Before you start
 
@@ -8,9 +8,11 @@ Make sure you have:
 
 1. A Supabase project for development or testing.
 2. Access to the Supabase dashboard in your browser.
-3. The migration files from this repository:
-   - `supabase/migrations/20260529120000_initial_schema.sql`
-   - `supabase/migrations/20260530120000_admin_helper_review_rpc.sql`
+3. The migration files from this repository, applied manually in this order:
+   1. `supabase/migrations/20260529120000_initial_schema.sql`
+   2. `supabase/migrations/20260530120000_admin_helper_review_rpc.sql`
+   3. `supabase/migrations/20260530130000_helper_profile_management.sql`
+   4. `supabase/migrations/20260530140000_tighten_booking_helper_rls.sql`
 
 Do **not** paste service role keys, database passwords, `.env.local` values, or any other secrets into the SQL Editor.
 
@@ -25,9 +27,11 @@ The migration creates the first database foundation for the non-medical marketpl
 - booking, complaint, payment-status, audit, and terms-acceptance tables;
 - `updated_at` triggers;
 - row-level security on every app table;
-- conservative starter RLS policies.
+- conservative starter RLS policies;
+- helper profile management/admin visibility RPCs;
+- tightened booking RLS requiring non-null `helper_profile_id` values to reference visible helpers with `verification_status` of `verified_basic` or `trusted`.
 
-It does **not** add Stripe, process payments, store card data, collect medical data, or make helpers employees.
+It does **not** add Stripe, process payments, store card data, collect medical data, add helper acceptance, add disputes, add Bulgarian localization, or make helpers employees.
 
 ## Step-by-step instructions
 
@@ -46,6 +50,10 @@ It does **not** add Stripe, process payments, store card data, collect medical d
 13. Copy the full SQL file contents.
 14. Paste the SQL into the Supabase SQL Editor.
 15. Click **Run** to install or replace the admin helper review RPC.
+16. Click **New query** again.
+17. Open `supabase/migrations/20260530130000_helper_profile_management.sql`, paste the full contents, and click **Run** to install or replace the helper profile management/admin visibility RPCs.
+18. Click **New query** again.
+19. Open `supabase/migrations/20260530140000_tighten_booking_helper_rls.sql`, paste the full contents, and click **Run** to tighten booking insert/update RLS for specific-helper requests.
 
 ## How to verify it worked
 
@@ -73,7 +81,8 @@ After the query succeeds:
    - Accompaniment
 4. Open **Authentication** and confirm your users are still managed by Supabase Auth.
 5. Open each table's policy/RLS view and confirm RLS is enabled.
-6. In the SQL Editor or Database function list, confirm `public.review_helper_application(p_application_id uuid, p_action text)` exists.
+6. In the SQL Editor or Database function list, confirm `public.review_helper_application(p_application_id uuid, p_action text)`, `public.update_own_helper_profile(p_bio text, p_city text, p_service_radius_km integer)`, and `public.set_helper_profile_visibility(p_helper_profile_id uuid, p_is_visible boolean)` exist.
+7. In the `bookings` policy view, confirm `bookings_client_insert` and `bookings_client_update` require a non-null `helper_profile_id` to reference a visible helper profile with `verification_status` of `verified_basic` or `trusted`.
 
 ## If SQL errors occur
 
@@ -123,3 +132,9 @@ This migration creates two authenticated RPC functions:
 2. `public.set_helper_profile_visibility(p_helper_profile_id uuid, p_is_visible boolean)` lets a signed-in `admin` toggle `helper_profiles.is_visible` for approved helper profiles and attempts to insert an `audit_logs` row containing the old and new visibility values.
 
 The migration does not disable RLS, does not weaken public helper policies, and does not require service role keys in the browser. Public `/helpers` listings still show only `helper_profiles` rows where `is_visible = true` and `verification_status` is `verified_basic` or `trusted`. Unverified helpers remain hidden. Booking assignment and payment logic are still not implemented.
+
+## Tighten booking helper RLS migration
+
+Apply `supabase/migrations/20260530140000_tighten_booking_helper_rls.sql` manually after the helper profile management migration. This migration drops and recreates only the client booking insert/update policies so existing ownership checks remain in place while non-null `bookings.helper_profile_id` values must reference a `helper_profiles` row where `is_visible = true` and `verification_status` is `verified_basic` or `trusted`.
+
+This is a shell safety cleanup only. It does not add payments, helper acceptance, full booking lifecycle, disputes, Bulgarian localization, chat, notifications, ratings, subscriptions, or advanced admin workflows.

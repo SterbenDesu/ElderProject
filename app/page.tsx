@@ -5,20 +5,20 @@ const serviceExamples = [
   { title: "Light errands", text: "Small local tasks and practical support that do not involve cash handling or valuables.", icon: "✓" },
   { title: "Shopping support", text: "Help planning or accompanying routine shopping, without card PINs or private credentials.", icon: "□" },
   { title: "Walks", text: "Calm outdoor accompaniment for everyday movement, not clinical supervision or emergency response.", icon: "↗" },
-  { title: "Check-ins", text: "Friendly scheduled visits or calls once real booking and account tools are added later.", icon: "○" },
+  { title: "Check-ins", text: "Friendly scheduled visits or calls within the current early booking-request shell.", icon: "○" },
   { title: "Technology help", text: "Basic phone, tablet, or video-call assistance without password collection.", icon: "⌁" },
 ];
 
 const trustCards = [
-  "Allowed and prohibited service lists are visible before real booking is added.",
-  "Future verification can reduce risk, but the platform will not promise absolute safety.",
+  "Allowed and prohibited service lists support the current early booking-request shell.",
+  "Basic helper review and visibility controls can reduce risk, but the platform will not promise absolute safety.",
   "Helpers are independent marketplace participants, not platform employees.",
 ];
 
 const steps = [
   { title: "Choose a need", text: "A family member or older adult selects a simple non-medical support category." },
   { title: "Review boundaries", text: "The request stays inside practical everyday support, with medical and financial tasks excluded." },
-  { title: "Match later", text: "Future phases can add verified helper profiles, booking, confirmations, and dispute review." },
+  { title: "Match later", text: "The current shell can record early booking requests; later phases can add helper acceptance, full lifecycle steps, payments, and dispute review." },
 ];
 
 export default function Home() {
@@ -29,7 +29,7 @@ export default function Home() {
         <div className="mx-auto grid max-w-6xl gap-10 px-5 py-12 sm:py-16 lg:grid-cols-[1.08fr_0.92fr] lg:px-8 lg:py-20">
           <div className="flex flex-col justify-center">
             <p className="w-fit rounded-full bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-clay shadow-sm ring-1 ring-stone-200">
-              Planned English-first MVP
+              Early database-backed shell
             </p>
             <h1 className="mt-5 max-w-3xl text-4xl font-bold tracking-tight text-forest sm:text-5xl lg:text-6xl">
               Warm everyday support, clearly kept non-medical.
@@ -42,11 +42,11 @@ export default function Home() {
                 Explore services
               </Link>
               <Link href="/helper/apply" className="rounded-full border border-forest/30 bg-white px-6 py-4 text-center font-semibold text-forest shadow-sm transition hover:bg-sage">
-                Planned helper path
+                Helper application path
               </Link>
             </div>
             <p className="mt-5 max-w-2xl text-sm leading-6 text-stone-600">
-              Not active yet: booking, payment processing, helper workflows, and admin tools are not enabled in this early shell. Supabase authentication and basic profile storage work when configured.
+              Current shell: Supabase-backed auth, client elderly profiles, booking requests, helper applications, helper profile editing, public helper visibility, and admin helper review are available when configured. Not launched yet: payments, helper acceptance, full booking lifecycle, disputes, Bulgarian localization, chat, notifications, ratings, subscriptions, and advanced admin workflows.
             </p>
           </div>
 

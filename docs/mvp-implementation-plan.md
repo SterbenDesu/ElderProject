@@ -23,7 +23,7 @@ Each phase should be implemented as a small Codex task. Do not start a later pha
 
 ### Phase 1: Project scaffold and static app shell
 
-**Status:** Completed in the first static Next.js scaffold. Visual/mobile polish pass completed for the static shell: stronger homepage structure, responsive navigation, clearer public pages, and more explicit placeholder messaging while keeping authentication, Supabase, Stripe, database, payment, and admin logic inactive.
+**Status:** Completed historically as the first static Next.js scaffold. The current shell has since moved beyond pure static pages and now includes Supabase-backed auth, client elderly profiles, booking requests, helper applications, helper profile editing, public helper visibility, and admin helper review when configured. Stripe/payment processing, helper acceptance, full booking lifecycle, disputes, Bulgarian localization, chat, notifications, ratings, subscriptions, and advanced admin workflows remain inactive.
 
 **Goal:** Create the smallest deployable web app shell without database, authentication, payment logic, or complex state.
 
@@ -787,7 +787,7 @@ Future deployment notes should include:
 - Migration steps after migrations exist.
 - Verification steps for public routes, protected routes, admin access, and safety pages.
 
-Current state: deployment configuration should remain documentation-only until the app scaffold exists.
+Current state: the app scaffold exists and the shell is database-backed when Supabase is configured, but it is not launched and remains short of the full MVP. Deployment still requires manual Supabase migration application and Vercel verification.
 
 ## 13. Risks
 
@@ -806,14 +806,10 @@ Highest risks to manage throughout the MVP:
 
 Recommended next task:
 
-**Scaffold the Next.js TypeScript Tailwind app shell with static routes, trust-focused design foundation, and updated deployment notes.**
+**After applying the latest Supabase migrations, manually review the current database-backed shell before broader UX/design work.**
 
 Suggested constraints for that task:
 
-- Modify only scaffold and documentation files needed for the static app shell.
-- Do not add Supabase yet.
-- Do not add Stripe yet.
-- Do not create database migrations yet.
-- Do not implement real authentication yet.
-- Do not implement Bulgarian UI yet.
-- Keep pages static, readable, responsive, and deployable.
+- Keep scope to shell-level cleanup and verification.
+- Do not add Stripe, live booking payments, helper acceptance, disputes UI, chat, notifications, ratings/reviews, subscriptions, native mobile work, or Bulgarian UI yet.
+- Keep public pages readable, responsive, and clear that this is an early shell rather than a launched platform.
