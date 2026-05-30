@@ -61,30 +61,33 @@ Purpose:
 - Stores elderly person profiles managed by a client/caregiver.
 - The elderly person does not need a separate login in the initial MVP.
 
-Essential fields:
+Current implemented fields in `supabase/migrations/20260529120000_initial_schema.sql`:
 
 - `id`
-- `caregiver_profile_id`
-- `display_name`
-- `general_location`
-- `mobility_notes`
-- `communication_preferences`
-- `emergency_contact_name`
-- `emergency_contact_phone`
+- `caregiver_id`
+- `full_name`
+- `city`
+- `notes`
 - `created_at`
 - `updated_at`
 
 Owner/access concept:
 
-- Owned by the client/caregiver profile referenced by `caregiver_profile_id`.
+- Owned by the client/caregiver profile referenced by `caregiver_id`.
 - Admins can access records only when needed for support, complaint, or safety review.
 
 High-level RLS notes:
 
-- Clients/caregivers can create, read, update, and later archive their own elderly profiles.
+- Clients/caregivers can create, read, update, and delete their own elderly profiles under the starter owner policies. If a profile is referenced by future bookings, deletion may be blocked by foreign-key restrictions; an archive field is not part of the current schema yet.
 - Other clients cannot read or edit these records.
 - Verified helpers should see only limited booking-relevant details for assigned or accepted bookings in a later phase.
-- Avoid collecting diagnosis, medication management needs, or detailed medical history.
+- Avoid collecting diagnosis, medication management needs, disability details, clinical care needs, or detailed medical history. The current app flow collects only `full_name`, `city`, and non-medical `notes`.
+
+### Current implementation note
+
+`/dashboard/elderly-profiles` now reads and writes the signed-in client/caregiver user's own `elderly_profiles` rows with the public Supabase browser client. The page supports create, list, edit, and owner-scoped delete actions when current RLS permits them. Signed-out users are prompted to log in, missing `profiles` rows show a setup error, and helper applicant, verified helper, admin, or other non-client roles are shown an access-boundary message rather than management controls.
+
+Elderly profile notes must stay non-medical. The UI warns users not to enter sensitive medical details, diagnoses, medication instructions, card PINs, passwords, cash-handling requests, or access-to-valuables requests. No medical, payment, Stripe, or live booking payment logic is implemented, and booking requests remain a future placeholder.
 
 ## `helper_applications`
 

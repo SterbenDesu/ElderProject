@@ -171,6 +171,21 @@ Do not paste service role keys, `.env.local` values, provider secrets, or databa
 
 None known for the current auth UI phase.
 
+## Client/caregiver elderly profiles deployment note
+
+`/dashboard/elderly-profiles` is now a database-backed client/caregiver flow for managing non-medical elderly profiles. It requires Supabase Auth, the `profiles` table, the `elderly_profiles` table, and the owner-scoped RLS policies from `supabase/migrations/20260529120000_initial_schema.sql`.
+
+Required environment variables remain name-only and public-client safe:
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+
+No service role key is used by the browser app, and no `.env.local` file should be committed. The flow stores only `full_name`, `city`, and non-medical `notes` in `elderly_profiles`. Do not collect medical details, diagnoses, medication instructions, card PINs, passwords, cash-handling requests, access-to-valuables requests, or other unnecessary sensitive data in this flow.
+
+Client/caregiver users can create, view, update, and delete their own elderly profiles when RLS and foreign-key rules permit it. If future bookings reference an elderly profile, deletion may be blocked by the database because the current schema does not include an archive flag.
+
+Booking flow, booking payments, Stripe/payment processing, native mobile apps, Bulgarian localization, and medical-service functionality are still not implemented. To verify deployment, sign in as a client/caregiver profile, open `/dashboard`, confirm the elderly profile count/link appears, then open `/dashboard/elderly-profiles` and create, edit, view, and delete a test non-medical elderly profile. Also verify helper applicant, verified helper, and admin profiles cannot use the management form.
+
 ## Admin helper application review deployment note
 
 `/admin` is now a database-backed admin dashboard foundation for helper application review. It requires Supabase Auth, the `profiles` table, `helper_applications`, `helper_profiles`, and the admin RLS policies from `supabase/migrations/20260529120000_initial_schema.sql`.
