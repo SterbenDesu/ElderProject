@@ -32,6 +32,7 @@ export type ClientBookingRequestInput = {
   requestedStartAt: string;
   requestedDurationMinutes: number;
   notes: string;
+  helperProfileId?: string | null;
 };
 
 const bookingColumns =
@@ -95,6 +96,7 @@ export async function createOwnBookingRequest(
     .insert({
       client_id: input.clientId,
       elderly_profile_id: input.elderlyProfileId,
+      helper_profile_id: input.helperProfileId ?? null,
       service_category_id: input.serviceCategoryId,
       status: "requested",
       requested_start_at: input.requestedStartAt,

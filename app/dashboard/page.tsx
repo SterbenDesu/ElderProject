@@ -120,7 +120,7 @@ function getRoleSections(role: ProfileRole): DashboardSection[] {
     {
       title: "Booking requests",
       description:
-        "Create and manage requested non-medical service requests. Payment and helper assignment are not active yet.",
+        "Create and manage general requests or request a specific visible helper. Payment, helper acceptance, and final confirmation are later phases.",
     },
     {
       title: "Safety and service boundaries",
@@ -554,17 +554,22 @@ export default function DashboardPage() {
                       </p>
                     )}
                     <p className="mt-2 text-sm leading-6 text-stone-600">
-                      Clients can now create requested non-medical service
-                      requests. Payment processing, helper assignment, helper
-                      acceptance, matching, and notifications are not active
-                      yet.
+                      Clients can create general non-medical booking requests or browse visible verified helpers and request a specific helper. These requests are not paid or accepted yet; payment and final confirmation are planned for later phases.
                     </p>
-                    <Link
-                      href="/dashboard/bookings"
-                      className="mt-4 inline-flex min-h-11 items-center rounded-full bg-forest px-5 py-2 text-sm font-semibold text-white transition hover:bg-stone-800"
-                    >
-                      Manage booking requests
-                    </Link>
+                    <div className="mt-4 flex flex-wrap gap-3">
+                      <Link
+                        href="/helpers"
+                        className="inline-flex min-h-11 items-center rounded-full bg-forest px-5 py-2 text-sm font-semibold text-white transition hover:bg-stone-800"
+                      >
+                        Browse helpers
+                      </Link>
+                      <Link
+                        href="/dashboard/bookings"
+                        className="inline-flex min-h-11 items-center rounded-full border border-stone-200 bg-white px-5 py-2 text-sm font-semibold text-forest transition hover:bg-sage"
+                      >
+                        Manage booking requests
+                      </Link>
+                    </div>
                   </section>
                 ) : null}
 
@@ -661,9 +666,7 @@ export default function DashboardPage() {
               </li>
               <li>• Dashboard placeholders change by database role.</li>
               <li>
-                • Client booking requests can be saved, but payment processing,
-                helper assignment, helper acceptance, and live booking payments
-                are not active.
+                • Client booking requests can be saved as general requests or for a specific visible helper, but helper acceptance, final confirmation, payment processing, and live booking payments are not active.
               </li>
               <li>
                 • Verified helpers can edit safe helper profile fields; only

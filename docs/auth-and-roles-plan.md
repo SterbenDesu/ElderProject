@@ -218,3 +218,13 @@ Only admins control public helper visibility. `/admin` now loads approved helper
 `/helpers` remains public-safe: it reads only `helper_profiles` rows where `is_visible = true` and `verification_status` is `verified_basic` or `trusted`, and it shows only safe fields. Helper applications, email addresses, hidden helpers, and unverified applicants are not exposed publicly.
 
 Booking assignment, helper acceptance, payment processing, Stripe, live booking payments, card collection, native mobile apps, Bulgarian localization, and medical-service functionality are still not implemented.
+
+## Visible helper detail pages and specific-helper booking requests
+
+`/helpers` now links each public visible verified helper card to `/helpers/[id]`. The detail route reads only `helper_profiles` rows where `is_visible = true` and `verification_status` is `verified_basic` or `trusted`, and it shows only safe public helper fields: bio, city, service radius, and a public verification label. It does not expose helper email addresses, private profile ownership IDs, helper application answers, hidden helpers, unverified applicants, or admin-only fields.
+
+Signed-out visitors on `/helpers/[id]` see a prompt to log in or sign up as a client/caregiver. Signed-in users with roles `helper_applicant`, `verified_helper`, or `admin` see an access-boundary message explaining that booking requests are for client/caregiver accounts. Signed-in `client` users can create a booking request for the visible helper.
+
+Specific-helper requests still use the same owner-scoped browser Supabase session and public environment variables only. The app inserts a `bookings` row with `status = requested` and stores the selected visible helper in `bookings.helper_profile_id`. Helper acceptance, helper notifications, final confirmation, payment collection, Stripe/payment processing, and live booking payments are not implemented yet.
+
+`/dashboard/bookings` now labels each booking as either a general/unassigned request or a request for a specific helper. When `helper_profile_id` is present, it attempts to show only safe public helper details from visible verified helper profiles. If that helper is later hidden or cannot be read under RLS, the client list keeps the booking visible but does not expose private helper data.
