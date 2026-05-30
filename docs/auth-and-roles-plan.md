@@ -25,8 +25,9 @@ Current behavior:
 - Duplicate profile creation is handled safely so an existing profile does not crash signup or the dashboard retry path.
 - The current Terms and Privacy placeholder versions are stored as `v0.1-placeholder`.
 - The header shows Login/Sign up for signed-out users and Dashboard/Sign out for signed-in users.
-- `/dashboard` shows a login prompt for signed-out users, loads signed-in profile data from the `profiles` table, shows a clear incomplete-profile message if the database row is missing, shows helper application status for `helper_applicant` users when an application exists, and links client/caregiver users to elderly profile management with an elderly profile count when RLS allows it.
+- `/dashboard` shows a login prompt for signed-out users, loads signed-in profile data from the `profiles` table, shows a clear incomplete-profile message if the database row is missing, shows helper application status for `helper_applicant` users when an application exists, and links client/caregiver users to elderly profile management and booking request management with counts when RLS allows them.
 - `/dashboard/elderly-profiles` now lets signed-in client/caregiver users create, view, update, and delete their own non-medical `elderly_profiles` rows using their normal authenticated browser session. Signed-out users see a login prompt, missing profile rows show a setup error, and helper/admin/non-client roles see an access-boundary message instead of management controls.
+- `/dashboard/bookings` now lets signed-in client/caregiver users create, view, and cancel their own basic booking requests with `bookings`, `elderly_profiles`, and allowed `service_categories`. Signed-out users see a login prompt, missing profile rows show a setup error, helper roles and other non-client roles see an access-boundary message, and admin users see a placeholder instead of full booking management.
 - `/helper/apply` now lets signed-in users create or update their own `helper_applications` row as `draft` or `submitted`; signed-out users see a login/signup prompt.
 - `/helpers` only reads visible verified `helper_profiles` and does not expose submitted `helper_applications` or unverified applicants publicly.
 
@@ -38,7 +39,7 @@ Current limitations:
 - Admin roles must not be self-assignable from browser metadata.
 - Do not use a Supabase service role key in the browser.
 - Do not commit `.env.local` or secret values.
-- Payments, Stripe, booking payments, medical-service functionality, Bulgarian localization, and native mobile apps remain out of scope.
+- Payments, Stripe, booking payments, helper assignment, helper acceptance, matching, helper notifications, medical-service functionality, Bulgarian localization, and native mobile apps remain out of scope.
 
 
 ## Implemented client/caregiver elderly profile flow
@@ -49,7 +50,18 @@ The form intentionally collects only `full_name`, `city`, and `notes`. The notes
 
 The current starter schema includes owner-scoped select, insert, update, and delete RLS policies for `elderly_profiles`. Delete can still be blocked later if related booking records exist because bookings reference elderly profiles with restrictive foreign keys. The UI reports that limitation instead of bypassing RLS or using privileged keys.
 
-Booking requests remain a placeholder. Booking flow, payment flow, Stripe, live booking payments, and medical-service functionality are not implemented.
+Booking requests now use elderly profiles for the client/caregiver booking request form, so clients need at least one elderly profile before creating a request. Payment flow, Stripe, live booking payments, helper assignment, helper acceptance, matching, helper notifications, and medical-service functionality are not implemented.
+
+
+## Implemented client/caregiver booking request flow
+
+Client/caregiver users can now open `/dashboard/bookings` to create and manage basic booking/service requests. The page uses the existing `bookings` table for requests, `elderly_profiles` for the selected elderly person, and `service_categories` for allowed non-medical service categories. It uses the signed-in user's normal Supabase browser session with only `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`; no service role key is used.
+
+New requests are inserted with `status = requested`. The client flow intentionally does not implement `accepted`, `payment_secured`, `in_progress`, `completed_by_helper`, `pending_client_confirmation`, `completed_released`, `disputed`, or `no_show` transitions. Clients can cancel only requests that are still `requested`; cancellation updates the row to `status = cancelled` and does not hard-delete booking records.
+
+The booking request form collects only `elderly_profile_id`, `service_category_id`, `city`, `requested_start_at`, `requested_duration_minutes`, and non-medical `notes`. The notes helper text warns users not to enter medical details, diagnoses, medication instructions, card PINs, passwords, cash-handling requests, or access-to-valuables requests. No medication, diagnosis, disability, clinical care, emergency care, payment card, or payment processing fields are part of this flow.
+
+Helper users cannot accept bookings yet, cannot view booking requests from this route, and are not notified. Admin users see only a placeholder on `/dashboard/bookings`; full admin booking management is not implemented.
 
 ## Implemented helper application flow
 
@@ -126,7 +138,7 @@ Route protection is not implemented in this auth-only phase. Future route protec
 - Public pages stay accessible to visitors.
 - `/dashboard` and nested client pages require a signed-in client/caregiver or admin as appropriate.
 - `/dashboard/elderly-profiles` requires the signed-in client/caregiver to own the elderly profile records being viewed or edited.
-- `/dashboard/bookings` requires the signed-in user to be connected to the booking as the client/caregiver, assigned verified helper, or admin.
+- `/dashboard/bookings` currently allows only the signed-in client/caregiver to manage their own booking requests; helper viewing/acceptance and full admin booking management are later phases.
 - `/helper/apply` currently prompts signed-out visitors to log in or sign up, then lets the signed-in application owner save `draft` or `submitted` application data. Future route protection should narrow this to helper-applicant workflows as protected routing is added.
 - `/helpers` shows only active public verified helper profiles when they exist; unverified applicants and submitted applications remain private.
 - `/admin` and nested admin routes require the admin role.

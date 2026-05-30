@@ -3,6 +3,7 @@
 import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { countOwnBookings } from "@/lib/supabase/bookings";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { countOwnElderlyProfiles } from "@/lib/supabase/elderlyProfiles";
 import {
@@ -76,7 +77,7 @@ function getRoleSections(role: ProfileRole): DashboardSection[] {
 
   return [
     { title: "Elderly profiles", description: "Create and manage non-medical elderly profiles connected to your client/caregiver account." },
-    { title: "Booking requests", description: "Future area for non-medical service requests and booking status. Booking flow is not implemented yet." },
+    { title: "Booking requests", description: "Create and manage requested non-medical service requests. Payment and helper assignment are not active yet." },
     { title: "Safety and service boundaries", description: "Reminder that the platform supports non-medical help only and does not guarantee absolute safety." },
   ];
 }
@@ -90,6 +91,8 @@ export default function DashboardPage() {
   const [helperApplicationMessage, setHelperApplicationMessage] = useState<string | null>(null);
   const [elderlyProfileCount, setElderlyProfileCount] = useState<number | null>(null);
   const [elderlyProfileMessage, setElderlyProfileMessage] = useState<string | null>(null);
+  const [bookingRequestCount, setBookingRequestCount] = useState<number | null>(null);
+  const [bookingRequestMessage, setBookingRequestMessage] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [profileMessage, setProfileMessage] = useState<string | null>(null);
   const [isRetryingProfileSetup, setIsRetryingProfileSetup] = useState(false);
@@ -114,6 +117,8 @@ export default function DashboardPage() {
       setHelperApplicationMessage(null);
       setElderlyProfileCount(null);
       setElderlyProfileMessage(null);
+      setBookingRequestCount(null);
+      setBookingRequestMessage(null);
       setProfileStatus("error");
       setProfileMessage(result.errorMessage);
       return;
@@ -125,6 +130,8 @@ export default function DashboardPage() {
       setHelperApplicationMessage(null);
       setElderlyProfileCount(null);
       setElderlyProfileMessage(null);
+      setBookingRequestCount(null);
+      setBookingRequestMessage(null);
       setProfileStatus("missing");
       setProfileMessage("Your auth account exists, but profile setup is incomplete. Use the retry button below after the database schema and RLS policies are applied.");
       return;
@@ -135,7 +142,10 @@ export default function DashboardPage() {
     setProfileMessage(null);
 
     if (result.profile.role === "client") {
-      const elderlyProfileResult = await countOwnElderlyProfiles(supabase, result.profile.id);
+      const [elderlyProfileResult, bookingRequestResult] = await Promise.all([
+        countOwnElderlyProfiles(supabase, result.profile.id),
+        countOwnBookings(supabase, result.profile.id),
+      ]);
 
       if (elderlyProfileResult.errorMessage) {
         setElderlyProfileCount(null);
@@ -144,9 +154,19 @@ export default function DashboardPage() {
         setElderlyProfileCount(elderlyProfileResult.count);
         setElderlyProfileMessage(null);
       }
+
+      if (bookingRequestResult.errorMessage) {
+        setBookingRequestCount(null);
+        setBookingRequestMessage(`Could not load booking request count: ${bookingRequestResult.errorMessage}. If this is an RLS error, confirm the bookings policies are applied.`);
+      } else {
+        setBookingRequestCount(bookingRequestResult.count);
+        setBookingRequestMessage(null);
+      }
     } else {
       setElderlyProfileCount(null);
       setElderlyProfileMessage(null);
+      setBookingRequestCount(null);
+      setBookingRequestMessage(null);
     }
 
     if (result.profile.role === "helper_applicant") {
@@ -225,6 +245,8 @@ export default function DashboardPage() {
         setHelperApplicationMessage(null);
         setElderlyProfileCount(null);
         setElderlyProfileMessage(null);
+        setBookingRequestCount(null);
+        setBookingRequestMessage(null);
         setProfileStatus("idle");
         return;
       }
@@ -237,6 +259,8 @@ export default function DashboardPage() {
         setHelperApplicationMessage(null);
         setElderlyProfileCount(null);
         setElderlyProfileMessage(null);
+        setBookingRequestCount(null);
+        setBookingRequestMessage(null);
         setProfileStatus("idle");
         return;
       }
@@ -258,6 +282,8 @@ export default function DashboardPage() {
         setHelperApplicationMessage(null);
         setElderlyProfileCount(null);
         setElderlyProfileMessage(null);
+        setBookingRequestCount(null);
+        setBookingRequestMessage(null);
         setProfileStatus("idle");
         return;
       }
@@ -378,10 +404,36 @@ export default function DashboardPage() {
                       </p>
                     )}
                     <p className="mt-2 text-sm leading-6 text-stone-600">
-                      Manage simple, non-medical elderly profiles now. Booking requests are a future placeholder and the booking flow is not implemented yet.
+                      Manage simple, non-medical elderly profiles and use them when creating booking requests.
                     </p>
-                    <Link href="/dashboard/elderly-profiles" className="mt-4 inline-flex min-h-11 items-center rounded-full bg-forest px-5 py-2 text-sm font-semibold text-white transition hover:bg-stone-800">
-                      Manage elderly profiles
+                    <div className="mt-4 flex flex-wrap gap-3">
+                      <Link href="/dashboard/elderly-profiles" className="inline-flex min-h-11 items-center rounded-full bg-forest px-5 py-2 text-sm font-semibold text-white transition hover:bg-stone-800">
+                        Manage elderly profiles
+                      </Link>
+                      <Link href="/dashboard/bookings" className="inline-flex min-h-11 items-center rounded-full border border-stone-200 bg-white px-5 py-2 text-sm font-semibold text-forest transition hover:bg-sage">
+                        Open booking requests
+                      </Link>
+                    </div>
+                  </section>
+                ) : null}
+
+                {profile.role === "client" ? (
+                  <section className="mt-6 rounded-3xl border border-stone-200 bg-white p-5">
+                    <h3 className="font-bold text-forest">Booking requests</h3>
+                    {bookingRequestMessage ? (
+                      <p className="mt-2 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm font-semibold leading-6 text-amber-900">{bookingRequestMessage}</p>
+                    ) : (
+                      <p className="mt-2 text-sm leading-6 text-stone-600">
+                        {bookingRequestCount === null
+                          ? "Booking request count is not loaded yet."
+                          : `You have ${bookingRequestCount} booking ${bookingRequestCount === 1 ? "request" : "requests"} saved.`}
+                      </p>
+                    )}
+                    <p className="mt-2 text-sm leading-6 text-stone-600">
+                      Clients can now create requested non-medical service requests. Payment processing, helper assignment, helper acceptance, matching, and notifications are not active yet.
+                    </p>
+                    <Link href="/dashboard/bookings" className="mt-4 inline-flex min-h-11 items-center rounded-full bg-forest px-5 py-2 text-sm font-semibold text-white transition hover:bg-stone-800">
+                      Manage booking requests
                     </Link>
                   </section>
                 ) : null}
@@ -440,7 +492,7 @@ export default function DashboardPage() {
             <ul className="mt-4 space-y-3 leading-7">
               <li>• Profile data now comes from the Supabase `profiles` table.</li>
               <li>• Dashboard placeholders change by database role.</li>
-              <li>• No payment processing, booking payments, Stripe logic, or live booking payments have been added.</li>
+              <li>• Client booking requests can be saved, but payment processing, helper assignment, helper acceptance, and live booking payments are not active.</li>
             </ul>
           </aside>
         </div>

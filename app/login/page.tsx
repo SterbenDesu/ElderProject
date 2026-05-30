@@ -51,7 +51,7 @@ export default function LoginPage() {
         <div className="rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200">
           <h2 className="text-2xl font-bold text-forest">Sign in with email</h2>
           <p className="mt-4 text-lg leading-8">
-            Use your Supabase email and password account to access the early dashboard. Booking, payments, and admin management are not active yet.
+            Use your Supabase email and password account to access the early dashboard. Basic client booking requests are available, while payments and full admin management are not active yet.
           </p>
 
           <form onSubmit={handleSubmit} className="mt-6 grid gap-5">
@@ -108,7 +108,7 @@ export default function LoginPage() {
           <h2 className="text-xl font-bold text-forest">Current auth scope</h2>
           <ul className="mt-4 space-y-3 leading-7">
             <li>• Email/password authentication uses Supabase when configured.</li>
-            <li>• Database profiles, helper approvals, bookings, and payments are still inactive.</li>
+            <li>• Database profiles, helper approvals, and basic client booking requests are active when the Supabase schema and RLS policies are applied; payments are still inactive.</li>
             <li>• Helpers remain independent marketplace participants, not employees.</li>
           </ul>
         </aside>

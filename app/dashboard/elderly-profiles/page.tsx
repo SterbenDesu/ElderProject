@@ -311,7 +311,7 @@ export default function ElderlyProfilesPage() {
       <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">Client dashboard</p>
       <h1 className="mt-3 text-4xl font-bold tracking-tight text-forest sm:text-5xl">Elderly profiles</h1>
       <p className="mt-5 max-w-3xl text-lg leading-8 text-stone-700">
-        Create simple, non-medical profiles for elderly people you support. These records help prepare future booking requests, but booking and payment flows are not implemented yet.
+        Create simple, non-medical profiles for elderly people you support. These records can now be selected in basic booking requests, while payment and helper assignment flows are not implemented yet.
       </p>
 
       {status === "loading" ? (
@@ -442,7 +442,7 @@ export default function ElderlyProfilesPage() {
             <div className="rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200">
               <h2 className="text-xl font-bold text-forest">Not implemented yet</h2>
               <ul className="mt-4 space-y-3 leading-7">
-                <li>• Booking requests are still a placeholder.</li>
+                <li>• Basic client booking requests are available at /dashboard/bookings.</li>
                 <li>• Payment flow, Stripe, and live booking payments are not implemented.</li>
                 <li>• There is no medical-service functionality.</li>
               </ul>

@@ -89,7 +89,7 @@ Current database rows created during signup when the schema and RLS policies all
 - `profiles` with the auth user id, email, safe role mapping, and simple display-name fallback.
 - `terms_acceptances` with the auth user id and placeholder Terms/Privacy versions.
 
-`/dashboard` now reads the signed-in user's `profiles` row and shows role-aware placeholders. For `helper_applicant` users, it also shows the current helper application status when a `helper_applications` row exists and links to `/helper/apply`. Admin users see a link to `/admin`. It does not include broad admin database management, elderly profile CRUD, bookings, Stripe, payment processing, or live booking payments.
+`/dashboard` now reads the signed-in user's `profiles` row and shows role-aware placeholders. For `helper_applicant` users, it also shows the current helper application status when a `helper_applications` row exists and links to `/helper/apply`. Client/caregiver users see elderly profile and booking request counts/links when RLS allows them. Admin users see a link to `/admin`. It does not include broad admin database management, Stripe, payment processing, helper assignment, helper acceptance, or live booking payments.
 
 Current helper application behavior:
 
@@ -157,6 +157,8 @@ Do not paste service role keys, `.env.local` values, provider secrets, or databa
 - `/dashboard` shows different placeholders for `client`, `helper_applicant`, `verified_helper`, and `admin` profile roles.
 - `/dashboard` shows helper application status for helper applicants when available and links to `/helper/apply`.
 - `/helper/apply` lets signed-in users save a helper application draft or submit it using `helper_applications`.
+- `/dashboard` shows client/caregiver booking request count when RLS allows it and links to `/dashboard/bookings`.
+- `/dashboard/bookings` lets client/caregiver users create requested booking rows, list their own booking rows, and cancel requested rows by setting `status = cancelled`.
 - `/helper/apply` shows `under_review`, `approved`, and `rejected` applications as read-only for applicants.
 - `/helpers` does not show unverified applicants or submitted helper applications publicly.
 - Terms and Privacy pages clearly state they are draft placeholders requiring legal review before launch.
@@ -165,7 +167,7 @@ Do not paste service role keys, `.env.local` values, provider secrets, or databa
 - No service role key is used in the browser.
 - Initial database schema migration exists and has been manually applied in Supabase before database-backed features are used.
 - RLS is enabled and reviewed on every app table.
-- No Stripe, live payment, booking payment, native mobile, Bulgarian localization, or medical-service functionality is active.
+- No Stripe, live payment, booking payment, helper assignment, helper acceptance, native mobile, Bulgarian localization, or medical-service functionality is active.
 
 ## Deployment issues
 
@@ -184,7 +186,25 @@ No service role key is used by the browser app, and no `.env.local` file should 
 
 Client/caregiver users can create, view, update, and delete their own elderly profiles when RLS and foreign-key rules permit it. If future bookings reference an elderly profile, deletion may be blocked by the database because the current schema does not include an archive flag.
 
-Booking flow, booking payments, Stripe/payment processing, native mobile apps, Bulgarian localization, and medical-service functionality are still not implemented. To verify deployment, sign in as a client/caregiver profile, open `/dashboard`, confirm the elderly profile count/link appears, then open `/dashboard/elderly-profiles` and create, edit, view, and delete a test non-medical elderly profile. Also verify helper applicant, verified helper, and admin profiles cannot use the management form.
+Booking requests are implemented separately at `/dashboard/bookings`; booking payments, Stripe/payment processing, native mobile apps, Bulgarian localization, and medical-service functionality are still not implemented. To verify deployment, sign in as a client/caregiver profile, open `/dashboard`, confirm the elderly profile count/link appears, then open `/dashboard/elderly-profiles` and create, edit, view, and delete a test non-medical elderly profile. Also verify helper applicant, verified helper, and admin profiles cannot use the management form.
+
+
+## Client/caregiver booking requests deployment note
+
+`/dashboard/bookings` is now a database-backed client/caregiver flow for creating and managing basic non-medical booking/service requests. It requires Supabase Auth, the `profiles` table, the `bookings` table, the `elderly_profiles` table, the `service_categories` table, and the owner-scoped RLS policies from `supabase/migrations/20260529120000_initial_schema.sql`.
+
+Required environment variables remain name-only and public-client safe:
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+
+No service role key is used by the browser app, and no `.env.local` file should be committed. New booking requests insert `bookings.status = requested` and use the selected client-owned `elderly_profiles.id`, an allowed `service_categories.id`, `city`, `requested_start_at`, `requested_duration_minutes`, and non-medical `notes`.
+
+Client/caregiver users can view their own booking requests and cancel a request only while it is still `requested`. Cancellation updates the row to `status = cancelled`; booking rows are not hard-deleted. Payment processing, Stripe, live booking payments, helper assignment, helper acceptance, matching, and helper notifications are not implemented. Helpers should not see or accept booking requests yet. Admin booking management is not implemented in the app; admin users see a placeholder on `/dashboard/bookings`.
+
+The booking notes UI warns users not to enter medical details, diagnoses, medication instructions, card PINs, passwords, cash-handling requests, or access-to-valuables requests. The flow does not add medical-service fields or collect unnecessary medical or health data.
+
+To verify deployment, sign in as a client/caregiver profile, ensure at least one elderly profile exists at `/dashboard/elderly-profiles`, open `/dashboard/bookings`, create a requested booking with an allowed service category, confirm it appears in the list with elderly profile, service category, city, date/time, duration, status, and notes, then cancel it and confirm the status changes to Cancelled. Also verify signed-out users are asked to log in and helper applicant, verified helper, and admin profiles cannot use the client booking form.
 
 ## Admin helper application review deployment note
 
@@ -206,4 +226,4 @@ Approval behavior inside the RPC:
 5. Keeps `helper_profiles.is_visible = false` by default, so approved helpers are not automatically public.
 6. Attempts to insert an `audit_logs` row for the status change.
 
-Booking logic, booking payments, Stripe/payment processing, native mobile apps, Bulgarian localization, and medical-service functionality are still not implemented. To verify deployment, sign in as an admin profile, open `/admin`, confirm non-admin accounts are denied, review a test helper application, and confirm `/helpers` only shows verified helper profiles that are explicitly visible.
+Full booking management, helper assignment, helper acceptance, booking payments, Stripe/payment processing, native mobile apps, Bulgarian localization, and medical-service functionality are still not implemented. To verify deployment, sign in as an admin profile, open `/admin`, confirm non-admin accounts are denied, review a test helper application, and confirm `/helpers` only shows verified helper profiles that are explicitly visible.
