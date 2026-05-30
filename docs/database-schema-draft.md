@@ -87,7 +87,7 @@ High-level RLS notes:
 
 `/dashboard/elderly-profiles` now reads and writes the signed-in client/caregiver user's own `elderly_profiles` rows with the public Supabase browser client. The page supports create, list, edit, and owner-scoped delete actions when current RLS permits them. Signed-out users are prompted to log in, missing `profiles` rows show a setup error, and helper applicant, verified helper, admin, or other non-client roles are shown an access-boundary message rather than management controls.
 
-Elderly profile notes must stay non-medical. The UI warns users not to enter sensitive medical details, diagnoses, medication instructions, card PINs, passwords, cash-handling requests, or access-to-valuables requests. No medical, payment, Stripe, or live booking payment logic is implemented, and booking requests remain a future placeholder.
+Elderly profile notes must stay non-medical. The UI warns users not to enter sensitive medical details, diagnoses, medication instructions, card PINs, passwords, cash-handling requests, or access-to-valuables requests. No medical, payment, Stripe, or live booking payment logic is implemented. Booking requests now use `elderly_profiles` as the client-owned elderly-person selection source.
 
 ## `helper_applications`
 
@@ -200,41 +200,39 @@ High-level RLS notes:
 
 Purpose:
 
-- Stores non-medical service booking requests and their lifecycle statuses.
-- Keeps payment-provider-ready placeholder fields without processing payments in this phase.
+- Stores non-medical client/caregiver booking/service requests and lifecycle statuses.
+- The current application flow only creates `requested` rows and lets clients cancel them with `cancelled`; later lifecycle statuses remain database-ready only.
+- Payment processing is not implemented in this flow, and the app does not collect card details or create `payment_records`.
 
-Essential fields:
+Essential fields in the applied starter schema:
 
 - `id`
-- `client_profile_id`
+- `client_id`
 - `elderly_profile_id`
 - `helper_profile_id`
 - `service_category_id`
+- `status`
 - `requested_start_at`
 - `requested_duration_minutes`
-- `general_location`
-- `non_medical_request_details`
-- `status`
-- `payment_status`
-- `payout_status`
-- `platform_commission_percent`
-- `provider_payment_reference`
-- `confirmation_window_ends_at`
+- `city`
+- `notes`
 - `created_at`
 - `updated_at`
 
 Owner/access concept:
 
-- Owned by the client/caregiver who created the booking.
-- Assigned verified helpers can access booking details necessary to decide, perform, or complete the accepted non-medical service.
-- Admins can access bookings for support, moderation, dispute review, and audit purposes.
+- Owned by the client/caregiver who created the booking through `client_id`.
+- The selected `elderly_profile_id` must belong to the same client/caregiver under the starter insert policy.
+- The selected `service_category_id` must refer to an allowed service category.
+- Assigned verified-helper viewing is a later phase; the current browser UI does not show requests to helpers or allow helper acceptance.
+- Admins may have database-level access through admin RLS, but full admin booking management is not implemented in the app yet.
 
-High-level RLS notes:
+High-level RLS and application notes:
 
-- Clients/caregivers can read bookings they created.
+- Clients/caregivers can read booking rows they created.
 - Clients/caregivers can create bookings only for elderly profiles they own and allowed service categories.
-- Verified helpers can read bookings assigned to them or accepted by them.
-- Admins can review and update statuses according to policy.
+- Client cancellation is an update to `status = cancelled`, not a hard delete.
+- New booking requests use `status = requested`. The app does not implement `accepted`, `payment_secured`, `in_progress`, `completed_by_helper`, `pending_client_confirmation`, `completed_released`, `disputed`, or `no_show` transitions yet.
 - Requests involving medication management, injections, wound care, clinical tasks, bank card PINs, passwords, cash handling, or access-to-valuables should be rejected or flagged.
 
 ## `complaints`
@@ -373,4 +371,4 @@ The admin review foundation now uses these existing tables:
 
 The starter migration includes admin RLS policies for selecting and updating operational records needed by this review flow. Admin role assignment is still sensitive: users cannot self-assign admin through signup, and helper applicants cannot approve themselves. Public helper listing remains limited to rows in `helper_profiles` where `is_visible = true` and `verification_status` is `verified_basic` or `trusted`; helper applications are never public listings.
 
-Payment logic, Stripe, live booking payments, and booking lifecycle logic remain unimplemented in the application layer.
+Payment logic, Stripe, live booking payments, helper assignment, helper acceptance, and advanced booking lifecycle logic remain unimplemented in the application layer.

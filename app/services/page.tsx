@@ -24,7 +24,7 @@ export default function ServicesPage() {
         <aside className="rounded-3xl bg-sage p-6 text-stone-700">
           <h2 className="text-xl font-bold text-forest">Not active yet</h2>
           <p className="mt-3 leading-7">
-            These are static categories for MVP review. Real search, booking, helper matching, payment, storage, and account features are not implemented.
+            These are static categories for MVP review. Basic client booking requests are available for signed-in client accounts, while real search, helper matching, payment, and advanced marketplace features are not implemented.
           </p>
         </aside>
       </div>

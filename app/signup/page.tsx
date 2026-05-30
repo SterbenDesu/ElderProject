@@ -195,7 +195,7 @@ export default function SignupPage() {
           <h2 className="text-xl font-bold text-forest">Current signup scope</h2>
           <ul className="mt-4 space-y-3 leading-7">
             <li>• Account type and Terms/Privacy acceptance are saved to Supabase auth metadata and app database tables when allowed by RLS.</li>
-            <li>• Bookings, payments, full role-based routing, and public helper visibility controls are not implemented yet.</li>
+            <li>• Basic client booking requests are implemented; payments, full role-based routing, and public helper visibility controls are not implemented yet.</li>
             <li>• No payments, medical services, or helper employment relationship are added.</li>
           </ul>
         </aside>
