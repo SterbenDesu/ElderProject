@@ -83,6 +83,9 @@ export default function HelpersPage() {
                   <p className="mt-3 text-sm font-semibold text-stone-600">
                     Service radius: {helperProfile.service_radius_km === null ? "Not listed" : `${helperProfile.service_radius_km} km`}
                   </p>
+                  <Link href={`/helpers/${helperProfile.id}`} className="mt-4 inline-flex min-h-11 items-center rounded-full bg-forest px-5 py-2 text-sm font-semibold text-white transition hover:bg-stone-800">
+                    View helper details
+                  </Link>
                 </article>
               ))}
             </div>

@@ -260,3 +260,27 @@ Manual verification:
 - Toggle the helper hidden again and confirm the helper no longer appears on `/helpers`.
 
 No booking assignment exists yet. Payment logic, Stripe/payment processing, live booking payments, card collection, native mobile apps, Bulgarian localization, and medical-service functionality are still not implemented.
+
+## Visible helper detail pages and specific-helper booking requests deployment note
+
+`/helpers` now links visible verified helper cards to `/helpers/[id]`. The detail page reads only public-safe `helper_profiles` fields for helpers where `is_visible = true` and `verification_status` is `verified_basic` or `trusted`. It does not show helper email addresses, private profile ownership IDs, helper applications, hidden helpers, unverified helpers, or admin-only fields.
+
+Signed-in client/caregiver users can request a specific visible helper from the helper detail page. The request inserts a `bookings` row with `status = requested` and stores the selected helper in `bookings.helper_profile_id`. Signed-out users are prompted to log in or sign up, and helper applicant, verified helper, and admin roles are told that booking requests are for client/caregiver accounts.
+
+No SQL migration is required if the initial schema has already been applied, because `bookings.helper_profile_id` already exists. Deployment still requires the same public browser environment variables by name only:
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+
+No service role key is used by the browser app, and no `.env.local` file should be committed. No Stripe integration, payment processing, card collection, cash payment language, off-platform payment language, helper acceptance, helper notifications, native mobile app, Bulgarian localization, or medical-service functionality is included in this phase.
+
+Manual verification after deployment:
+
+1. Confirm at least one verified helper profile is set to `is_visible = true` from the admin helper visibility controls.
+2. Open `/helpers` and confirm each visible helper card links to `/helpers/[id]` and does not show email addresses.
+3. Open a helper detail page while signed out and confirm it prompts for login/signup.
+4. Sign in as a client/caregiver with at least one elderly profile and create a request from `/helpers/[id]`.
+5. Open `/dashboard/bookings` and confirm the booking appears as a request for a specific helper with safe public helper information.
+6. Create a general request from `/dashboard/bookings` and confirm it appears as general/unassigned.
+7. Sign in as `helper_applicant`, `verified_helper`, and `admin` accounts and confirm they cannot create client booking requests.
+8. Hide the helper profile and confirm `/helpers/[id]` becomes unavailable publicly and dashboard booking history does not expose private helper data.

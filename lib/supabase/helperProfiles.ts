@@ -84,6 +84,61 @@ export async function loadVisibleVerifiedHelperProfiles(
   };
 }
 
+export async function loadVisibleVerifiedHelperProfileById(
+  supabase: SupabaseClient,
+  helperProfileId: string,
+): Promise<{
+  helperProfile: PublicHelperProfile | null;
+  errorMessage: string | null;
+}> {
+  const { data, error } = await supabase
+    .from("helper_profiles")
+    .select("id,verification_status,bio,city,service_radius_km")
+    .eq("id", helperProfileId)
+    .eq("is_visible", true)
+    .in("verification_status", ["verified_basic", "trusted"])
+    .maybeSingle();
+
+  if (error) {
+    return { helperProfile: null, errorMessage: error.message };
+  }
+
+  return {
+    helperProfile: (data as PublicHelperProfile | null) ?? null,
+    errorMessage: null,
+  };
+}
+
+export async function loadVisibleVerifiedHelperProfilesByIds(
+  supabase: SupabaseClient,
+  helperProfileIds: string[],
+): Promise<{
+  helperProfiles: PublicHelperProfile[];
+  errorMessage: string | null;
+}> {
+  const uniqueIds = Array.from(new Set(helperProfileIds.filter(Boolean)));
+
+  if (uniqueIds.length === 0) {
+    return { helperProfiles: [], errorMessage: null };
+  }
+
+  const { data, error } = await supabase
+    .from("helper_profiles")
+    .select("id,verification_status,bio,city,service_radius_km")
+    .in("id", uniqueIds)
+    .eq("is_visible", true)
+    .in("verification_status", ["verified_basic", "trusted"]);
+
+  if (error) {
+    return { helperProfiles: [], errorMessage: error.message };
+  }
+
+  return {
+    helperProfiles: (data as PublicHelperProfile[] | null) ?? [],
+    errorMessage: null,
+  };
+}
+
 export async function loadOwnHelperProfile(
   supabase: SupabaseClient,
   profileId: string,

@@ -389,3 +389,19 @@ A migration adds two security-definer RPCs that are designed to preserve RLS bou
 - `public.set_helper_profile_visibility(p_helper_profile_id uuid, p_is_visible boolean)` verifies `auth.uid()` has `profiles.role = admin`, only allows verified helper profiles to be made public, updates `helper_profiles.is_visible`, and writes a best-effort `audit_logs` row with `actor_id`, `action = helper_profile_visibility_changed`, `target_table = helper_profiles`, `target_id`, and metadata containing old and new visibility values.
 
 `/helpers` reads only visible verified `helper_profiles` rows and does not read or expose `helper_applications`, public email addresses, hidden helpers, or unverified applicants. No booking assignment exists yet, and payment logic is still not implemented.
+
+## Current specific-helper request behavior
+
+The existing starter schema already includes nullable `bookings.helper_profile_id`, so no new SQL migration is required for the visible helper detail and request-this-helper flow. The app now uses this field when a client/caregiver requests a specific public helper from `/helpers/[id]`.
+
+Current application behavior:
+
+- Public helper detail pages read only visible verified `helper_profiles` rows: `is_visible = true` and `verification_status` in `verified_basic` or `trusted`.
+- Public helper pages expose only safe profile fields: `bio`, `city`, `service_radius_km`, and public verification status labels.
+- Public helper pages do not expose helper email addresses, `profile_id`, helper applications, private user details, hidden helpers, unverified helpers, or admin-only fields.
+- Client/caregiver users can create `bookings` rows with `status = requested` and `helper_profile_id` set to the selected visible helper profile.
+- General booking requests still store `helper_profile_id = null`.
+- `/dashboard/bookings` distinguishes general/unassigned requests from specific-helper requests and shows only safe public helper details when the helper remains visible and readable.
+- Helper acceptance is not implemented yet.
+- Payment processing, Stripe, card collection, and live booking payments are not implemented yet.
+- The notes UI remains non-medical and warns users not to enter medical details, medication instructions, diagnoses, card PINs, passwords, cash-handling requests, or access-to-valuables requests.

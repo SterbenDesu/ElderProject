@@ -13,6 +13,11 @@ import {
 } from "@/lib/supabase/bookings";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { loadOwnElderlyProfiles, type ElderlyProfile } from "@/lib/supabase/elderlyProfiles";
+import {
+  formatHelperVerificationStatus,
+  loadVisibleVerifiedHelperProfilesByIds,
+  type PublicHelperProfile,
+} from "@/lib/supabase/helperProfiles";
 import { loadProfile, type Profile, type ProfileRole } from "@/lib/supabase/profiles";
 
 type PageStatus = "loading" | "signed-out" | "signed-in" | "unconfigured";
@@ -73,7 +78,7 @@ function formatStatus(status: string) {
 }
 
 function buildDatabaseErrorMessage(action: string, errorMessage: string) {
-  return `${action}: ${errorMessage}. If this mentions row-level security or permission denied, confirm the bookings, elderly_profiles, service_categories, and profiles RLS policies from the Supabase migration are applied for your signed-in client account.`;
+  return `${action}: ${errorMessage}. If this mentions row-level security or permission denied, confirm the bookings, elderly_profiles, service_categories, helper_profiles, and profiles RLS policies from the Supabase migration are applied for your signed-in client account.`;
 }
 
 export default function BookingsPage() {
@@ -84,6 +89,7 @@ export default function BookingsPage() {
   const [elderlyProfiles, setElderlyProfiles] = useState<ElderlyProfile[]>([]);
   const [serviceCategories, setServiceCategories] = useState<ServiceCategory[]>([]);
   const [bookings, setBookings] = useState<ClientBooking[]>([]);
+  const [bookingHelperProfiles, setBookingHelperProfiles] = useState<PublicHelperProfile[]>([]);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [message, setMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -99,6 +105,10 @@ export default function BookingsPage() {
   const serviceCategoryById = useMemo(
     () => new Map(serviceCategories.map((category) => [category.id, category])),
     [serviceCategories],
+  );
+  const helperProfileById = useMemo(
+    () => new Map(bookingHelperProfiles.map((helperProfile) => [helperProfile.id, helperProfile])),
+    [bookingHelperProfiles],
   );
 
   const fetchClientData = useCallback(async (currentProfile: Profile) => {
@@ -143,8 +153,21 @@ export default function BookingsPage() {
     if (bookingsResult.errorMessage) {
       setMessage(buildDatabaseErrorMessage("Could not load booking requests", bookingsResult.errorMessage));
       setBookings([]);
+      setBookingHelperProfiles([]);
     } else {
       setBookings(bookingsResult.bookings);
+
+      const helperProfileIds = bookingsResult.bookings
+        .map((booking) => booking.helper_profile_id)
+        .filter((helperProfileId): helperProfileId is string => Boolean(helperProfileId));
+      const helperProfilesResult = await loadVisibleVerifiedHelperProfilesByIds(supabase, helperProfileIds);
+
+      if (helperProfilesResult.errorMessage) {
+        setBookingHelperProfiles([]);
+        setMessage(buildDatabaseErrorMessage("Booking requests loaded, but requested helper public details could not be loaded", helperProfilesResult.errorMessage));
+      } else {
+        setBookingHelperProfiles(helperProfilesResult.helperProfiles);
+      }
     }
   }, []);
 
@@ -168,6 +191,7 @@ export default function BookingsPage() {
       setElderlyProfiles([]);
       setServiceCategories([]);
       setBookings([]);
+      setBookingHelperProfiles([]);
       setProfileStatus("error");
       setMessage(`Could not load your profile from the profiles table: ${result.errorMessage}. Confirm the profiles table and RLS policies are applied.`);
       return;
@@ -178,6 +202,7 @@ export default function BookingsPage() {
       setElderlyProfiles([]);
       setServiceCategories([]);
       setBookings([]);
+      setBookingHelperProfiles([]);
       setProfileStatus("missing");
       setMessage("Your auth account is signed in, but the profiles table row is missing. Complete profile setup from the dashboard or confirm signup database records were created.");
       return;
@@ -192,6 +217,7 @@ export default function BookingsPage() {
       setElderlyProfiles([]);
       setServiceCategories([]);
       setBookings([]);
+      setBookingHelperProfiles([]);
     }
   }, [fetchClientData]);
 
@@ -217,6 +243,10 @@ export default function BookingsPage() {
         setUser(null);
         setProfile(null);
         setProfileStatus("idle");
+        setElderlyProfiles([]);
+        setServiceCategories([]);
+        setBookings([]);
+        setBookingHelperProfiles([]);
         return;
       }
 
@@ -225,6 +255,10 @@ export default function BookingsPage() {
         setUser(null);
         setProfile(null);
         setProfileStatus("idle");
+        setElderlyProfiles([]);
+        setServiceCategories([]);
+        setBookings([]);
+        setBookingHelperProfiles([]);
         return;
       }
 
@@ -244,6 +278,7 @@ export default function BookingsPage() {
         setElderlyProfiles([]);
         setServiceCategories([]);
         setBookings([]);
+        setBookingHelperProfiles([]);
         return;
       }
 
@@ -340,7 +375,7 @@ export default function BookingsPage() {
       serviceCategoryId: current.serviceCategoryId,
       city: current.city,
     }));
-    setSuccessMessage("Booking request created with status Requested. Helper assignment and payment are not active yet.");
+    setSuccessMessage("Booking request created with status Requested. Payment and final confirmation are not active yet.");
     setIsSaving(false);
   }
 
@@ -393,7 +428,7 @@ export default function BookingsPage() {
       <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">Client dashboard</p>
       <h1 className="mt-3 text-4xl font-bold tracking-tight text-forest sm:text-5xl">Booking requests</h1>
       <p className="mt-5 max-w-3xl text-lg leading-8 text-stone-700">
-        Create and manage basic non-medical service requests. Payment processing, helper assignment, helper acceptance, and matching are not active yet.
+        Create and manage basic non-medical service requests, including requests for a specific visible helper. Payment processing, helper acceptance, final confirmation, and matching are not active yet.
       </p>
 
       {status === "loading" ? (
@@ -550,7 +585,7 @@ export default function BookingsPage() {
               <h2 className="text-xl font-bold text-forest">Current limits</h2>
               <ul className="mt-4 space-y-3 leading-7">
                 <li>• Requests are saved with status Requested.</li>
-                <li>• Helper assignment, helper acceptance, matching, and notifications are not active.</li>
+                <li>• Specific-helper requests only store the helper profile ID; helper acceptance, matching, and notifications are not active.</li>
                 <li>• Payment processing and live booking payments are not active.</li>
                 <li>• Services remain non-medical only.</li>
               </ul>
@@ -587,6 +622,7 @@ export default function BookingsPage() {
               {bookings.map((booking) => {
                 const elderlyProfile = elderlyProfileById.get(booking.elderly_profile_id);
                 const serviceCategory = serviceCategoryById.get(booking.service_category_id);
+                const helperProfile = booking.helper_profile_id ? helperProfileById.get(booking.helper_profile_id) : null;
 
                 return (
                   <article key={booking.id} className="rounded-3xl border border-stone-200 p-5">
@@ -613,6 +649,22 @@ export default function BookingsPage() {
                       <div>
                         <dt className="font-bold text-forest">Status</dt>
                         <dd className="mt-1">{formatStatus(booking.status)}</dd>
+                      </div>
+                      <div className="sm:col-span-2">
+                        <dt className="font-bold text-forest">Helper request type</dt>
+                        <dd className="mt-1 leading-6">
+                          {booking.helper_profile_id ? (
+                            helperProfile ? (
+                              <>
+                                Requested for a specific visible helper in {helperProfile.city} ({formatHelperVerificationStatus(helperProfile.verification_status)}). Service radius: {helperProfile.service_radius_km === null ? "Not listed" : `${helperProfile.service_radius_km} km`}.
+                              </>
+                            ) : (
+                              "Requested for a specific helper, but the helper is no longer publicly visible or the safe public helper details could not be read."
+                            )
+                          ) : (
+                            "General/unassigned request. No specific helper profile is stored on this booking."
+                          )}
+                        </dd>
                       </div>
                       <div className="sm:col-span-2">
                         <dt className="font-bold text-forest">Non-medical notes</dt>
