@@ -36,13 +36,20 @@ export function SiteShell({ children }: { children: ReactNode }) {
           className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-5 lg:px-8"
           aria-label="Main navigation"
         >
-          <Link href="/" className="group flex min-h-12 items-center gap-3 rounded-full pr-3 text-forest">
+          <Link
+            href="/"
+            className="group flex min-h-12 items-center gap-3 rounded-full pr-3 text-forest"
+          >
             <span className="grid size-10 place-items-center rounded-full bg-forest text-base font-bold text-white shadow-sm transition group-hover:bg-stone-800">
               VP
             </span>
             <span>
-              <span className="block text-lg font-bold tracking-tight">VnukPodNaem</span>
-              <span className="hidden text-xs font-semibold uppercase tracking-[0.18em] text-moss sm:block">Non-medical support</span>
+              <span className="block text-lg font-bold tracking-tight">
+                VnukPodNaem
+              </span>
+              <span className="hidden text-xs font-semibold uppercase tracking-[0.18em] text-moss sm:block">
+                Non-medical support
+              </span>
             </span>
           </Link>
 
@@ -59,7 +66,12 @@ export function SiteShell({ children }: { children: ReactNode }) {
           <details className="group relative md:hidden">
             <summary className="flex min-h-12 cursor-pointer list-none items-center gap-2 rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-semibold text-forest shadow-sm transition hover:border-moss/40 hover:bg-sage [&::-webkit-details-marker]:hidden">
               Menu
-              <span aria-hidden="true" className="text-lg leading-none transition group-open:rotate-45">+</span>
+              <span
+                aria-hidden="true"
+                className="text-lg leading-none transition group-open:rotate-45"
+              >
+                +
+              </span>
             </summary>
             <div className="absolute right-0 mt-3 w-[min(88vw,22rem)] rounded-3xl border border-stone-200 bg-white p-3 shadow-xl shadow-stone-300/40">
               <div className="grid gap-1">
@@ -80,12 +92,23 @@ export function SiteShell({ children }: { children: ReactNode }) {
           <div>
             <p className="text-lg font-bold text-forest">VnukPodNaem</p>
             <p className="mt-3 max-w-2xl leading-7">
-              A planned marketplace for non-medical everyday support. Helpers are independent marketplace participants, not employees of the platform. Real account authentication is available when Supabase is configured. Live booking, payment processing, helper workflows, and admin management are not active yet; signed-in profiles are database-backed when Supabase is configured.
+              A planned marketplace for non-medical everyday support. Helpers
+              are independent marketplace participants, not employees of the
+              platform. Real account authentication is available when Supabase
+              is configured. Live booking payments, payment processing, and
+              booking assignment are not active yet; signed-in profiles, helper
+              applications, verified helper profile editing, and admin helper
+              visibility controls are database-backed when Supabase is
+              configured.
             </p>
           </div>
           <div className="flex flex-wrap gap-2 sm:justify-end">
             {footerLinks.map((link) => (
-              <Link key={link.href} href={link.href} className="rounded-full px-3 py-2 font-semibold text-stone-700 transition hover:bg-sage hover:text-forest">
+              <Link
+                key={link.href}
+                href={link.href}
+                className="rounded-full px-3 py-2 font-semibold text-stone-700 transition hover:bg-sage hover:text-forest"
+              >
                 {link.label}
               </Link>
             ))}

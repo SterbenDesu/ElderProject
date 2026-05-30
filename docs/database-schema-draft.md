@@ -372,3 +372,20 @@ The admin review foundation now uses these existing tables:
 The starter migration includes admin RLS policies for selecting and updating operational records needed by this review flow. Admin role assignment is still sensitive: users cannot self-assign admin through signup, and helper applicants cannot approve themselves. Public helper listing remains limited to rows in `helper_profiles` where `is_visible = true` and `verification_status` is `verified_basic` or `trusted`; helper applications are never public listings.
 
 Payment logic, Stripe, live booking payments, helper assignment, helper acceptance, and advanced booking lifecycle logic remain unimplemented in the application layer.
+
+## Verified helper profile editing and admin public visibility update
+
+The helper profile management phase continues to use the existing `helper_profiles` table. Verified helpers may edit only these safe public fields:
+
+- `bio`
+- `city`
+- `service_radius_km`
+
+Verified helpers may not edit `verification_status`, `is_visible`, `profile_id`, account `role`, or admin-only fields. Public visibility remains admin-controlled through the `is_visible` column.
+
+A migration adds two security-definer RPCs that are designed to preserve RLS boundaries while avoiding service role keys in the browser:
+
+- `public.update_own_helper_profile(p_bio text, p_city text, p_service_radius_km integer)` verifies `auth.uid()` has `profiles.role = verified_helper`, requires an existing verified helper profile, and updates only `bio`, `city`, and `service_radius_km`.
+- `public.set_helper_profile_visibility(p_helper_profile_id uuid, p_is_visible boolean)` verifies `auth.uid()` has `profiles.role = admin`, only allows verified helper profiles to be made public, updates `helper_profiles.is_visible`, and writes a best-effort `audit_logs` row with `actor_id`, `action = helper_profile_visibility_changed`, `target_table = helper_profiles`, `target_id`, and metadata containing old and new visibility values.
+
+`/helpers` reads only visible verified `helper_profiles` rows and does not read or expose `helper_applications`, public email addresses, hidden helpers, or unverified applicants. No booking assignment exists yet, and payment logic is still not implemented.

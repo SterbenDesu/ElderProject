@@ -199,3 +199,22 @@ Helper application review actions are handled by the Supabase RPC `public.review
 The RPC verifies the current authenticated user has `profiles.role = 'admin'` before doing any review work. It supports `under_review`, `approved`, and `rejected`. Approval updates the applicant `profiles.role` to `verified_helper`, creates or updates a `helper_profiles` row with `verification_status = verified_basic`, and keeps `helper_profiles.is_visible = false` so approval does not automatically publish the helper in public search.
 
 Role changes remain protected: users cannot self-assign admin or verified helper during signup, and the profile role-protection trigger should remain in place unless replaced by an equal or safer database-side control.
+
+## Verified helper profile management and public visibility
+
+Verified helpers can now open `/dashboard/helper-profile` to manage only the safe public profile fields stored in `helper_profiles`: `bio`, `city`, and `service_radius_km`. The route uses the signed-in user's normal Supabase browser session and the public environment variables only. It does not expose helper controls for `verification_status`, `is_visible`, `profile_id`, `role`, or admin-only fields.
+
+Access behavior for `/dashboard/helper-profile` is role-aware:
+
+- signed-out visitors see a login message;
+- signed-in users with no `profiles` row see a clear profile setup error;
+- `verified_helper` users can edit the safe helper profile fields when an approved `helper_profiles` row exists;
+- `helper_applicant` users see application-status guidance and a link to `/helper/apply`;
+- `client` users see that helper profile management is only for approved helpers;
+- `admin` users are linked back to `/admin` for helper visibility management.
+
+Only admins control public helper visibility. `/admin` now loads approved helper profiles and calls the admin-only `set_helper_profile_visibility(p_helper_profile_id uuid, p_is_visible boolean)` RPC to toggle `helper_profiles.is_visible`. The RPC verifies the signed-in actor has `profiles.role = admin`, only allows verified helper profiles to be made public, and attempts to write an `audit_logs` row with the old and new visibility values. Helpers cannot make themselves public.
+
+`/helpers` remains public-safe: it reads only `helper_profiles` rows where `is_visible = true` and `verification_status` is `verified_basic` or `trusted`, and it shows only safe fields. Helper applications, email addresses, hidden helpers, and unverified applicants are not exposed publicly.
+
+Booking assignment, helper acceptance, payment processing, Stripe, live booking payments, card collection, native mobile apps, Bulgarian localization, and medical-service functionality are still not implemented.

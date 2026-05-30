@@ -53,32 +53,80 @@ function formatDate(value: string | null) {
 function getRoleSections(role: ProfileRole): DashboardSection[] {
   if (role === "helper_applicant") {
     return [
-      { title: "Helper application", description: "Use /helper/apply to save a draft or submit your helper application." },
-      { title: "Verification status", description: "Submitted applications can be reviewed by admins. Approval is not guaranteed, and approved helpers are not automatically public." },
-      { title: "Service boundaries", description: "Reminder that VnukPodNaem covers non-medical support and helpers are independent marketplace participants." },
+      {
+        title: "Helper application",
+        description:
+          "Use /helper/apply to save a draft or submit your helper application.",
+      },
+      {
+        title: "Verification status",
+        description:
+          "Submitted applications can be reviewed by admins. Approval is not guaranteed, and approved helpers are not automatically public.",
+      },
+      {
+        title: "Service boundaries",
+        description:
+          "Reminder that VnukPodNaem covers non-medical support and helpers are independent marketplace participants.",
+      },
     ];
   }
 
   if (role === "verified_helper") {
     return [
-      { title: "Assigned bookings placeholder", description: "Future area for accepted non-medical support bookings assigned through the marketplace." },
-      { title: "Helper profile", description: "Future area for maintaining approved helper profile details and visibility settings." },
+      {
+        title: "Assigned bookings placeholder",
+        description:
+          "Future area for accepted non-medical support bookings assigned through the marketplace.",
+      },
+      {
+        title: "Helper profile",
+        description:
+          "Manage safe public helper profile fields. Admins still control whether the profile is visible publicly.",
+      },
     ];
   }
 
   if (role === "admin") {
     return [
-      { title: "Admin dashboard", description: "Use /admin to review helper applications and basic verification decisions." },
-      { title: "Helper applications", description: "Review submitted applications, mark under review, approve, or reject." },
-      { title: "Disputes placeholder", description: "Future area for admin-reviewed complaints and booking disputes." },
-      { title: "Audit logs placeholder", description: "Future area for viewing important safety and moderation actions." },
+      {
+        title: "Admin dashboard",
+        description:
+          "Use /admin to review helper applications and manage public helper visibility.",
+      },
+      {
+        title: "Helper applications",
+        description:
+          "Review submitted applications, mark under review, approve, or reject.",
+      },
+      {
+        title: "Disputes placeholder",
+        description:
+          "Future area for admin-reviewed complaints and booking disputes.",
+      },
+      {
+        title: "Audit logs placeholder",
+        description:
+          "Future area for viewing important safety and moderation actions.",
+      },
     ];
   }
 
   return [
-    { title: "Elderly profiles", description: "Create and manage non-medical elderly profiles connected to your client/caregiver account." },
-    { title: "Booking requests", description: "Create and manage requested non-medical service requests. Payment and helper assignment are not active yet." },
-    { title: "Safety and service boundaries", description: "Reminder that the platform supports non-medical help only and does not guarantee absolute safety." },
+    {
+      title: "Elderly profiles",
+      description:
+        "Create and manage non-medical elderly profiles connected to your client/caregiver account.",
+    },
+    {
+      title: "Booking requests",
+      description:
+        "Create and manage requested non-medical service requests. Payment and helper assignment are not active yet.",
+    },
+    {
+      title: "Safety and service boundaries",
+      description:
+        "Reminder that the platform supports non-medical help only and does not guarantee absolute safety.",
+    },
   ];
 }
 
@@ -87,12 +135,23 @@ export default function DashboardPage() {
   const [profileStatus, setProfileStatus] = useState<ProfileStatus>("idle");
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [helperApplication, setHelperApplication] = useState<HelperApplication | null>(null);
-  const [helperApplicationMessage, setHelperApplicationMessage] = useState<string | null>(null);
-  const [elderlyProfileCount, setElderlyProfileCount] = useState<number | null>(null);
-  const [elderlyProfileMessage, setElderlyProfileMessage] = useState<string | null>(null);
-  const [bookingRequestCount, setBookingRequestCount] = useState<number | null>(null);
-  const [bookingRequestMessage, setBookingRequestMessage] = useState<string | null>(null);
+  const [helperApplication, setHelperApplication] =
+    useState<HelperApplication | null>(null);
+  const [helperApplicationMessage, setHelperApplicationMessage] = useState<
+    string | null
+  >(null);
+  const [elderlyProfileCount, setElderlyProfileCount] = useState<number | null>(
+    null,
+  );
+  const [elderlyProfileMessage, setElderlyProfileMessage] = useState<
+    string | null
+  >(null);
+  const [bookingRequestCount, setBookingRequestCount] = useState<number | null>(
+    null,
+  );
+  const [bookingRequestMessage, setBookingRequestMessage] = useState<
+    string | null
+  >(null);
   const [message, setMessage] = useState<string | null>(null);
   const [profileMessage, setProfileMessage] = useState<string | null>(null);
   const [isRetryingProfileSetup, setIsRetryingProfileSetup] = useState(false);
@@ -133,7 +192,9 @@ export default function DashboardPage() {
       setBookingRequestCount(null);
       setBookingRequestMessage(null);
       setProfileStatus("missing");
-      setProfileMessage("Your auth account exists, but profile setup is incomplete. Use the retry button below after the database schema and RLS policies are applied.");
+      setProfileMessage(
+        "Your auth account exists, but profile setup is incomplete. Use the retry button below after the database schema and RLS policies are applied.",
+      );
       return;
     }
 
@@ -149,7 +210,9 @@ export default function DashboardPage() {
 
       if (elderlyProfileResult.errorMessage) {
         setElderlyProfileCount(null);
-        setElderlyProfileMessage(`Could not load elderly profile count: ${elderlyProfileResult.errorMessage}. If this is an RLS error, confirm the elderly_profiles policies are applied.`);
+        setElderlyProfileMessage(
+          `Could not load elderly profile count: ${elderlyProfileResult.errorMessage}. If this is an RLS error, confirm the elderly_profiles policies are applied.`,
+        );
       } else {
         setElderlyProfileCount(elderlyProfileResult.count);
         setElderlyProfileMessage(null);
@@ -157,7 +220,9 @@ export default function DashboardPage() {
 
       if (bookingRequestResult.errorMessage) {
         setBookingRequestCount(null);
-        setBookingRequestMessage(`Could not load booking request count: ${bookingRequestResult.errorMessage}. If this is an RLS error, confirm the bookings policies are applied.`);
+        setBookingRequestMessage(
+          `Could not load booking request count: ${bookingRequestResult.errorMessage}. If this is an RLS error, confirm the bookings policies are applied.`,
+        );
       } else {
         setBookingRequestCount(bookingRequestResult.count);
         setBookingRequestMessage(null);
@@ -170,11 +235,16 @@ export default function DashboardPage() {
     }
 
     if (result.profile.role === "helper_applicant") {
-      const helperApplicationResult = await loadOwnHelperApplication(supabase, result.profile.id);
+      const helperApplicationResult = await loadOwnHelperApplication(
+        supabase,
+        result.profile.id,
+      );
 
       if (helperApplicationResult.errorMessage) {
         setHelperApplication(null);
-        setHelperApplicationMessage(`Could not load helper application status: ${helperApplicationResult.errorMessage}. If this is an RLS error, confirm the helper_applications policies are applied.`);
+        setHelperApplicationMessage(
+          `Could not load helper application status: ${helperApplicationResult.errorMessage}. If this is an RLS error, confirm the helper_applications policies are applied.`,
+        );
         return;
       }
 
@@ -189,7 +259,9 @@ export default function DashboardPage() {
 
   async function retryProfileSetup() {
     if (!user?.email) {
-      setProfileMessage("Cannot retry profile setup because the signed-in user email is unavailable.");
+      setProfileMessage(
+        "Cannot retry profile setup because the signed-in user email is unavailable.",
+      );
       return;
     }
 
@@ -304,17 +376,27 @@ export default function DashboardPage() {
 
   return (
     <section className="mx-auto max-w-5xl px-5 py-12 lg:px-8 lg:py-16">
-      <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">Account dashboard</p>
-      <h1 className="mt-3 text-4xl font-bold tracking-tight text-forest sm:text-5xl">Dashboard</h1>
+      <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">
+        Account dashboard
+      </p>
+      <h1 className="mt-3 text-4xl font-bold tracking-tight text-forest sm:text-5xl">
+        Dashboard
+      </h1>
 
       {status === "loading" ? (
-        <div className="mt-8 rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200" role="status">
+        <div
+          className="mt-8 rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200"
+          role="status"
+        >
           Checking your account session…
         </div>
       ) : null}
 
       {status === "unconfigured" ? (
-        <div className="mt-8 rounded-[2rem] border border-amber-200 bg-amber-50 p-6 text-amber-900" role="alert">
+        <div
+          className="mt-8 rounded-[2rem] border border-amber-200 bg-amber-50 p-6 text-amber-900"
+          role="alert"
+        >
           <h2 className="text-2xl font-bold">Supabase configuration needed</h2>
           <p className="mt-4 leading-7">{message}</p>
         </div>
@@ -325,14 +407,25 @@ export default function DashboardPage() {
           <div className="rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200">
             <h2 className="text-2xl font-bold text-forest">Please log in</h2>
             <p className="mt-4 text-lg leading-8">
-              You need to log in before viewing your database-backed dashboard profile. Protected middleware is intentionally deferred.
+              You need to log in before viewing your database-backed dashboard
+              profile. Protected middleware is intentionally deferred.
             </p>
-            {message ? <p className="mt-4 rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{message}</p> : null}
+            {message ? (
+              <p className="mt-4 rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+                {message}
+              </p>
+            ) : null}
             <div className="mt-6 flex flex-wrap gap-3">
-              <Link href="/login" className="inline-flex min-h-12 items-center rounded-full bg-forest px-5 py-3 font-semibold text-white transition hover:bg-stone-800">
+              <Link
+                href="/login"
+                className="inline-flex min-h-12 items-center rounded-full bg-forest px-5 py-3 font-semibold text-white transition hover:bg-stone-800"
+              >
                 Login
               </Link>
-              <Link href="/signup" className="inline-flex min-h-12 items-center rounded-full border border-stone-200 bg-white px-5 py-3 font-semibold text-forest transition hover:bg-sage">
+              <Link
+                href="/signup"
+                className="inline-flex min-h-12 items-center rounded-full border border-stone-200 bg-white px-5 py-3 font-semibold text-forest transition hover:bg-sage"
+              >
                 Sign up
               </Link>
             </div>
@@ -340,9 +433,17 @@ export default function DashboardPage() {
           <aside className="rounded-[2rem] bg-sage p-6 text-stone-700">
             <h2 className="text-xl font-bold text-forest">Dashboard access</h2>
             <ul className="mt-4 space-y-3 leading-7">
-              <li>• Signed-in users load their profile from the Supabase `profiles` table.</li>
-              <li>• No bookings, payments, or live booking payment workflows are active.</li>
-              <li>• Route protection middleware is still intentionally deferred.</li>
+              <li>
+                • Signed-in users load their profile from the Supabase
+                `profiles` table.
+              </li>
+              <li>
+                • No bookings, payments, or live booking payment workflows are
+                active.
+              </li>
+              <li>
+                • Route protection middleware is still intentionally deferred.
+              </li>
             </ul>
           </aside>
         </div>
@@ -353,10 +454,18 @@ export default function DashboardPage() {
           <div className="rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200">
             <h2 className="text-2xl font-bold text-forest">Welcome</h2>
 
-            {profileStatus === "loading" ? <p className="mt-5 rounded-3xl bg-cream p-5 text-sm font-semibold text-stone-700">Loading your profile from Supabase…</p> : null}
+            {profileStatus === "loading" ? (
+              <p className="mt-5 rounded-3xl bg-cream p-5 text-sm font-semibold text-stone-700">
+                Loading your profile from Supabase…
+              </p>
+            ) : null}
 
-            {(profileStatus === "missing" || profileStatus === "error") && profileMessage ? (
-              <div className="mt-5 rounded-3xl border border-amber-200 bg-amber-50 p-5 text-amber-900" role="alert">
+            {(profileStatus === "missing" || profileStatus === "error") &&
+            profileMessage ? (
+              <div
+                className="mt-5 rounded-3xl border border-amber-200 bg-amber-50 p-5 text-amber-900"
+                role="alert"
+              >
                 <h3 className="font-bold">Profile setup needs attention</h3>
                 <p className="mt-2 text-sm leading-6">{profileMessage}</p>
                 <button
@@ -365,7 +474,9 @@ export default function DashboardPage() {
                   disabled={isRetryingProfileSetup}
                   className="mt-4 inline-flex min-h-11 items-center justify-center rounded-full bg-forest px-5 py-2 text-sm font-semibold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  {isRetryingProfileSetup ? "Retrying profile setup…" : "Retry profile setup"}
+                  {isRetryingProfileSetup
+                    ? "Retrying profile setup…"
+                    : "Retry profile setup"}
                 </button>
               </div>
             ) : null}
@@ -383,7 +494,9 @@ export default function DashboardPage() {
                   </div>
                   <div>
                     <dt className="font-bold text-forest">Display name</dt>
-                    <dd className="mt-1">{profile.display_name || "Not set yet"}</dd>
+                    <dd className="mt-1">
+                      {profile.display_name || "Not set yet"}
+                    </dd>
                   </div>
                   <div>
                     <dt className="font-bold text-forest">Created date</dt>
@@ -395,7 +508,9 @@ export default function DashboardPage() {
                   <section className="mt-6 rounded-3xl border border-stone-200 bg-white p-5">
                     <h3 className="font-bold text-forest">Elderly profiles</h3>
                     {elderlyProfileMessage ? (
-                      <p className="mt-2 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm font-semibold leading-6 text-amber-900">{elderlyProfileMessage}</p>
+                      <p className="mt-2 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm font-semibold leading-6 text-amber-900">
+                        {elderlyProfileMessage}
+                      </p>
                     ) : (
                       <p className="mt-2 text-sm leading-6 text-stone-600">
                         {elderlyProfileCount === null
@@ -404,13 +519,20 @@ export default function DashboardPage() {
                       </p>
                     )}
                     <p className="mt-2 text-sm leading-6 text-stone-600">
-                      Manage simple, non-medical elderly profiles and use them when creating booking requests.
+                      Manage simple, non-medical elderly profiles and use them
+                      when creating booking requests.
                     </p>
                     <div className="mt-4 flex flex-wrap gap-3">
-                      <Link href="/dashboard/elderly-profiles" className="inline-flex min-h-11 items-center rounded-full bg-forest px-5 py-2 text-sm font-semibold text-white transition hover:bg-stone-800">
+                      <Link
+                        href="/dashboard/elderly-profiles"
+                        className="inline-flex min-h-11 items-center rounded-full bg-forest px-5 py-2 text-sm font-semibold text-white transition hover:bg-stone-800"
+                      >
                         Manage elderly profiles
                       </Link>
-                      <Link href="/dashboard/bookings" className="inline-flex min-h-11 items-center rounded-full border border-stone-200 bg-white px-5 py-2 text-sm font-semibold text-forest transition hover:bg-sage">
+                      <Link
+                        href="/dashboard/bookings"
+                        className="inline-flex min-h-11 items-center rounded-full border border-stone-200 bg-white px-5 py-2 text-sm font-semibold text-forest transition hover:bg-sage"
+                      >
                         Open booking requests
                       </Link>
                     </div>
@@ -421,7 +543,9 @@ export default function DashboardPage() {
                   <section className="mt-6 rounded-3xl border border-stone-200 bg-white p-5">
                     <h3 className="font-bold text-forest">Booking requests</h3>
                     {bookingRequestMessage ? (
-                      <p className="mt-2 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm font-semibold leading-6 text-amber-900">{bookingRequestMessage}</p>
+                      <p className="mt-2 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm font-semibold leading-6 text-amber-900">
+                        {bookingRequestMessage}
+                      </p>
                     ) : (
                       <p className="mt-2 text-sm leading-6 text-stone-600">
                         {bookingRequestCount === null
@@ -430,9 +554,15 @@ export default function DashboardPage() {
                       </p>
                     )}
                     <p className="mt-2 text-sm leading-6 text-stone-600">
-                      Clients can now create requested non-medical service requests. Payment processing, helper assignment, helper acceptance, matching, and notifications are not active yet.
+                      Clients can now create requested non-medical service
+                      requests. Payment processing, helper assignment, helper
+                      acceptance, matching, and notifications are not active
+                      yet.
                     </p>
-                    <Link href="/dashboard/bookings" className="mt-4 inline-flex min-h-11 items-center rounded-full bg-forest px-5 py-2 text-sm font-semibold text-white transition hover:bg-stone-800">
+                    <Link
+                      href="/dashboard/bookings"
+                      className="mt-4 inline-flex min-h-11 items-center rounded-full bg-forest px-5 py-2 text-sm font-semibold text-white transition hover:bg-stone-800"
+                    >
                       Manage booking requests
                     </Link>
                   </section>
@@ -440,9 +570,13 @@ export default function DashboardPage() {
 
                 {profile.role === "helper_applicant" ? (
                   <section className="mt-6 rounded-3xl border border-stone-200 bg-white p-5">
-                    <h3 className="font-bold text-forest">Helper application status</h3>
+                    <h3 className="font-bold text-forest">
+                      Helper application status
+                    </h3>
                     {helperApplicationMessage ? (
-                      <p className="mt-2 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm font-semibold leading-6 text-amber-900">{helperApplicationMessage}</p>
+                      <p className="mt-2 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm font-semibold leading-6 text-amber-900">
+                        {helperApplicationMessage}
+                      </p>
                     ) : (
                       <p className="mt-2 text-sm leading-6 text-stone-600">
                         {helperApplication
@@ -451,9 +585,15 @@ export default function DashboardPage() {
                       </p>
                     )}
                     <p className="mt-2 text-sm leading-6 text-stone-600">
-                      You can save a draft or submit your application while it remains editable. Submitted applications can be reviewed by admins; approval is not guaranteed, and public helper visibility is not controlled from this dashboard.
+                      You can save a draft or submit your application while it
+                      remains editable. Submitted applications can be reviewed
+                      by admins; approval is not guaranteed, and public helper
+                      visibility is not controlled from this dashboard.
                     </p>
-                    <Link href="/helper/apply" className="mt-4 inline-flex min-h-11 items-center rounded-full bg-forest px-5 py-2 text-sm font-semibold text-white transition hover:bg-stone-800">
+                    <Link
+                      href="/helper/apply"
+                      className="mt-4 inline-flex min-h-11 items-center rounded-full bg-forest px-5 py-2 text-sm font-semibold text-white transition hover:bg-stone-800"
+                    >
                       Open helper application
                     </Link>
                   </section>
@@ -462,8 +602,15 @@ export default function DashboardPage() {
                 {profile.role === "admin" ? (
                   <section className="mt-6 rounded-3xl border border-clay/30 bg-cream p-5">
                     <h3 className="font-bold text-forest">Admin tools</h3>
-                    <p className="mt-2 text-sm leading-6 text-stone-600">Open the admin dashboard to review helper applications. Non-admin users cannot view admin application data.</p>
-                    <Link href="/admin" className="mt-4 inline-flex min-h-11 items-center rounded-full bg-forest px-5 py-2 text-sm font-semibold text-white transition hover:bg-stone-800">
+                    <p className="mt-2 text-sm leading-6 text-stone-600">
+                      Open the admin dashboard to review helper applications and
+                      manage public helper visibility. Non-admin users cannot
+                      view admin data.
+                    </p>
+                    <Link
+                      href="/admin"
+                      className="mt-4 inline-flex min-h-11 items-center rounded-full bg-forest px-5 py-2 text-sm font-semibold text-white transition hover:bg-stone-800"
+                    >
                       Open admin dashboard
                     </Link>
                   </section>
@@ -471,16 +618,33 @@ export default function DashboardPage() {
 
                 {profile.role === "verified_helper" ? (
                   <section className="mt-6 rounded-3xl border border-stone-200 bg-white p-5">
-                    <h3 className="font-bold text-forest">Verified helper status</h3>
-                    <p className="mt-2 text-sm leading-6 text-stone-600">Your profile role is verified helper. Applicant-only draft and submission language is hidden here; public marketplace visibility is managed separately and is not automatic.</p>
+                    <h3 className="font-bold text-forest">
+                      Verified helper status
+                    </h3>
+                    <p className="mt-2 text-sm leading-6 text-stone-600">
+                      Your profile role is verified helper. Applicant-only draft
+                      and submission language is hidden here; public marketplace
+                      visibility is managed by admins and is not automatic.
+                    </p>
+                    <Link
+                      href="/dashboard/helper-profile"
+                      className="mt-4 inline-flex min-h-11 items-center rounded-full bg-forest px-5 py-2 text-sm font-semibold text-white transition hover:bg-stone-800"
+                    >
+                      Manage helper profile
+                    </Link>
                   </section>
                 ) : null}
 
                 <div className="mt-6 grid gap-4 sm:grid-cols-2">
                   {roleSections.map((section) => (
-                    <section key={section.title} className="rounded-3xl border border-stone-200 p-4">
+                    <section
+                      key={section.title}
+                      className="rounded-3xl border border-stone-200 p-4"
+                    >
                       <h3 className="font-bold text-forest">{section.title}</h3>
-                      <p className="mt-2 text-sm leading-6 text-stone-600">{section.description}</p>
+                      <p className="mt-2 text-sm leading-6 text-stone-600">
+                        {section.description}
+                      </p>
                     </section>
                   ))}
                 </div>
@@ -488,11 +652,23 @@ export default function DashboardPage() {
             ) : null}
           </div>
           <aside className="rounded-[2rem] bg-sage p-6 text-stone-700">
-            <h2 className="text-xl font-bold text-forest">Current dashboard scope</h2>
+            <h2 className="text-xl font-bold text-forest">
+              Current dashboard scope
+            </h2>
             <ul className="mt-4 space-y-3 leading-7">
-              <li>• Profile data now comes from the Supabase `profiles` table.</li>
+              <li>
+                • Profile data now comes from the Supabase `profiles` table.
+              </li>
               <li>• Dashboard placeholders change by database role.</li>
-              <li>• Client booking requests can be saved, but payment processing, helper assignment, helper acceptance, and live booking payments are not active.</li>
+              <li>
+                • Client booking requests can be saved, but payment processing,
+                helper assignment, helper acceptance, and live booking payments
+                are not active.
+              </li>
+              <li>
+                • Verified helpers can edit safe helper profile fields; only
+                admins can make approved helper profiles public.
+              </li>
             </ul>
           </aside>
         </div>
