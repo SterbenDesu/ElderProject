@@ -98,7 +98,7 @@ export default function HelpersPage() {
             <li>• Unverified helper applicants are not shown publicly.</li>
             <li>• Submitted applications are private and are not marketplace profiles.</li>
             <li>• Public visibility requires a visible helper profile with verified status.</li>
-            <li>• No booking payments, Stripe, admin approval tools, or guaranteed safety claims are active.</li>
+            <li>• No booking payments, Stripe, applicant records, or guaranteed safety claims are shown here.</li>
           </ul>
         </aside>
       </div>

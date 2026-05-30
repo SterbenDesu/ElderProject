@@ -151,7 +151,7 @@ export default function ApplyPage() {
     }
 
     if (application && !canApplicantEditApplication(application.status)) {
-      setMessage("This application is no longer editable from the applicant page. Admin review is not implemented in this task, and applicants cannot approve themselves.");
+      setMessage("This application is no longer editable from the applicant page. Admin review happens separately, and applicants cannot approve themselves.");
       return;
     }
 
@@ -260,7 +260,7 @@ export default function ApplyPage() {
 
             {isReadOnly ? (
               <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900" role="alert">
-                This application is {application ? formatHelperApplicationStatus(application.status).toLowerCase() : "not editable"}. It is read-only here, applicants cannot approve themselves, and admin review tools are not implemented yet.
+                This application is {application ? formatHelperApplicationStatus(application.status).toLowerCase() : "not editable"}. It is read-only here, applicants cannot approve themselves, and admin review tools are only available to admin users.
               </div>
             ) : null}
 

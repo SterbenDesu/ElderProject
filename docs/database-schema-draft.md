@@ -121,12 +121,12 @@ High-level RLS notes:
 - The current UI supports applicant actions that set status to `draft` or `submitted` only.
 - Applications with `under_review`, `approved`, or `rejected` are shown read-only in the applicant UI.
 - Applicants cannot modify review fields, approve themselves, create public helper profiles, or make themselves visible from the application page.
-- Admin review decisions should create audit logs later.
+- Admin helper application review decisions now attempt to create audit logs from the admin session when RLS allows it; a trusted server-side audit path is still recommended for later high-risk workflows.
 
 
 ### Current implementation note
 
-`/helper/apply` now reads and writes the signed-in user's own `helper_applications` row using the existing authenticated RLS policies and only the public Supabase browser variables. The applicant form stores `full_name`, `city`, `motivation`, `experience_summary`, and `availability_summary`. Admin review, helper approval, and public helper visibility are not implemented yet. `/helpers` reads only `helper_profiles` rows where the profile is public and verified; it does not read or expose `helper_applications`.
+`/helper/apply` now reads and writes the signed-in user's own `helper_applications` row using the existing authenticated RLS policies and only the public Supabase browser variables. The applicant form stores `full_name`, `city`, `motivation`, `experience_summary`, and `availability_summary`. Basic admin review and approval now exist at `/admin`; public helper visibility is still separate and is not automatic. `/helpers` reads only `helper_profiles` rows where the profile is public and verified; it does not read or expose `helper_applications`.
 
 ## `helper_profiles`
 
@@ -358,3 +358,16 @@ High-level RLS notes:
 - Users should not modify historical acceptance records after creation.
 - Admin read access should be limited to appropriate support or compliance needs.
 - Confirm retention rules before storing IP address and user agent in production.
+
+## Admin helper application review usage
+
+The admin review foundation now uses these existing tables:
+
+- `helper_applications` stores submitted applicant review records and their review `status` (`draft`, `submitted`, `under_review`, `approved`, or `rejected`).
+- `profiles` stores the account role. Approval updates the applicant's `profiles.role` to `verified_helper`.
+- `helper_profiles` stores the helper marketplace profile foundation. Approval creates or updates a row for the applicant with `verification_status = verified_basic` and `is_visible = false` so approved helpers are not published automatically.
+- `audit_logs` stores a best-effort admin status-change log with `actor_id`, `action`, `target_table`, `target_id`, and metadata containing old and new statuses.
+
+The starter migration includes admin RLS policies for selecting and updating operational records needed by this review flow. Admin role assignment is still sensitive: users cannot self-assign admin through signup, and helper applicants cannot approve themselves. Public helper listing remains limited to rows in `helper_profiles` where `is_visible = true` and `verification_status` is `verified_basic` or `trusted`; helper applications are never public listings.
+
+Payment logic, Stripe, live booking payments, and booking lifecycle logic remain unimplemented in the application layer.
