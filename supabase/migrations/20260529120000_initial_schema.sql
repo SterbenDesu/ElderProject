@@ -277,7 +277,14 @@ for select
 to authenticated
 using (public.is_admin());
 
--- TODO: Add server-only admin role-management functions before allowing browser updates to all profiles.
+create policy "profiles_admin_update_all"
+on public.profiles
+for update
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
+
+-- Admin role-management is intentionally limited to authenticated users whose existing profile role is admin.
 
 -- Elderly profiles: clients/caregivers manage records they own; admins can view all.
 create policy "elderly_profiles_owner_select"
@@ -515,7 +522,13 @@ for select
 to authenticated
 using (public.is_admin());
 
--- TODO: Audit log inserts should come from trusted server-side actions or database functions, not direct browser writes.
+create policy "audit_logs_admin_insert"
+on public.audit_logs
+for insert
+to authenticated
+with check (public.is_admin());
+
+-- TODO: Move audit log writes into trusted server-side actions or database functions before high-risk workflows expand.
 
 -- Terms acceptances: users can view/insert their own acceptance records; admins can view all.
 create policy "terms_acceptances_owner_select"

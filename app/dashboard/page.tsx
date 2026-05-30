@@ -52,7 +52,7 @@ function getRoleSections(role: ProfileRole): DashboardSection[] {
   if (role === "helper_applicant") {
     return [
       { title: "Helper application", description: "Use /helper/apply to save a draft or submit your helper application." },
-      { title: "Verification status", description: "Submitted applications wait for future admin review. Approval is not guaranteed and admin approval is not implemented yet." },
+      { title: "Verification status", description: "Submitted applications can be reviewed by admins. Approval is not guaranteed, and approved helpers are not automatically public." },
       { title: "Service boundaries", description: "Reminder that VnukPodNaem covers non-medical support and helpers are independent marketplace participants." },
     ];
   }
@@ -60,14 +60,14 @@ function getRoleSections(role: ProfileRole): DashboardSection[] {
   if (role === "verified_helper") {
     return [
       { title: "Assigned bookings placeholder", description: "Future area for accepted non-medical support bookings assigned through the marketplace." },
-      { title: "Helper profile placeholder", description: "Future area for helper profile details after admin verification exists." },
+      { title: "Helper profile", description: "Future area for maintaining approved helper profile details and visibility settings." },
     ];
   }
 
   if (role === "admin") {
     return [
-      { title: "Admin overview placeholder", description: "Future area for operational summaries after protected admin permissions are implemented." },
-      { title: "Helper applications placeholder", description: "Future area for reviewing helper applications and verification decisions." },
+      { title: "Admin dashboard", description: "Use /admin to review helper applications and basic verification decisions." },
+      { title: "Helper applications", description: "Review submitted applications, mark under review, approve, or reject." },
       { title: "Disputes placeholder", description: "Future area for admin-reviewed complaints and booking disputes." },
       { title: "Audit logs placeholder", description: "Future area for viewing important safety and moderation actions." },
     ];
@@ -287,7 +287,7 @@ export default function DashboardPage() {
             <h2 className="text-xl font-bold text-forest">Dashboard access</h2>
             <ul className="mt-4 space-y-3 leading-7">
               <li>• Signed-in users load their profile from the Supabase `profiles` table.</li>
-              <li>• No bookings, payments, helper approvals, or admin management workflows are active.</li>
+              <li>• No bookings, payments, or live booking payment workflows are active.</li>
               <li>• Route protection middleware is still intentionally deferred.</li>
             </ul>
           </aside>
@@ -350,11 +350,28 @@ export default function DashboardPage() {
                       </p>
                     )}
                     <p className="mt-2 text-sm leading-6 text-stone-600">
-                      You can save a draft or submit your application. Submitted applications wait for future admin review; approval is not guaranteed, and public helper visibility is not active from this dashboard.
+                      You can save a draft or submit your application while it remains editable. Submitted applications can be reviewed by admins; approval is not guaranteed, and public helper visibility is not controlled from this dashboard.
                     </p>
                     <Link href="/helper/apply" className="mt-4 inline-flex min-h-11 items-center rounded-full bg-forest px-5 py-2 text-sm font-semibold text-white transition hover:bg-stone-800">
                       Open helper application
                     </Link>
+                  </section>
+                ) : null}
+
+                {profile.role === "admin" ? (
+                  <section className="mt-6 rounded-3xl border border-clay/30 bg-cream p-5">
+                    <h3 className="font-bold text-forest">Admin tools</h3>
+                    <p className="mt-2 text-sm leading-6 text-stone-600">Open the admin dashboard to review helper applications. Non-admin users cannot view admin application data.</p>
+                    <Link href="/admin" className="mt-4 inline-flex min-h-11 items-center rounded-full bg-forest px-5 py-2 text-sm font-semibold text-white transition hover:bg-stone-800">
+                      Open admin dashboard
+                    </Link>
+                  </section>
+                ) : null}
+
+                {profile.role === "verified_helper" ? (
+                  <section className="mt-6 rounded-3xl border border-stone-200 bg-white p-5">
+                    <h3 className="font-bold text-forest">Verified helper status</h3>
+                    <p className="mt-2 text-sm leading-6 text-stone-600">Your profile role is verified helper. Applicant-only draft and submission language is hidden here; public marketplace visibility is managed separately and is not automatic.</p>
                   </section>
                 ) : null}
 
@@ -374,7 +391,7 @@ export default function DashboardPage() {
             <ul className="mt-4 space-y-3 leading-7">
               <li>• Profile data now comes from the Supabase `profiles` table.</li>
               <li>• Dashboard placeholders change by database role.</li>
-              <li>• No payment processing, booking payments, Stripe logic, or admin database management has been added.</li>
+              <li>• No payment processing, booking payments, Stripe logic, or live booking payments have been added.</li>
             </ul>
           </aside>
         </div>

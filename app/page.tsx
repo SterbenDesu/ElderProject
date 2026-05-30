@@ -130,7 +130,7 @@ export default function Home() {
           <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">For helpers</p>
           <h2 className="mt-3 text-3xl font-bold text-forest">Independent, scoped participation</h2>
           <p className="mt-4 leading-8 text-stone-700">
-            Future helpers will apply as independent marketplace participants. This shell does not create jobs, employee relationships, live applications, payouts, or admin approval tools.
+            Future helpers will apply as independent marketplace participants. This app does not create jobs, employee relationships, payouts, live booking payments, or automatic public helper visibility.
           </p>
         </article>
       </section>

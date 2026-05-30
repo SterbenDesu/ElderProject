@@ -89,14 +89,14 @@ Current database rows created during signup when the schema and RLS policies all
 - `profiles` with the auth user id, email, safe role mapping, and simple display-name fallback.
 - `terms_acceptances` with the auth user id and placeholder Terms/Privacy versions.
 
-`/dashboard` now reads the signed-in user's `profiles` row and shows role-aware placeholders. For `helper_applicant` users, it also shows the current helper application status when a `helper_applications` row exists and links to `/helper/apply`. It does not include admin database management, elderly profile CRUD, bookings, Stripe, payment processing, or live booking payments.
+`/dashboard` now reads the signed-in user's `profiles` row and shows role-aware placeholders. For `helper_applicant` users, it also shows the current helper application status when a `helper_applications` row exists and links to `/helper/apply`. Admin users see a link to `/admin`. It does not include broad admin database management, elderly profile CRUD, bookings, Stripe, payment processing, or live booking payments.
 
 Current helper application behavior:
 
 - `/helper/apply` uses `helper_applications` for signed-in applicants.
 - Applicants can save a draft (`status = draft`) or submit (`status = submitted`).
 - `under_review`, `approved`, and `rejected` applications are read-only in the applicant UI.
-- Admin review and approval tooling is not implemented yet.
+- Basic admin review and approval tooling is implemented at `/admin`.
 - Public helper marketplace visibility is not implemented from the application page.
 - Unverified helpers and submitted applications are not shown publicly; `/helpers` only reads visible verified `helper_profiles` rows.
 
@@ -167,3 +167,24 @@ Do not paste service role keys, `.env.local` values, provider secrets, or databa
 ## Deployment issues
 
 None known for the current auth UI phase.
+
+## Admin helper application review deployment note
+
+`/admin` is now a database-backed admin dashboard foundation for helper application review. It requires Supabase Auth, the `profiles` table, `helper_applications`, `helper_profiles`, and the admin RLS policies from `supabase/migrations/20260529120000_initial_schema.sql`.
+
+Required environment variables remain name-only and public-client safe:
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+
+No service role key is used by the browser app, and no `.env.local` file should be committed. Admin review uses the signed-in admin user's normal Supabase session and RLS policies.
+
+Approval behavior:
+
+1. Sets `helper_applications.status = approved`.
+2. Updates the applicant's `profiles.role` to `verified_helper`.
+3. Creates or updates the applicant's `helper_profiles` row with `verification_status = verified_basic`.
+4. Keeps `helper_profiles.is_visible = false` by default, so approved helpers are not automatically public.
+5. Attempts to insert an `audit_logs` row for the status change.
+
+Booking logic, booking payments, Stripe/payment processing, native mobile apps, Bulgarian localization, and medical-service functionality are still not implemented. To verify deployment, sign in as an admin profile, open `/admin`, confirm non-admin accounts are denied, review a test helper application, and confirm `/helpers` only shows verified helper profiles that are explicitly visible.

@@ -33,7 +33,7 @@ Current limitations:
 
 - The Supabase schema must be applied manually before signup database writes and dashboard profile reads work.
 - Role-based routing and protected middleware are not implemented yet.
-- No admin database management UI, admin review workflow, or helper approval UI is implemented yet.
+- A basic `/admin` helper application review foundation is implemented for admin profiles; broader admin database management is still not implemented.
 - Admin roles must not be self-assignable from browser metadata.
 - Do not use a Supabase service role key in the browser.
 - Do not commit `.env.local` or secret values.
@@ -44,7 +44,7 @@ Current limitations:
 
 The helper application flow now uses the `helper_applications` table directly from the authenticated browser session with the public Supabase publishable key. Applicants can save a draft or submit an application with `full_name`, `city`, `motivation`, `experience_summary`, and `availability_summary`. Saving sets `status = draft`; submitting sets `status = submitted`.
 
-Applications with `under_review`, `approved`, or `rejected` status are shown as read-only in the applicant UI. Applicants cannot approve themselves, cannot create public helper marketplace profiles from `/helper/apply`, and cannot make themselves visible in `/helpers`. Admin review and public helper visibility workflows remain planned work and are not implemented yet.
+Applications with `under_review`, `approved`, or `rejected` status are shown as read-only in the applicant UI. Applicants cannot approve themselves, cannot create public helper marketplace profiles from `/helper/apply`, and cannot make themselves visible in `/helpers`. Basic admin review now exists at `/admin`; public helper visibility remains a separate planned workflow.
 
 ## Planned roles
 
@@ -149,7 +149,7 @@ High-level policy direction:
 - Signup inserts `terms_acceptances.profile_id`, `terms_acceptances.terms_version`, and `terms_acceptances.privacy_version`. The database default handles `accepted_at`.
 - If auth succeeds but profile or terms storage fails, the UI reports that account creation succeeded but profile setup did not fully complete. The dashboard provides a safe retry path for signed-in users.
 - `/dashboard` reads `email`, `role`, `display_name`, and `created_at` from `profiles`. It shows role-aware placeholder sections for `client`, `helper_applicant`, `verified_helper`, and `admin`, and shows helper application status for helper applicants when available.
-- This phase adds the applicant-owned helper application draft/submission form only. It does not add Stripe, live payment collection, booking payment processing, admin database management or approval, elderly profile CRUD, bookings, Bulgarian localization, native mobile apps, medical-service functionality, or automatic public helper visibility.
+- This phase includes the applicant-owned helper application draft/submission form and a basic admin review foundation. It does not add Stripe, live payment collection, booking payment processing, broad admin database management, elderly profile CRUD, bookings, Bulgarian localization, native mobile apps, medical-service functionality, or automatic public helper visibility.
 
 ## Open questions for the next Supabase phase
 
@@ -157,3 +157,13 @@ High-level policy direction:
 - Which admin actions require server-only logic instead of direct client updates.
 - What minimum profile data is required before protected features are available.
 - How terms and privacy version acceptance should be enforced before booking or helper application actions.
+
+## Implemented admin helper application review foundation
+
+`/admin` now performs client-side access checks with the signed-in Supabase session and the signed-in user's `profiles.role` value. Signed-out visitors are asked to log in, signed-in users without a profile see a missing-profile message, signed-in non-admin users see access denied, and only `admin` users load helper application review data.
+
+The admin dashboard foundation now uses `helper_applications` for the real review list and detail panel. Admin users can mark an application `under_review`, `approved`, or `rejected`. Approval also attempts to update the applicant's `profiles.role` to `verified_helper` and create or update the related `helper_profiles` row with `verification_status = verified_basic` and `is_visible = false`.
+
+Approved helpers are intentionally not made public automatically. Public listing still requires `helper_profiles.is_visible = true` plus a verified public status through a separate safe visibility workflow. The current admin panel does not add Stripe, payment processing, live booking payments, booking management, Bulgarian localization, native mobile functionality, medical-service functionality, or guaranteed-safety claims.
+
+Audit logging is attempted by inserting an `audit_logs` row with the admin actor, `target_table = helper_applications`, the application id, and metadata containing `old_status` and `new_status`. If RLS blocks that insert in an environment, the app reports a warning and does not disable security.
