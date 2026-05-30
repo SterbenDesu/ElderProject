@@ -118,7 +118,10 @@ See `docs/supabase-setup.md`, `docs/auth-and-roles-plan.md`, `docs/database-sche
 3. Create a new query.
 4. Paste the contents of `supabase/migrations/20260529120000_initial_schema.sql`.
 5. Run the query.
-6. Verify tables and RLS policies in Supabase.
+6. Create another query.
+7. Paste the contents of `supabase/migrations/20260530120000_admin_helper_review_rpc.sql`.
+8. Run the query to install or replace `public.review_helper_application(p_application_id uuid, p_action text)`.
+9. Verify tables, RLS policies, and the admin helper review RPC in Supabase.
 
 Do not paste service role keys, `.env.local` values, provider secrets, or database passwords into the SQL Editor.
 
@@ -177,14 +180,15 @@ Required environment variables remain name-only and public-client safe:
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 
-No service role key is used by the browser app, and no `.env.local` file should be committed. Admin review uses the signed-in admin user's normal Supabase session and RLS policies.
+No service role key is used by the browser app, and no `.env.local` file should be committed. Admin review uses the signed-in admin user's normal Supabase session and the admin-only database RPC `public.review_helper_application(p_application_id uuid, p_action text)`. The browser app calls this RPC with `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`; role changes are intentionally not done directly from browser table updates and no service role key is used in the browser.
 
-Approval behavior:
+Approval behavior inside the RPC:
 
-1. Sets `helper_applications.status = approved`.
-2. Updates the applicant's `profiles.role` to `verified_helper`.
-3. Creates or updates the applicant's `helper_profiles` row with `verification_status = verified_basic`.
-4. Keeps `helper_profiles.is_visible = false` by default, so approved helpers are not automatically public.
-5. Attempts to insert an `audit_logs` row for the status change.
+1. Verifies the current authenticated user has `profiles.role = admin`.
+2. Sets `helper_applications.status = approved`.
+3. Updates the applicant's `profiles.role` to `verified_helper`.
+4. Creates or updates the applicant's `helper_profiles` row with `verification_status = verified_basic`.
+5. Keeps `helper_profiles.is_visible = false` by default, so approved helpers are not automatically public.
+6. Attempts to insert an `audit_logs` row for the status change.
 
 Booking logic, booking payments, Stripe/payment processing, native mobile apps, Bulgarian localization, and medical-service functionality are still not implemented. To verify deployment, sign in as an admin profile, open `/admin`, confirm non-admin accounts are denied, review a test helper application, and confirm `/helpers` only shows verified helper profiles that are explicitly visible.

@@ -8,8 +8,9 @@ Make sure you have:
 
 1. A Supabase project for development or testing.
 2. Access to the Supabase dashboard in your browser.
-3. The migration file from this repository:
+3. The migration files from this repository:
    - `supabase/migrations/20260529120000_initial_schema.sql`
+   - `supabase/migrations/20260530120000_admin_helper_review_rpc.sql`
 
 Do **not** paste service role keys, database passwords, `.env.local` values, or any other secrets into the SQL Editor.
 
@@ -40,6 +41,11 @@ It does **not** add Stripe, process payments, store card data, collect medical d
 8. Read the first comments in the SQL and confirm you are in the correct project.
 9. Click **Run**.
 10. Wait for Supabase to finish running the query.
+11. Click **New query** again.
+12. Open `supabase/migrations/20260530120000_admin_helper_review_rpc.sql` from this repository.
+13. Copy the full SQL file contents.
+14. Paste the SQL into the Supabase SQL Editor.
+15. Click **Run** to install or replace the admin helper review RPC.
 
 ## How to verify it worked
 
@@ -67,6 +73,7 @@ After the query succeeds:
    - Accompaniment
 4. Open **Authentication** and confirm your users are still managed by Supabase Auth.
 5. Open each table's policy/RLS view and confirm RLS is enabled.
+6. In the SQL Editor or Database function list, confirm `public.review_helper_application(p_application_id uuid, p_action text)` exists.
 
 ## If SQL errors occur
 
@@ -92,3 +99,12 @@ Common beginner causes:
 - Never store full card data, card PINs, passwords, or medical instructions in these tables.
 - Review and test RLS policies before adding database-backed app features.
 - Helper application owner policies allow applicants to create or update only their own `draft` or `submitted` applications. Applicants must not be able to set `under_review`, `approved`, or `rejected`; those statuses are reserved for a future admin review workflow.
+
+
+## Admin helper review RPC migration
+
+Apply `supabase/migrations/20260530120000_admin_helper_review_rpc.sql` manually after the initial schema migration. The migration creates `public.review_helper_application(p_application_id uuid, p_action text)`, an authenticated admin-only RPC used by `/admin` for `under_review`, `approved`, and `rejected` helper application actions.
+
+The RPC intentionally performs helper approval role changes inside the database instead of directly from browser table updates. It verifies the current `auth.uid()` has `profiles.role = 'admin'`, updates `helper_applications.status`, updates the applicant `profiles.role` to `verified_helper` on approval, creates or updates the related `helper_profiles` row with `verification_status = verified_basic`, and keeps `helper_profiles.is_visible = false`. Approved helpers therefore remain hidden from `/helpers` until a separate admin visibility process explicitly sets `is_visible = true`.
+
+Do not use service role keys in the browser, do not disable RLS, and do not add broad public update policies to support helper approval.
