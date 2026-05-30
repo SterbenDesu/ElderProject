@@ -322,14 +322,23 @@ create policy "helper_applications_owner_insert"
 on public.helper_applications
 for insert
 to authenticated
-with check (profile_id = auth.uid());
+with check (
+  profile_id = auth.uid()
+  and status in ('draft', 'submitted')
+);
 
 create policy "helper_applications_owner_update"
 on public.helper_applications
 for update
 to authenticated
-using (profile_id = auth.uid())
-with check (profile_id = auth.uid());
+using (
+  profile_id = auth.uid()
+  and status in ('draft', 'submitted')
+)
+with check (
+  profile_id = auth.uid()
+  and status in ('draft', 'submitted')
+);
 
 create policy "helper_applications_admin_select_all"
 on public.helper_applications

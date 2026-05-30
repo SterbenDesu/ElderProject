@@ -5,6 +5,11 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import {
+  formatHelperApplicationStatus,
+  loadOwnHelperApplication,
+  type HelperApplication,
+} from "@/lib/supabase/helperApplications";
+import {
   createSignupDatabaseRecords,
   getSignupAccountTypeFromUser,
   loadProfile,
@@ -46,8 +51,8 @@ function formatDate(value: string | null) {
 function getRoleSections(role: ProfileRole): DashboardSection[] {
   if (role === "helper_applicant") {
     return [
-      { title: "Helper application", description: "Placeholder for the future helper application form and submitted application details." },
-      { title: "Verification status", description: "Placeholder for review status after the admin workflow is implemented." },
+      { title: "Helper application", description: "Use /helper/apply to save a draft or submit your helper application." },
+      { title: "Verification status", description: "Submitted applications wait for future admin review. Approval is not guaranteed and admin approval is not implemented yet." },
       { title: "Service boundaries", description: "Reminder that VnukPodNaem covers non-medical support and helpers are independent marketplace participants." },
     ];
   }
@@ -80,6 +85,8 @@ export default function DashboardPage() {
   const [profileStatus, setProfileStatus] = useState<ProfileStatus>("idle");
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [helperApplication, setHelperApplication] = useState<HelperApplication | null>(null);
+  const [helperApplicationMessage, setHelperApplicationMessage] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [profileMessage, setProfileMessage] = useState<string | null>(null);
   const [isRetryingProfileSetup, setIsRetryingProfileSetup] = useState(false);
@@ -100,6 +107,8 @@ export default function DashboardPage() {
 
     if (result.errorMessage) {
       setProfile(null);
+      setHelperApplication(null);
+      setHelperApplicationMessage(null);
       setProfileStatus("error");
       setProfileMessage(result.errorMessage);
       return;
@@ -107,6 +116,8 @@ export default function DashboardPage() {
 
     if (!result.profile) {
       setProfile(null);
+      setHelperApplication(null);
+      setHelperApplicationMessage(null);
       setProfileStatus("missing");
       setProfileMessage("Your auth account exists, but profile setup is incomplete. Use the retry button below after the database schema and RLS policies are applied.");
       return;
@@ -115,6 +126,23 @@ export default function DashboardPage() {
     setProfile(result.profile);
     setProfileStatus("loaded");
     setProfileMessage(null);
+
+    if (result.profile.role === "helper_applicant") {
+      const helperApplicationResult = await loadOwnHelperApplication(supabase, result.profile.id);
+
+      if (helperApplicationResult.errorMessage) {
+        setHelperApplication(null);
+        setHelperApplicationMessage(`Could not load helper application status: ${helperApplicationResult.errorMessage}. If this is an RLS error, confirm the helper_applications policies are applied.`);
+        return;
+      }
+
+      setHelperApplication(helperApplicationResult.application);
+      setHelperApplicationMessage(null);
+      return;
+    }
+
+    setHelperApplication(null);
+    setHelperApplicationMessage(null);
   }, []);
 
   async function retryProfileSetup() {
@@ -171,6 +199,8 @@ export default function DashboardPage() {
         setMessage(error.message);
         setUser(null);
         setProfile(null);
+        setHelperApplication(null);
+        setHelperApplicationMessage(null);
         setProfileStatus("idle");
         return;
       }
@@ -179,6 +209,8 @@ export default function DashboardPage() {
         setStatus("signed-out");
         setUser(null);
         setProfile(null);
+        setHelperApplication(null);
+        setHelperApplicationMessage(null);
         setProfileStatus("idle");
         return;
       }
@@ -196,6 +228,8 @@ export default function DashboardPage() {
         setStatus("signed-out");
         setUser(null);
         setProfile(null);
+        setHelperApplication(null);
+        setHelperApplicationMessage(null);
         setProfileStatus("idle");
         return;
       }
@@ -302,6 +336,27 @@ export default function DashboardPage() {
                     <dd className="mt-1">{formatDate(profile.created_at)}</dd>
                   </div>
                 </dl>
+
+                {profile.role === "helper_applicant" ? (
+                  <section className="mt-6 rounded-3xl border border-stone-200 bg-white p-5">
+                    <h3 className="font-bold text-forest">Helper application status</h3>
+                    {helperApplicationMessage ? (
+                      <p className="mt-2 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm font-semibold leading-6 text-amber-900">{helperApplicationMessage}</p>
+                    ) : (
+                      <p className="mt-2 text-sm leading-6 text-stone-600">
+                        {helperApplication
+                          ? `Current status: ${formatHelperApplicationStatus(helperApplication.status)}.`
+                          : "No helper application has been saved yet."}
+                      </p>
+                    )}
+                    <p className="mt-2 text-sm leading-6 text-stone-600">
+                      You can save a draft or submit your application. Submitted applications wait for future admin review; approval is not guaranteed, and public helper visibility is not active from this dashboard.
+                    </p>
+                    <Link href="/helper/apply" className="mt-4 inline-flex min-h-11 items-center rounded-full bg-forest px-5 py-2 text-sm font-semibold text-white transition hover:bg-stone-800">
+                      Open helper application
+                    </Link>
+                  </section>
+                ) : null}
 
                 <div className="mt-6 grid gap-4 sm:grid-cols-2">
                   {roleSections.map((section) => (

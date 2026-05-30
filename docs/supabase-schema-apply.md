@@ -91,3 +91,4 @@ Common beginner causes:
 - Never commit `.env.local`.
 - Never store full card data, card PINs, passwords, or medical instructions in these tables.
 - Review and test RLS policies before adding database-backed app features.
+- Helper application owner policies allow applicants to create or update only their own `draft` or `submitted` applications. Applicants must not be able to set `under_review`, `approved`, or `rejected`; those statuses are reserved for a future admin review workflow.
