@@ -2,8 +2,8 @@ import Link from "next/link";
 
 const safetyPoints = [
   { title: "Clear service limits", text: "The product scope stays focused on companionship and practical everyday help, not medical or licensed care." },
-  { title: "Future verification", text: "Later phases may add helper review workflows, but this static shell does not verify anyone yet." },
-  { title: "Complaint pathways", text: "Future booking phases should include concern reporting and admin review before any payment release logic is added." },
+  { title: "Early helper review", text: "The shell includes basic helper applications, admin helper review, helper profile editing, and admin-controlled public helper visibility when Supabase is configured; this still does not guarantee safety." },
+  { title: "Future complaint pathways", text: "Disputes and complaint UI are not implemented yet; future booking phases should define concern reporting and admin review before any payment release logic is added." },
   { title: "No absolute guarantees", text: "Good process can reduce risk, but the platform must not promise guaranteed safety." },
 ];
 
@@ -12,9 +12,9 @@ export default function SafetyPage() {
     <section className="mx-auto max-w-6xl px-5 py-12 lg:px-8 lg:py-16">
       <div className="max-w-3xl">
         <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">Safety</p>
-        <h1 className="mt-3 text-4xl font-bold tracking-tight text-forest sm:text-5xl">Trust-focused boundaries for a future marketplace</h1>
+        <h1 className="mt-3 text-4xl font-bold tracking-tight text-forest sm:text-5xl">Trust-focused boundaries for an early marketplace shell</h1>
         <p className="mt-5 text-lg leading-8 text-stone-700">
-          VnukPodNaem is planned as a technology marketplace for non-medical everyday assistance. The first static shell makes product boundaries visible before live accounts, bookings, payments, or admin tooling exist.
+          VnukPodNaem is planned as a technology marketplace for non-medical everyday assistance. The current testable shell has basic database-backed auth, client elderly profiles, booking requests, helper applications, helper profile editing, public helper visibility, and admin helper review when Supabase is configured. It is not launched, and payments, helper acceptance, disputes, chat, notifications, ratings, subscriptions, Bulgarian localization, and advanced admin workflows are not implemented.
         </p>
       </div>
 

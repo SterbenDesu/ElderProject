@@ -2,7 +2,7 @@
 
 This document began as the planning draft for the future Supabase database. The initial MVP schema is now represented by `supabase/migrations/20260529120000_initial_schema.sql`.
 
-Use the migration file as the source of truth for the current implemented SQL schema. Keep this draft as background planning context for later iterations and review it before adding new database-backed features.
+Use the migration files as the source of truth for the current implemented SQL schema. Keep this draft as background planning context for later iterations and review it before adding new database-backed features. The current app shell is database-backed when Supabase is configured, but it is still not launched and is not the full MVP.
 
 
 ## Current migration status
@@ -11,7 +11,7 @@ Use the migration file as the source of truth for the current implemented SQL sc
 - Manual dashboard apply instructions created: `docs/supabase-schema-apply.md`.
 - The migration creates the starter app tables, constraints, seed service categories, `updated_at` triggers, and conservative row-level security policies.
 - Codex does not connect to Supabase directly for this setup. Apply and test the SQL manually in a development Supabase project before relying on it for real users.
-- Payment-related data remains provider-status metadata only. No Stripe, live payment processing, full card data, card PINs, cash handling, or provider secrets are implemented.
+- Payment-related data remains provider-status metadata only. No Stripe, live payment processing, full card data, card PINs, cash handling, or provider secrets are implemented. Helper acceptance, disputes UI, chat, notifications, ratings/reviews, subscriptions, Bulgarian localization, and advanced admin workflows are also not implemented.
 
 ## General schema principles
 
@@ -359,6 +359,7 @@ High-level RLS notes:
 - Users should not modify historical acceptance records after creation.
 - Admin read access should be limited to appropriate support or compliance needs.
 - Confirm retention rules before storing IP address and user agent in production.
+- Repeated retry/signup edge cases may create multiple `terms_acceptances` rows for the same profile and placeholder versions; decide later whether to add a uniqueness/idempotency constraint after testing the signup retry path.
 
 ## Admin helper application review usage
 
@@ -392,16 +393,16 @@ A migration adds two security-definer RPCs that are designed to preserve RLS bou
 
 ## Current specific-helper request behavior
 
-The existing starter schema already includes nullable `bookings.helper_profile_id`, so no new SQL migration is required for the visible helper detail and request-this-helper flow. The app now uses this field when a client/caregiver requests a specific public helper from `/helpers/[id]`.
+The starter schema already includes nullable `bookings.helper_profile_id`, and the app uses this field when a client/caregiver requests a specific public helper from `/helpers/[id]`. The `20260530140000_tighten_booking_helper_rls.sql` migration updates client booking insert/update RLS so the database also requires a non-null `helper_profile_id` to reference a visible helper profile with `verification_status` of `verified_basic` or `trusted`.
 
 Current application behavior:
 
 - Public helper detail pages read only visible verified `helper_profiles` rows: `is_visible = true` and `verification_status` in `verified_basic` or `trusted`.
 - Public helper pages expose only safe profile fields: `bio`, `city`, `service_radius_km`, and public verification status labels.
 - Public helper pages do not expose helper email addresses, `profile_id`, helper applications, private user details, hidden helpers, unverified helpers, or admin-only fields.
-- Client/caregiver users can create `bookings` rows with `status = requested` and `helper_profile_id` set to the selected visible helper profile.
+- Client/caregiver users can create `bookings` rows with `status = requested` and `helper_profile_id` set to the selected visible helper profile; database RLS now enforces that non-null helper reference in addition to app-level checks.
 - General booking requests still store `helper_profile_id = null`.
 - `/dashboard/bookings` distinguishes general/unassigned requests from specific-helper requests and shows only safe public helper details when the helper remains visible and readable.
 - Helper acceptance is not implemented yet.
-- Payment processing, Stripe, card collection, and live booking payments are not implemented yet.
+- Payment processing, Stripe, card collection, live booking payments, helper acceptance, disputes, Bulgarian localization, chat, notifications, ratings/reviews, subscriptions, and advanced admin workflows are not implemented yet.
 - The notes UI remains non-medical and warns users not to enter medical details, medication instructions, diagnoses, card PINs, passwords, cash-handling requests, or access-to-valuables requests.

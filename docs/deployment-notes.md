@@ -8,7 +8,7 @@ Recommended provider: **Vercel** for the Next.js web app.
 
 ## Current deployment status
 
-Not deployed yet. The repository now contains a Next.js app shell with Supabase email/password authentication UI and first database-backed profile writes/reads when Supabase public environment variables are configured. The initial Supabase SQL schema must be applied manually in the Supabase dashboard before signup database writes and dashboard profile reads work.
+Not deployed yet. The repository now contains a Next.js app shell with Supabase email/password authentication, database-backed client elderly profiles, booking requests, helper applications, helper profile editing, public helper visibility, and admin helper review when Supabase public environment variables are configured. It is still an early shell, not a launched/full MVP. All required Supabase SQL migrations must be applied manually in the Supabase dashboard before database-backed workflows are considered ready.
 
 ## Current stack
 
@@ -22,7 +22,7 @@ Not deployed yet. The repository now contains a Next.js app shell with Supabase 
 
 - Vercel for hosting the web app.
 - Supabase for email/password authentication and the PostgreSQL database schema.
-- Stripe or another marketplace payment provider is not required for this phase and must not be added until a later payment-specific task. No payment logic or live booking payments exist yet.
+- Stripe or another marketplace payment provider is not required for this phase and must not be added until a later payment-specific task. No payment logic, live booking payments, helper acceptance, disputes, Bulgarian localization, chat, notifications, ratings/reviews, subscriptions, or advanced admin workflows exist yet.
 
 ## Required environment variables
 
@@ -67,15 +67,18 @@ npm run start
 
 ## Database setup
 
-The initial database schema is now represented in:
+The current database schema and RPC/policy updates are represented by the ordered migration files in `supabase/migrations/`:
 
 ```bash
 supabase/migrations/20260529120000_initial_schema.sql
+supabase/migrations/20260530120000_admin_helper_review_rpc.sql
+supabase/migrations/20260530130000_helper_profile_management.sql
+supabase/migrations/20260530140000_tighten_booking_helper_rls.sql
 ```
 
-This migration creates the starter `profiles`, elderly profile, helper application/profile, service category, booking, complaint, payment-status, audit log, and terms acceptance tables. It also enables row-level security on all app tables and adds conservative starter policies.
+These migrations create the starter `profiles`, elderly profile, helper application/profile, service category, booking, complaint, payment-status, audit log, and terms acceptance tables; install admin/helper-profile RPCs; enable row-level security; and tighten booking insert/update RLS so non-null `helper_profile_id` values must reference visible verified/trusted helper profiles.
 
-The schema must be applied manually before signup database writes and dashboard profile reads work. Codex does not need direct Supabase access for this step. Follow `docs/supabase-schema-apply.md`.
+The migrations must be applied manually before signup, dashboard, helper, booking, and admin database workflows are considered ready. Codex does not need direct Supabase access for this step. Follow `docs/supabase-schema-apply.md`.
 
 Current auth metadata saved during signup when Supabase accepts it:
 
@@ -102,7 +105,7 @@ Current helper application behavior:
 
 Before real user data is used in production:
 
-1. Apply the SQL migration in a development Supabase project first.
+1. Apply the ordered SQL migrations in a development Supabase project first.
 2. Confirm all app tables exist.
 3. Confirm row-level security is enabled on every app table.
 4. Test role-based access for visitors, clients/caregivers, helper applicants, verified helpers, and admins.
@@ -115,13 +118,13 @@ See `docs/supabase-setup.md`, `docs/auth-and-roles-plan.md`, `docs/database-sche
 
 1. Open the Supabase dashboard.
 2. Open **SQL Editor**.
-3. Create a new query.
-4. Paste the contents of `supabase/migrations/20260529120000_initial_schema.sql`.
-5. Run the query.
-6. Create another query.
-7. Paste the contents of `supabase/migrations/20260530120000_admin_helper_review_rpc.sql`.
-8. Run the query to install or replace `public.review_helper_application(p_application_id uuid, p_action text)`.
-9. Verify tables, RLS policies, and the admin helper review RPC in Supabase.
+3. Create a new query for each migration and run them manually in this exact order:
+   1. `supabase/migrations/20260529120000_initial_schema.sql`
+   2. `supabase/migrations/20260530120000_admin_helper_review_rpc.sql`
+   3. `supabase/migrations/20260530130000_helper_profile_management.sql`
+   4. `supabase/migrations/20260530140000_tighten_booking_helper_rls.sql`
+4. Verify tables, RLS policies, `public.review_helper_application`, `public.update_own_helper_profile`, and `public.set_helper_profile_visibility` in Supabase.
+5. Verify the `bookings_client_insert` and `bookings_client_update` policies require non-null `helper_profile_id` values to reference visible `verified_basic` or `trusted` helper profiles.
 
 Do not paste service role keys, `.env.local` values, provider secrets, or database passwords into the SQL Editor.
 
@@ -165,9 +168,9 @@ Do not paste service role keys, `.env.local` values, provider secrets, or databa
 - No secrets are committed or documented.
 - No `.env.local` file is committed.
 - No service role key is used in the browser.
-- Initial database schema migration exists and has been manually applied in Supabase before database-backed features are used.
+- All required database migrations exist and have been manually applied in Supabase before database-backed features are used.
 - RLS is enabled and reviewed on every app table.
-- No Stripe, live payment, booking payment, helper assignment, helper acceptance, native mobile, Bulgarian localization, or medical-service functionality is active.
+- No Stripe, live payment, booking payment, helper assignment, helper acceptance, disputes, chat, notifications, ratings/reviews, subscriptions, native mobile, Bulgarian localization, advanced admin workflows, or medical-service functionality is active.
 
 ## Deployment issues
 
@@ -186,7 +189,7 @@ No service role key is used by the browser app, and no `.env.local` file should 
 
 Client/caregiver users can create, view, update, and delete their own elderly profiles when RLS and foreign-key rules permit it. If future bookings reference an elderly profile, deletion may be blocked by the database because the current schema does not include an archive flag.
 
-Booking requests are implemented separately at `/dashboard/bookings`; booking payments, Stripe/payment processing, native mobile apps, Bulgarian localization, and medical-service functionality are still not implemented. To verify deployment, sign in as a client/caregiver profile, open `/dashboard`, confirm the elderly profile count/link appears, then open `/dashboard/elderly-profiles` and create, edit, view, and delete a test non-medical elderly profile. Also verify helper applicant, verified helper, and admin profiles cannot use the management form.
+Booking requests are implemented separately at `/dashboard/bookings`; booking payments, Stripe/payment processing, helper acceptance, disputes, chat, notifications, ratings/reviews, subscriptions, native mobile apps, Bulgarian localization, advanced admin workflows, and medical-service functionality are still not implemented. To verify deployment, sign in as a client/caregiver profile, open `/dashboard`, confirm the elderly profile count/link appears, then open `/dashboard/elderly-profiles` and create, edit, view, and delete a test non-medical elderly profile. Also verify helper applicant, verified helper, and admin profiles cannot use the management form.
 
 
 ## Client/caregiver booking requests deployment note
@@ -200,7 +203,7 @@ Required environment variables remain name-only and public-client safe:
 
 No service role key is used by the browser app, and no `.env.local` file should be committed. New booking requests insert `bookings.status = requested` and use the selected client-owned `elderly_profiles.id`, an allowed `service_categories.id`, `city`, `requested_start_at`, `requested_duration_minutes`, and non-medical `notes`.
 
-Client/caregiver users can view their own booking requests and cancel a request only while it is still `requested`. Cancellation updates the row to `status = cancelled`; booking rows are not hard-deleted. Payment processing, Stripe, live booking payments, helper assignment, helper acceptance, matching, and helper notifications are not implemented. Helpers should not see or accept booking requests yet. Admin booking management is not implemented in the app; admin users see a placeholder on `/dashboard/bookings`.
+Client/caregiver users can view their own booking requests and cancel a request only while it is still `requested`. Cancellation updates the row to `status = cancelled`; booking rows are not hard-deleted. Payment processing, Stripe, live booking payments, helper assignment, helper acceptance, matching, helper notifications, disputes, chat, ratings/reviews, subscriptions, Bulgarian localization, and advanced admin workflows are not implemented. Helpers should not see or accept booking requests yet. Admin booking management is not implemented in the app; admin users see a placeholder on `/dashboard/bookings`.
 
 The booking notes UI warns users not to enter medical details, diagnoses, medication instructions, card PINs, passwords, cash-handling requests, or access-to-valuables requests. The flow does not add medical-service fields or collect unnecessary medical or health data.
 
@@ -226,7 +229,7 @@ Approval behavior inside the RPC:
 5. Keeps `helper_profiles.is_visible = false` by default, so approved helpers are not automatically public.
 6. Attempts to insert an `audit_logs` row for the status change.
 
-Full booking management, helper assignment, helper acceptance, booking payments, Stripe/payment processing, native mobile apps, Bulgarian localization, and medical-service functionality are still not implemented. To verify deployment, sign in as an admin profile, open `/admin`, confirm non-admin accounts are denied, review a test helper application, and confirm `/helpers` only shows verified helper profiles that are explicitly visible.
+Full booking management, helper assignment, helper acceptance, booking payments, Stripe/payment processing, disputes, chat, notifications, ratings/reviews, subscriptions, native mobile apps, Bulgarian localization, advanced admin workflows, and medical-service functionality are still not implemented. To verify deployment, sign in as an admin profile, open `/admin`, confirm non-admin accounts are denied, review a test helper application, and confirm `/helpers` only shows verified helper profiles that are explicitly visible.
 
 ## Verified helper profile management and admin helper visibility deployment note
 
@@ -248,8 +251,9 @@ Manual deployment steps:
 1. Apply `supabase/migrations/20260529120000_initial_schema.sql` if it has not already been applied.
 2. Apply `supabase/migrations/20260530120000_admin_helper_review_rpc.sql` if it has not already been applied.
 3. Apply `supabase/migrations/20260530130000_helper_profile_management.sql`.
-4. Redeploy the Next.js app with `npm run build` as the build command and `npm run start` as the start command.
-5. Verify with a client, helper applicant, verified helper, and admin account.
+4. Apply `supabase/migrations/20260530140000_tighten_booking_helper_rls.sql`.
+5. Redeploy the Next.js app with `npm run build` as the build command and `npm run start` as the start command.
+6. Verify with a client, helper applicant, verified helper, and admin account.
 
 Manual verification:
 
@@ -259,7 +263,7 @@ Manual verification:
 - As an admin, open `/admin`, toggle an approved helper visible, then confirm that helper appears on `/helpers` without an email address.
 - Toggle the helper hidden again and confirm the helper no longer appears on `/helpers`.
 
-No booking assignment exists yet. Payment logic, Stripe/payment processing, live booking payments, card collection, native mobile apps, Bulgarian localization, and medical-service functionality are still not implemented.
+No booking assignment/helper acceptance exists yet. Payment logic, Stripe/payment processing, live booking payments, card collection, disputes, chat, notifications, ratings/reviews, subscriptions, native mobile apps, Bulgarian localization, advanced admin workflows, and medical-service functionality are still not implemented.
 
 ## Visible helper detail pages and specific-helper booking requests deployment note
 
@@ -267,12 +271,12 @@ No booking assignment exists yet. Payment logic, Stripe/payment processing, live
 
 Signed-in client/caregiver users can request a specific visible helper from the helper detail page. The request inserts a `bookings` row with `status = requested` and stores the selected helper in `bookings.helper_profile_id`. Signed-out users are prompted to log in or sign up, and helper applicant, verified helper, and admin roles are told that booking requests are for client/caregiver accounts.
 
-No SQL migration is required if the initial schema has already been applied, because `bookings.helper_profile_id` already exists. Deployment still requires the same public browser environment variables by name only:
+The `supabase/migrations/20260530140000_tighten_booking_helper_rls.sql` migration is now required after the initial/helper RPC migrations. It keeps existing client ownership, elderly-profile ownership, and allowed service-category checks while requiring non-null `bookings.helper_profile_id` values to reference visible helpers with `verification_status` of `verified_basic` or `trusted`. Deployment still requires the same public browser environment variables by name only:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 
-No service role key is used by the browser app, and no `.env.local` file should be committed. No Stripe integration, payment processing, card collection, cash payment language, off-platform payment language, helper acceptance, helper notifications, native mobile app, Bulgarian localization, or medical-service functionality is included in this phase.
+No service role key is used by the browser app, and no `.env.local` file should be committed. No Stripe integration, payment processing, card collection, cash payment language, off-platform payment language, helper acceptance, disputes, chat, notifications, ratings/reviews, subscriptions, native mobile app, Bulgarian localization, advanced admin workflows, or medical-service functionality is included in this phase.
 
 Manual verification after deployment:
 
@@ -284,3 +288,4 @@ Manual verification after deployment:
 6. Create a general request from `/dashboard/bookings` and confirm it appears as general/unassigned.
 7. Sign in as `helper_applicant`, `verified_helper`, and `admin` accounts and confirm they cannot create client booking requests.
 8. Hide the helper profile and confirm `/helpers/[id]` becomes unavailable publicly and dashboard booking history does not expose private helper data.
+9. After applying `20260530140000_tighten_booking_helper_rls.sql`, confirm a client cannot create or update a booking with `helper_profile_id` pointing to a hidden or unverified helper profile, while general requests with `helper_profile_id = null` still work.

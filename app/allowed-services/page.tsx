@@ -3,7 +3,7 @@ const allowedServices = [
   { title: "Light errands", text: "Simple local tasks that do not involve valuables, cash handling, or private credentials." },
   { title: "Shopping", text: "Shopping lists, accompaniment, or carrying light items within practical limits." },
   { title: "Walks", text: "Outdoor accompaniment for everyday walks, not medical supervision." },
-  { title: "Check-ins", text: "Friendly scheduled check-ins once real booking tools exist." },
+  { title: "Check-ins", text: "Friendly scheduled check-ins within the current early booking-request shell." },
   { title: "Technology help", text: "Basic device assistance without passwords, account takeover, or financial access." },
   { title: "Accompaniment", text: "Going along to appointments or institutions for everyday support, not clinical decisions." },
 ];

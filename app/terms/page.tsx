@@ -15,12 +15,12 @@ export default function TermsPage() {
           <p className="mt-2 leading-7 text-stone-700">The planned product is a technology marketplace, not a medical provider, licensed care provider, employer, or safety guarantor.</p>
         </article>
         <article className="rounded-3xl bg-sage p-5">
-          <h2 className="font-bold text-forest">Future accounts</h2>
-          <p className="mt-2 leading-7 text-stone-700">Real account creation, identity workflows, helper verification, booking, and admin review are not active in this shell.</p>
+          <h2 className="font-bold text-forest">Current shell accounts</h2>
+          <p className="mt-2 leading-7 text-stone-700">Supabase Auth and database-backed shell workflows may store test account/profile, booking-request, helper application, helper profile, and admin helper-review data when configured.</p>
         </article>
         <article className="rounded-3xl bg-sage p-5">
           <h2 className="font-bold text-forest">Future payments</h2>
-          <p className="mt-2 leading-7 text-stone-700">No payment processing, refunds, payout handling, or payment-provider integration is implemented yet.</p>
+          <p className="mt-2 leading-7 text-stone-700">No payment processing, refunds, payout handling, payment-provider integration, helper acceptance, full booking lifecycle, disputes, chat, notifications, ratings, subscriptions, or Bulgarian localization is implemented yet.</p>
         </article>
       </div>
     </section>

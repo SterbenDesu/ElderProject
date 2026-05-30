@@ -94,12 +94,13 @@ export function SiteShell({ children }: { children: ReactNode }) {
             <p className="mt-3 max-w-2xl leading-7">
               A planned marketplace for non-medical everyday support. Helpers
               are independent marketplace participants, not employees of the
-              platform. Real account authentication is available when Supabase
-              is configured. Live booking payments, payment processing, and
-              booking assignment are not active yet; signed-in profiles, helper
-              applications, verified helper profile editing, and admin helper
-              visibility controls are database-backed when Supabase is
-              configured.
+              platform. This early shell is database-backed when Supabase is
+              configured: auth, client elderly profiles, booking requests,
+              helper applications, helper profile editing, public helper
+              visibility, and admin helper review are available for testing.
+              Payments, helper acceptance, full booking lifecycle, disputes,
+              Bulgarian localization, chat, notifications, ratings,
+              subscriptions, and advanced admin workflows are not active yet.
             </p>
           </div>
           <div className="flex flex-wrap gap-2 sm:justify-end">
