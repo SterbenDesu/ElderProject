@@ -70,6 +70,7 @@ export default function AdminPage() {
   const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [emailWarning, setEmailWarning] = useState<string | null>(null);
+  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [auditWarning, setAuditWarning] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [workingApplicationId, setWorkingApplicationId] = useState<string | null>(null);
@@ -118,6 +119,7 @@ export default function AdminPage() {
 
     setStatus("checking-profile");
     setMessage(null);
+    setActionSuccess(null);
     setActionError(null);
 
     const profileResult = await loadProfile(supabase, currentUser.id);
@@ -225,12 +227,12 @@ export default function AdminPage() {
     }
 
     setWorkingApplicationId(application.id);
+    setActionSuccess(null);
     setActionError(null);
     setAuditWarning(null);
 
     const result = await changeHelperApplicationStatus(supabase, {
-      actorId: user.id,
-      application,
+      applicationId: application.id,
       newStatus,
     });
 
@@ -240,17 +242,10 @@ export default function AdminPage() {
       return;
     }
 
-    const updatedApplication = result.application;
-
-    setApplications((currentApplications) =>
-      currentApplications.map((currentApplication) =>
-        currentApplication.id === updatedApplication.id
-          ? { ...currentApplication, ...updatedApplication, applicant_email: currentApplication.applicant_email }
-          : currentApplication,
-      ),
-    );
-    setSelectedApplicationId(updatedApplication.id);
+    setActionSuccess(`${actionLabel(newStatus)} completed for ${application.full_name}.`);
     setAuditWarning(result.auditWarning);
+    await loadApplications();
+    setSelectedApplicationId(result.application.id);
     setWorkingApplicationId(null);
   }
 
@@ -355,6 +350,7 @@ export default function AdminPage() {
           <section className="rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200">
             <h2 className="text-2xl font-bold text-forest">Review details</h2>
 
+            {actionSuccess ? <p className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm font-semibold leading-6 text-emerald-800" role="status">{actionSuccess}</p> : null}
             {actionError ? <p className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-3 text-sm font-semibold leading-6 text-red-800" role="alert">{actionError}</p> : null}
             {auditWarning ? <p className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm font-semibold leading-6 text-amber-900">{auditWarning}</p> : null}
 

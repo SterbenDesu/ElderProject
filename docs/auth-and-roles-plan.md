@@ -162,8 +162,17 @@ High-level policy direction:
 
 `/admin` now performs client-side access checks with the signed-in Supabase session and the signed-in user's `profiles.role` value. Signed-out visitors are asked to log in, signed-in users without a profile see a missing-profile message, signed-in non-admin users see access denied, and only `admin` users load helper application review data.
 
-The admin dashboard foundation now uses `helper_applications` for the real review list and detail panel. Admin users can mark an application `under_review`, `approved`, or `rejected`. Approval also attempts to update the applicant's `profiles.role` to `verified_helper` and create or update the related `helper_profiles` row with `verification_status = verified_basic` and `is_visible = false`.
+The admin dashboard foundation now uses `helper_applications` for the real review list and detail panel. Admin users can mark an application `under_review`, `approved`, or `rejected` through the admin-only Supabase RPC `public.review_helper_application(p_application_id uuid, p_action text)`. Approval updates the applicant's `profiles.role` to `verified_helper` and creates or updates the related `helper_profiles` row with `verification_status = verified_basic` and `is_visible = false` inside that database function instead of direct browser table updates.
 
 Approved helpers are intentionally not made public automatically. Public listing still requires `helper_profiles.is_visible = true` plus a verified public status through a separate safe visibility workflow. The current admin panel does not add Stripe, payment processing, live booking payments, booking management, Bulgarian localization, native mobile functionality, medical-service functionality, or guaranteed-safety claims.
 
-Audit logging is attempted by inserting an `audit_logs` row with the admin actor, `target_table = helper_applications`, the application id, and metadata containing `old_status` and `new_status`. If RLS blocks that insert in an environment, the app reports a warning and does not disable security.
+Audit logging is attempted inside the RPC by inserting an `audit_logs` row with the admin actor, `target_table = helper_applications`, the application id, and metadata containing `old_status` and `new_status`. If audit insertion fails, the RPC still returns one stable JSON object with an audit warning field; the app reports the warning and does not disable security.
+
+
+## Admin helper approval RPC
+
+Helper application review actions are handled by the Supabase RPC `public.review_helper_application(p_application_id uuid, p_action text)`, installed by `supabase/migrations/20260530120000_admin_helper_review_rpc.sql`. The browser admin page calls this RPC with the signed-in admin session and only the publishable Supabase key. It does not use a service role key and does not directly coordinate role/profile updates from browser code.
+
+The RPC verifies the current authenticated user has `profiles.role = 'admin'` before doing any review work. It supports `under_review`, `approved`, and `rejected`. Approval updates the applicant `profiles.role` to `verified_helper`, creates or updates a `helper_profiles` row with `verification_status = verified_basic`, and keeps `helper_profiles.is_visible = false` so approval does not automatically publish the helper in public search.
+
+Role changes remain protected: users cannot self-assign admin or verified helper during signup, and the profile role-protection trigger should remain in place unless replaced by an equal or safer database-side control.
