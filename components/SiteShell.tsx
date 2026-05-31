@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { AuthNav } from "@/components/AuthNav";
+import { LanguageSelector } from "@/components/LanguageSelector";
 
 const navigationLinks = [
   { href: "/services", label: "Services" },
@@ -64,6 +65,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
           </div>
 
           <div className="hidden items-center gap-2 md:flex">
+            <LanguageSelector />
             <AuthNav />
           </div>
 
@@ -84,7 +86,8 @@ export function SiteShell({ children }: { children: ReactNode }) {
                 ))}
                 <AuthNav variant="links" loggedOutLinks={loggedOutOnlyLinks} />
               </div>
-              <div className="mt-3 border-t border-stone-100 pt-3">
+              <div className="mt-3 grid gap-3 border-t border-stone-100 pt-3">
+                <LanguageSelector compact />
                 <AuthNav variant="mobile" />
               </div>
             </div>
