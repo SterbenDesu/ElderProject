@@ -9,6 +9,7 @@ export type Profile = {
   email: string;
   role: ProfileRole;
   display_name: string | null;
+  phone: string | null;
   created_at: string | null;
 };
 
@@ -55,7 +56,7 @@ export function getSignupAccountTypeFromUser(user: User): SignupAccountType {
 export async function loadProfile(supabase: SupabaseClient, userId: string): Promise<{ profile: Profile | null; errorMessage: string | null }> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("id,email,role,display_name,created_at")
+    .select("id,email,role,display_name,phone,created_at")
     .eq("id", userId)
     .single();
 
@@ -72,13 +73,20 @@ export async function loadProfile(supabase: SupabaseClient, userId: string): Pro
 
 export async function createProfileIfMissing(
   supabase: SupabaseClient,
-  input: { userId: string; email: string; accountType: SignupAccountType },
+  input: {
+    userId: string;
+    email: string;
+    accountType: SignupAccountType;
+    displayName?: string;
+    phone?: string;
+  },
 ): Promise<{ errorMessage: string | null }> {
   const { error } = await supabase.from("profiles").insert({
     id: input.userId,
     email: input.email,
     role: mapSignupAccountTypeToProfileRole(input.accountType),
-    display_name: deriveDisplayNameFromEmail(input.email),
+    display_name: input.displayName?.trim() || deriveDisplayNameFromEmail(input.email),
+    phone: input.phone?.trim() || null,
   });
 
   if (isDuplicateRowError(error)) {
@@ -111,7 +119,13 @@ export async function createTermsAcceptance(
 
 export async function createSignupDatabaseRecords(
   supabase: SupabaseClient,
-  input: { userId: string; email: string; accountType: SignupAccountType },
+  input: {
+    userId: string;
+    email: string;
+    accountType: SignupAccountType;
+    displayName?: string;
+    phone?: string;
+  },
 ): Promise<{ errorMessage: string | null }> {
   const profileResult = await createProfileIfMissing(supabase, input);
 

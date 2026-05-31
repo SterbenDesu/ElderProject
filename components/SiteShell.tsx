@@ -4,17 +4,20 @@ import { AuthNav } from "@/components/AuthNav";
 
 const navigationLinks = [
   { href: "/services", label: "Services" },
+  { href: "/helpers", label: "Caregivers" },
   { href: "/safety", label: "Safety" },
-  { href: "/allowed-services", label: "Allowed" },
-  { href: "/prohibited-services", label: "Boundaries" },
-  { href: "/helpers", label: "Helpers" },
+];
+
+const loggedOutOnlyLinks = [
+  { href: "/signup", label: "Become a caregiver" },
 ];
 
 const footerLinks = [
+  { href: "/services", label: "Services" },
+  { href: "/helpers", label: "Caregivers" },
+  { href: "/safety", label: "Safety" },
   { href: "/terms", label: "Terms" },
   { href: "/privacy", label: "Privacy" },
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/admin", label: "Admin" },
 ];
 
 function NavLink({ href, label }: { href: string; label: string }) {
@@ -48,7 +51,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
                 VnukPodNaem
               </span>
               <span className="hidden text-xs font-semibold uppercase tracking-[0.18em] text-moss sm:block">
-                Non-medical support
+                Everyday support
               </span>
             </span>
           </Link>
@@ -57,6 +60,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
             {navigationLinks.map((link) => (
               <NavLink key={link.href} {...link} />
             ))}
+            <AuthNav variant="links" loggedOutLinks={loggedOutOnlyLinks} />
           </div>
 
           <div className="hidden items-center gap-2 md:flex">
@@ -78,6 +82,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
                 {navigationLinks.map((link) => (
                   <NavLink key={link.href} {...link} />
                 ))}
+                <AuthNav variant="links" loggedOutLinks={loggedOutOnlyLinks} />
               </div>
               <div className="mt-3 border-t border-stone-100 pt-3">
                 <AuthNav variant="mobile" />
@@ -92,15 +97,12 @@ export function SiteShell({ children }: { children: ReactNode }) {
           <div>
             <p className="text-lg font-bold text-forest">VnukPodNaem</p>
             <p className="mt-3 max-w-2xl leading-7">
-              A planned marketplace for non-medical everyday support. Helpers
-              are independent marketplace participants, not employees of the
-              platform. This early shell is database-backed when Supabase is
-              configured: auth, client elderly profiles, booking requests,
-              helper applications, helper profile editing, public helper
-              visibility, and admin helper review are available for testing.
-              Payments, helper acceptance, full booking lifecycle, disputes,
-              Bulgarian localization, chat, notifications, ratings,
-              subscriptions, and advanced admin workflows are not active yet.
+              A marketplace shell for trusted everyday support: visits,
+              errands, shopping, companionship, home tasks, and accompaniment.
+              Signup is universal, caregiver applications happen after account
+              creation, and reviewed caregivers can become visible through admin
+              approval. Final reservation, scheduling, and payment processing
+              are not active yet.
             </p>
           </div>
           <div className="flex flex-wrap gap-2 sm:justify-end">

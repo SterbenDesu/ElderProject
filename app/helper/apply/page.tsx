@@ -201,7 +201,7 @@ export default function ApplyPage() {
       <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">Helper application</p>
       <h1 className="mt-3 text-4xl font-bold tracking-tight text-forest sm:text-5xl">Apply as a helper</h1>
       <p className="mt-5 max-w-3xl text-lg leading-8 text-stone-700">
-        Save a draft or submit your non-medical helper application. This page does not approve helpers, create public marketplace listings, or create employment relationships.
+        Save a draft or submit your caregiver application. This page does not approve caregivers, create public marketplace listings, or create employment relationships.
       </p>
 
       {pageStatus === "loading" ? (
@@ -221,7 +221,7 @@ export default function ApplyPage() {
         <div className="mt-8 rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200">
           <h2 className="text-2xl font-bold text-forest">Log in or sign up first</h2>
           <p className="mt-4 text-lg leading-8">
-            Helper applications are connected to your account profile. Please log in or create a helper applicant account before saving a draft or submitting an application.
+            Caregiver applications are connected to your account profile. Please sign in or create a normal account before saving a draft or submitting an application.
           </p>
           {message ? <p className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900">Session message: {message}</p> : null}
           <div className="mt-6 flex flex-wrap gap-3">
@@ -251,7 +251,7 @@ export default function ApplyPage() {
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h2 className="text-2xl font-bold text-forest">Application details</h2>
-                <p className="mt-2 text-sm text-stone-600">Signed in as {user.email}. Profile role: {profile.role}.</p>
+                <p className="mt-2 text-sm text-stone-600">Signed in as {user.email}. Account status: {profile.role}.</p>
               </div>
               <span className="rounded-full bg-sage px-4 py-2 text-sm font-bold text-forest">
                 Status: {application ? formatHelperApplicationStatus(application.status) : "Not started"}

@@ -295,3 +295,59 @@ Manual verification after deployment:
 7. Sign in as `helper_applicant`, `verified_helper`, and `admin` accounts and confirm they cannot create client booking requests.
 8. Hide the helper profile and confirm `/helpers/[id]` becomes unavailable publicly and dashboard booking history does not expose private helper data.
 9. After applying `20260530140000_tighten_booking_helper_rls.sql`, confirm a client cannot create or update a booking with `helper_profile_id` pointing to a hidden or unverified helper profile, while general requests with `helper_profile_id = null` still work.
+
+## V2 first UI/product refactor deployment note (2026-05-31)
+
+The first visible V2 UI/product refactor is implemented without database schema changes.
+
+Required services remain:
+
+- Vercel or another Next.js-compatible hosting provider.
+- Supabase project with the existing migrations already applied.
+
+Required environment variables by name only:
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+
+Build command:
+
+- `npm run build`
+
+Start command:
+
+- `npm run start`
+
+Database setup and migrations:
+
+- No new SQL migration is required for this refactor.
+- Continue using the existing Supabase migrations in `supabase/migrations`.
+- Universal signup now creates profiles with the existing internal `client` role.
+- First/last name are saved to `profiles.display_name` and phone is saved to `profiles.phone`.
+- Gender is saved in Supabase auth metadata only because the existing `profiles` table has no gender column.
+
+Current V2 behavior to verify after deployment:
+
+1. Open `/` and confirm the homepage is service-first with a city/location, date/date range, and service type search box.
+2. Submit the homepage search and confirm it navigates to `/helpers` with simple query parameters; no booking should be created.
+3. Open `/signup` and confirm there is no account type selection.
+4. Create a test account and confirm the profile is created with the internal `client` role.
+5. Sign in from `/login` and confirm the app redirects to `/`.
+6. Confirm the header shows an avatar/initials menu while signed in.
+7. Confirm normal users do not see an Admin menu item.
+8. Confirm admin users do see the Admin menu item and can still open `/admin`.
+9. Open `/dashboard` and confirm it reads as My profile and includes Browse caregivers and Become a caregiver actions.
+10. Open `/helper/apply` from the avatar menu or dashboard and confirm the existing caregiver application flow still loads.
+
+Not implemented in this refactor:
+
+- Real homepage search filtering.
+- Scheduling logic.
+- Final reservation flow.
+- Payment processing or Stripe.
+- Helper acceptance workflow.
+- Ratings/reviews.
+- File upload.
+- Bulgarian localization.
+- Native mobile app work.
+- Real password reset emails. The forgot-password UI is placeholder only.

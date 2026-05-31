@@ -177,3 +177,18 @@ Do not build these without a future explicit product-approved task:
 - Should profile photos be required or optional?
 - What documents should caregivers upload, pending legal review?
 - What are the exact policies users must accept before applying as caregiver?
+
+## V2 first visible UI refactor implemented (2026-05-31)
+
+The first visible V2 app refactor is now implemented in the Next.js shell.
+
+- The homepage now leads with service-first booking/search copy instead of making safety warnings the dominant message.
+- The homepage includes a simple visual search module with city/location, date or date range, service type, and a Browse caregivers button.
+- The homepage search module is query-based only for now. It sends users to `/helpers` and preserves simple values in URL query parameters through the browser's normal GET form behavior.
+- Real caregiver filtering, scheduling, final reservation, helper acceptance, and payment processing are not implemented yet.
+- Safety/legal boundaries still exist, but the homepage now links to `/safety` and uses calmer supporting copy.
+- Top navigation now uses simpler public links: Services, Caregivers, Safety, and Become a caregiver for signed-out users.
+- Logged-in users now see an avatar/initials account menu with My profile, Browse caregivers, Become a caregiver, Sign out, and Admin only when the current profile role is `admin`.
+- `/dashboard` is now framed as My profile / account hub instead of an internal development dashboard.
+- The visible caregiver entry point uses the existing `/helper/apply` application flow; no new caregiver application schema was added.
+- The forgot-password experience on `/login` is a placeholder only and intentionally does not send Supabase reset emails yet.

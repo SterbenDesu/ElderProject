@@ -4,8 +4,8 @@ import "./globals.css";
 
 
 export const metadata: Metadata = {
-  title: "VnukPodNaem | Non-medical elderly support marketplace",
-  description: "A small English-first app shell for non-medical companionship and everyday support services.",
+  title: "VnukPodNaem | Everyday family support marketplace",
+  description: "Book trusted everyday support for visits, errands, shopping, companionship, home tasks, and accompaniment.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
