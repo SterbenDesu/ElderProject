@@ -219,7 +219,7 @@ function HelpersPageContent() {
             <>
               <p className="mt-4 text-lg leading-8">
                 {criteria.city
-                  ? `No visible verified caregivers are listed in ${criteria.city} yet.`
+                  ? `${t("No visible verified caregivers are listed in")} ${criteria.city} ${t("yet.")}`
                   : t("Public caregiver marketplace listings are not active yet because there are no visible verified caregiver profiles to show.")}
               </p>
               <p className="mt-4 leading-7">
@@ -241,7 +241,7 @@ function HelpersPageContent() {
                       : t("Verified caregiver")}
                   </p>
                   <h3 className="mt-2 text-xl font-bold text-forest">
-                    Caregiver in {helperProfile.city}
+                    {t("Caregiver in")} {helperProfile.city}
                   </h3>
                   <p className="mt-2 leading-7 text-stone-600">
                     {helperProfile.bio}

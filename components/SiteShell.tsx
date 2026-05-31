@@ -45,7 +45,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
           <Link
             href="/"
             className="group flex min-h-12 items-center gap-3 rounded-full pr-3 text-forest transition hover:text-stone-800"
-            aria-label="VnukPodNaem home"
+            aria-label="Vnuk Pod Naem home"
           >
             <span className="grid size-11 place-items-center rounded-2xl bg-gradient-to-br from-forest via-moss to-clay text-white shadow-md shadow-stone-300/50 ring-1 ring-white/80 transition group-hover:scale-[1.02]">
               <svg
@@ -72,7 +72,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
               </svg>
             </span>
             <span className="block text-xl font-extrabold tracking-[-0.03em] text-forest">
-              VnukPodNaem
+              Vnuk Pod Naem
             </span>
           </Link>
 
@@ -117,7 +117,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
       <footer className="border-t border-stone-200 bg-white/80">
         <div className="mx-auto grid max-w-6xl gap-8 px-5 py-10 text-sm text-stone-600 sm:grid-cols-[1.3fr_0.7fr] lg:px-8">
           <div>
-            <p className="text-lg font-bold text-forest">VnukPodNaem</p>
+            <p className="text-lg font-bold text-forest">Vnuk Pod Naem</p>
             <p className="mt-3 max-w-2xl leading-7">
               A marketplace shell for trusted everyday support: visits,
               errands, shopping, companionship, home tasks, and accompaniment.

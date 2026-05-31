@@ -42,7 +42,7 @@ export function deriveDisplayNameFromEmail(email: string) {
     return fallback;
   }
 
-  return "VnukPodNaem user";
+  return "Vnuk Pod Naem user";
 }
 
 export function getSignupAccountTypeFromUser(user: User): SignupAccountType {

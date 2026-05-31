@@ -41,7 +41,7 @@ const safetyGuidance = [
   "No cash handling.",
   "No card PINs or passwords.",
   "No access-to-valuables requests.",
-  "Helpers are independent marketplace participants, not VnukPodNaem employees.",
+  "Helpers are independent marketplace participants, not Vnuk Pod Naem employees.",
 ];
 
 function getDebuggableDatabaseMessage(context: string, errorMessage: string) {

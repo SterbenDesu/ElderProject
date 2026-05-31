@@ -227,3 +227,15 @@ The current UI refinement keeps the V2 marketplace direction but makes the first
 - The EN/BG language switch is now active across the currently implemented interface. It uses a lightweight in-repo translation layer, persists the selected language with localStorage and a cookie, updates the document language, and translates shared navigation, footer, homepage, helper filters/listings, public pages, auth/account/admin/helper application surfaces, and common dynamic labels where practical.
 - The language switch now shows only the active language at a time and toggles to the other language, avoiding the previous double-state control.
 - Current translation scope covers all currently built pages and shared UI. Future refinements may still improve wording, add more granular dynamic error translations, and replace the lightweight phrase map with a fuller route-level i18n structure if the product grows.
+
+## Language and service-card refinement implemented (2026-05-31)
+
+This pass keeps the current visual direction and focuses on language completeness, Bulgarian copy quality, and service selection polish.
+
+- The site display name is localized in visible UI: English uses `Vnuk Pod Naem`, and Bulgarian uses `Внук Под Наем`. The older internal/project identifier may remain in internal files where it is not visible UI.
+- The header language control uses two separate compact buttons, `EN` and `BG`, near the sign-in/account area. The active language is visually selected, the control works signed in or signed out, remains available in the mobile menu, and persists through localStorage and a cookie.
+- Bulgarian copy should be meaning-based and natural, not literal word-for-word translation from English. Public copy should sound warm, clear, professional, and suitable for Bulgarian families arranging elder support.
+- Full visible current-shell translation is expected across implemented pages and shared UI, including homepage, navigation, footer, public service/safety/legal pages, caregiver listings/detail pages, auth pages, account/dashboard pages, helper application/profile pages, bookings, elderly profiles, admin surfaces, buttons, labels, empty states, status labels, and common helper text where practical.
+- Emoji use is not allowed in the UI. Service cards use simple professional inline SVG-style icons with consistent sizing, stroke style, container size, and alignment.
+- Homepage service cards keep multi-select behavior but use consistent plus/check indicators with matching size, shape, position, selected state, and no layout shift.
+- Homepage copy blocks should avoid cramped text. Prefer readable line height, comfortable max widths, and consistent spacing between headings, body text, cards, and calls to action.

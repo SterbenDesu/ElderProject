@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { HomeSearchCard } from "@/components/HomeSearchCard";
+import { HomeSearchCard, ServiceIcon } from "@/components/HomeSearchCard";
 
 const howItWorks = [
   {
@@ -18,49 +18,49 @@ const howItWorks = [
 
 const popularServices = [
   {
-    icon: "🏡",
+    icon: "home",
     title: "Stay at home",
     text: "A steady presence at home with conversation and light practical help during a planned visit.",
   },
   {
-    icon: "☕",
+    icon: "clock",
     title: "Quick visit",
     text: "A shorter check-in for company, simple errands, or a little help with the day.",
   },
   {
-    icon: "🛒",
+    icon: "cart",
     title: "Shopping",
     text: "Help with lists, store trips, and bringing back everyday essentials without extra stress.",
   },
   {
-    icon: "🧺",
+    icon: "spark",
     title: "House work",
     text: "Light home tasks such as tidying, organizing, and small household support.",
   },
   {
-    icon: "🌿",
+    icon: "heart",
     title: "Companionship",
     text: "Friendly time for conversation, walks, hobbies, or simply staying socially connected.",
   },
   {
-    icon: "🚶",
+    icon: "pin",
     title: "Accompaniment",
     text: "An extra person for appointments, offices, shops, or family visits when support helps.",
   },
-];
+] as const;
 
 const trustReasons = [
   {
-    title: "Built around everyday life",
-    text: "The focus is practical support, companionship, errands, home tasks, and accompaniment.",
+    title: "Support that feels clear and easy to arrange",
+    text: "Choose what you need, review caregiver profiles, and continue step by step.",
   },
   {
-    title: "Caregiver review first",
-    text: "Caregivers apply after creating a normal account and are reviewed before offering services.",
+    title: "Reviewed profiles before visibility",
+    text: "Caregiver profiles are reviewed before they become visible in the public listing.",
   },
   {
-    title: "Clear service boundaries",
-    text: "Some services are restricted for safety and legal reasons, with details kept in dedicated pages.",
+    title: "Simple service scope",
+    text: "Everyday support categories are kept understandable, with safety limits explained in dedicated pages.",
   },
 ];
 
@@ -76,13 +76,13 @@ export default function Home() {
           aria-hidden="true"
           className="absolute right-0 top-10 size-72 rounded-full bg-clay/10 blur-3xl"
         />
-        <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 lg:grid-cols-[1.02fr_0.98fr] lg:px-8 lg:py-20">
+        <div className="mx-auto grid max-w-6xl gap-12 px-5 py-14 lg:grid-cols-[1.02fr_0.98fr] lg:px-8 lg:py-20">
           <div className="relative z-10 flex flex-col justify-center">
             <h1 className="max-w-4xl text-4xl font-extrabold tracking-[-0.04em] text-forest sm:text-5xl lg:text-6xl">
               Find trusted everyday support for the people you love.
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-stone-700 sm:text-xl">
-              VnukPodNaem helps families look for calm, practical help with
+            <p className="mt-6 max-w-3xl text-lg leading-9 text-stone-700 sm:text-xl">
+              Vnuk Pod Naem helps families find calm, practical help with
               visits, companionship, shopping, errands, home tasks, and
               accompaniment.
             </p>
@@ -102,7 +102,7 @@ export default function Home() {
               </Link>
             </div>
 
-            <p className="mt-5 max-w-xl rounded-2xl border border-stone-200/80 bg-white/65 px-4 py-3 text-sm font-semibold leading-6 text-stone-600">
+            <p className="mt-6 max-w-2xl rounded-2xl border border-stone-200/80 bg-white/70 px-5 py-4 text-sm font-semibold leading-6 text-stone-600">
               Caregivers are reviewed before becoming visible. Some services
               are restricted for safety and legal reasons.
             </p>
@@ -118,7 +118,7 @@ export default function Home() {
         className="mx-auto max-w-6xl px-5 py-16 lg:px-8"
         aria-labelledby="how-it-works"
       >
-        <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
+        <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
           <div>
             <p className="text-sm font-bold uppercase tracking-[0.18em] text-clay">
               How it works
@@ -130,7 +130,7 @@ export default function Home() {
               A simple path from need to next step
             </h2>
           </div>
-          <p className="text-lg leading-8 text-stone-700">
+          <p className="max-w-3xl text-lg leading-8 text-stone-700">
             The homepage keeps the first action easy: describe the support you
             are looking for, then continue to caregiver listings without making
             a reservation too early.
@@ -178,10 +178,10 @@ export default function Home() {
             {popularServices.map((service) => (
               <article
                 key={service.title}
-                className="group rounded-[2rem] bg-cream p-6 shadow-sm shadow-stone-200/60 ring-1 ring-stone-200 transition hover:-translate-y-1 hover:bg-white hover:shadow-lg hover:shadow-stone-200/80"
+                className="group rounded-[2rem] bg-cream p-7 shadow-sm shadow-stone-200/60 ring-1 ring-stone-200 transition hover:-translate-y-1 hover:bg-white hover:shadow-lg hover:shadow-stone-200/80"
               >
-                <span className="grid size-12 place-items-center rounded-2xl bg-white text-2xl shadow-sm">
-                  {service.icon}
+                <span className="grid size-12 place-items-center rounded-2xl bg-white text-forest shadow-sm ring-1 ring-stone-100">
+                  <ServiceIcon name={service.icon} className="size-6" />
                 </span>
                 <h3 className="mt-5 text-xl font-extrabold text-forest">
                   {service.title}
@@ -197,17 +197,16 @@ export default function Home() {
         className="mx-auto max-w-6xl px-5 py-16 lg:px-8"
         aria-labelledby="why-families"
       >
-        <div className="grid gap-8 rounded-[2.5rem] bg-forest p-6 text-white shadow-xl shadow-stone-300/40 sm:p-8 lg:grid-cols-[0.95fr_1.05fr] lg:p-10">
+        <div className="grid gap-8 rounded-[2.5rem] bg-forest p-7 text-white shadow-xl shadow-stone-300/40 sm:p-9 lg:grid-cols-[0.95fr_1.05fr] lg:p-11">
           <div>
             <p className="text-sm font-bold uppercase tracking-[0.18em] text-sage">
-              Why families choose us
+              Support that feels clear and easy to arrange
             </p>
             <h2 id="why-families" className="mt-3 text-3xl font-bold sm:text-4xl">
-              Warm help with clear expectations
+              Choose what you need, then continue step by step
             </h2>
-            <p className="mt-4 text-lg leading-8 text-stone-100">
-              The experience is designed to feel approachable for families while
-              keeping review, service scope, and next steps easy to find.
+            <p className="mt-5 max-w-xl text-lg leading-8 text-stone-100">
+              Choose services, review caregiver profiles, and move forward at a steady pace with clear next steps.
             </p>
             <Link
               href="/helpers"
@@ -268,7 +267,7 @@ export default function Home() {
             Clear boundaries without making the page feel heavy
           </h2>
           <p className="mt-4 leading-8 text-stone-700">
-            VnukPodNaem keeps service limits in dedicated safety and service
+            Vnuk Pod Naem keeps service limits in dedicated safety and service
             scope pages so families can review them before sending a request.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">

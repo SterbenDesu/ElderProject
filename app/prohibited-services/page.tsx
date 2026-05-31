@@ -15,7 +15,7 @@ export default function ProhibitedServicesPage() {
         <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">Prohibited services</p>
         <h1 className="mt-3 text-4xl font-bold tracking-tight text-forest sm:text-5xl">Requests the platform must not accept</h1>
         <p className="mt-5 text-lg leading-8 text-stone-700">
-          VnukPodNaem is not a medical care service and does not support unsafe financial, credential, valuables-related, or off-platform transaction requests.
+          Vnuk Pod Naem is not a medical care service and does not support unsafe financial, credential, valuables-related, or off-platform transaction requests.
         </p>
       </div>
       <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

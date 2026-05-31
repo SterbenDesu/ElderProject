@@ -363,7 +363,7 @@ export default function HelperDetailPage() {
               <div className="mt-6 rounded-3xl bg-cream p-5 text-sm leading-6 text-stone-700">
                 <h3 className="font-bold text-forest">Non-medical service boundary</h3>
                 <p className="mt-2">
-                  VnukPodNaem helpers may be requested for companionship, errands, shopping, walks, check-ins, technology help, and accompaniment. Do not request medical care, medication management, clinical tasks, card PINs, passwords, cash handling, or access to valuables. Helpers are independent marketplace participants, not VnukPodNaem employees, and the platform does not guarantee absolute safety.
+                  Vnuk Pod Naem helpers may be requested for companionship, errands, shopping, walks, check-ins, technology help, and accompaniment. Do not request medical care, medication management, clinical tasks, card PINs, passwords, cash handling, or access to valuables. Helpers are independent marketplace participants, not Vnuk Pod Naem employees, and the platform does not guarantee absolute safety.
                 </p>
               </div>
             </article>

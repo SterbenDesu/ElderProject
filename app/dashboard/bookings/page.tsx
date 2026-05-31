@@ -595,7 +595,7 @@ export default function BookingsPage() {
               <ul className="mt-4 space-y-3 leading-7">
                 <li>• Do not include medical tasks or medication instructions.</li>
                 <li>• Do not include PINs, passwords, or valuable-access instructions.</li>
-                <li>• Helpers are independent marketplace participants, not VnukPodNaem employees.</li>
+                <li>• Helpers are independent marketplace participants, not Vnuk Pod Naem employees.</li>
                 <li>• The platform does not guarantee absolute safety.</li>
               </ul>
             </div>

@@ -32,7 +32,7 @@ const safetyGuidance = [
   "Services are non-medical everyday support only.",
   "No medication management, medication reminders with clinical judgment, injections, wound care, or clinical tasks.",
   "No cash handling, card PINs, passwords, or access-to-valuables requests.",
-  "Helpers are independent marketplace participants, not employees of VnukPodNaem.",
+  "Helpers are independent marketplace participants, not employees of Vnuk Pod Naem.",
   "Public visibility is controlled by admins only; editing this form cannot publish your profile.",
 ];
 

@@ -120,7 +120,7 @@ export default function SignupPage() {
         Create your account
       </p>
       <h1 className="mt-3 text-4xl font-bold tracking-tight text-forest sm:text-5xl">
-        Join VnukPodNaem
+        Join Vnuk Pod Naem
       </h1>
       <div className="mt-8 grid gap-5 lg:grid-cols-[1fr_0.72fr]">
         <div className="rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200">
