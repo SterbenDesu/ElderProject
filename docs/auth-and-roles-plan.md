@@ -10,6 +10,17 @@ This document describes the VnukPodNaem authentication and role model. Supabase 
 - Real payments, Stripe, live booking payments, and payment processing are out of scope for this phase.
 - Helper acceptance, full booking lifecycle, disputes/complaints UI, chat, notifications, ratings/reviews, subscriptions, advanced admin workflows, Bulgarian localization, native mobile apps, and medical-service functionality are out of scope for this phase.
 
+## V2 role interpretation
+
+The product direction is now a universal user signup model. Roles remain internal authorization states, not choices that users make during signup.
+
+- The default new user role should be `client` or an equivalent normal user role internally.
+- Users do not choose a role at signup. Signup should collect normal account/profile fields and policy acceptance only.
+- `helper_applicant` should be assigned when a user submits a caregiver application, not at signup.
+- `verified_helper` should be assigned only after admin approval.
+- `admin` should remain manually controlled, never self-assignable from browser metadata, and hidden from normal navigation/UI.
+- Existing database role fields may remain for now, but future UX should hide role mechanics behind profile, application, and approval flows.
+
 ## Current auth implementation
 
 Current behavior:
@@ -18,8 +29,8 @@ Current behavior:
 - Required public environment variables are `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
 - The Supabase Email provider must be enabled in the Supabase dashboard.
 - The Supabase Site URL must be configured for local and deployed URLs.
-- Signup collects an account type and stores it in auth user metadata as `account_type` when Supabase accepts the signup.
-- Signup maps the client/caregiver UI option to `profiles.role = client` and the helper applicant UI option to `profiles.role = helper_applicant`.
+- Current deployed/signup UI may still collect an account type and store it in auth user metadata as `account_type`; this is legacy UX that should be removed in a future V2 refactor.
+- Current signup may still map the client/caregiver UI option to `profiles.role = client` and the helper applicant UI option to `profiles.role = helper_applicant`; future V2 signup should instead create a normal user/client-capable profile by default.
 - Signup also sends `terms_accepted`, `terms_version`, and `privacy_version` auth metadata.
 - After auth signup succeeds, the browser client attempts to insert the user's `profiles` row and a `terms_acceptances` row using only `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
 - Duplicate profile creation is handled safely so an existing profile does not crash signup or the dashboard retry path.
@@ -34,7 +45,7 @@ Current behavior:
 Current limitations:
 
 - The Supabase schema must be applied manually before signup database writes and dashboard profile reads work.
-- Role-based routing and protected middleware are not implemented yet.
+- Role-based routing and protected middleware are not implemented yet. Future role checks should follow the V2 interpretation above.
 - A basic `/admin` helper application review foundation is implemented for admin profiles; broader admin database management is still not implemented.
 - Admin roles must not be self-assignable from browser metadata.
 - Do not use a Supabase service role key in the browser.
@@ -159,8 +170,11 @@ High-level policy direction:
 
 ## Role assignment notes
 
-- New users should start with the least privileged role needed for their signup path.
-- Admin roles must not be self-assignable from the browser.
+- New users should start as `client` or an equivalent normal user role by default, regardless of whether they may later apply as caregivers.
+- Users should not choose roles during signup.
+- `helper_applicant` should be assigned when a user submits the caregiver application flow.
+- `verified_helper` should be assigned only after admin approval.
+- Admin roles must not be self-assignable from the browser and should stay hidden from normal UI.
 - Helper verification must require admin approval before a helper becomes public or eligible for bookings.
 - Suspended or banned accounts should lose access to protected marketplace actions.
 - Role changes and important safety decisions should create audit logs later.
@@ -168,7 +182,7 @@ High-level policy direction:
 ## Current database-backed auth behavior
 
 - Tables now used by the app: `profiles`, `terms_acceptances`, `elderly_profiles`, `bookings`, `service_categories`, `helper_applications`, and `helper_profiles` for public visible helper reads plus helper profile editing/admin visibility controls.
-- Signup creates the Supabase Auth user first, then inserts `profiles.id`, `profiles.email`, `profiles.role`, and a simple email-derived `profiles.display_name`. Database defaults handle `created_at` and `updated_at`.
+- Current signup creates the Supabase Auth user first, then inserts `profiles.id`, `profiles.email`, `profiles.role`, and a simple email-derived `profiles.display_name`. Database defaults handle `created_at` and `updated_at`. Future V2 signup should default the inserted profile to a normal user role without asking the user to choose a role.
 - Signup inserts `terms_acceptances.profile_id`, `terms_acceptances.terms_version`, and `terms_acceptances.privacy_version`. The database default handles `accepted_at`.
 - If auth succeeds but profile or terms storage fails, the UI reports that account creation succeeded but profile setup did not fully complete. The dashboard provides a safe retry path for signed-in users.
 - `/dashboard` reads `email`, `role`, `display_name`, and `created_at` from `profiles`. It shows role-aware placeholder sections for `client`, `helper_applicant`, `verified_helper`, and `admin`, and shows helper application status for helper applicants when available.

@@ -21,6 +21,22 @@ Codex must read and follow this file before making changes.
 - Do not change authentication, authorization, database rules, or deployment logic without explicitly stating the risk first.
 - If the requested task requires changes outside the expected scope, stop and explain why before editing.
 
+## Current product direction
+
+- VnukPodNaem should use a universal user signup model.
+- Do not ask users to choose client/helper role during signup.
+- New users should be treated as standard users/client-capable users by default.
+- Caregiver status is obtained later through a “Become a caregiver” application flow.
+- Admin approval is required before caregiver functionality becomes available.
+- Public copy should prioritize services, booking, trust, and ease of use.
+- Safety boundaries should be present but not repetitive, alarming, or dominant.
+- Do not overuse phrases like “non-medical”, “clinical care”, or “not medical care” in every visible section.
+- Keep legal/safety limits in dedicated safety, terms, helper application, and booking confirmation areas.
+- Admin access should be hidden from normal navigation and visible only to admin users.
+- Top navigation should be simple and user-facing.
+- Prefer profile/avatar menus for account actions after login.
+- Avoid implementing large feature leaps without first updating documentation and asking for product confirmation.
+
 ## Work style
 
 Before coding, Codex must provide:
