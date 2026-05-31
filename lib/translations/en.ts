@@ -4,5 +4,6 @@ export const en = {
     languageLabel: "Language",
     signIn: "Sign in",
     account: "Account",
+    switchTo: "Switch to Bulgarian",
   },
 };

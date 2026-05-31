@@ -210,3 +210,20 @@ The homepage search has been corrected to behave like a structured marketplace e
 - Real service availability and date availability filtering are not implemented yet and must not be implied until caregiver service/availability data exists.
 - The header now includes an EN/BG language selector foundation near the account/avatar area and stores the selected language in localStorage.
 - The language selector is a foundation only. Full-site Bulgarian/English translation remains a later task.
+
+
+## UI and i18n refinement pass implemented (2026-05-31)
+
+The current UI refinement keeps the V2 marketplace direction but makes the first search and shared shell feel more polished and complete.
+
+- Homepage service search now supports selecting multiple service types at once using accessible checkbox-card controls.
+- Selected homepage services are preserved in `/helpers` with a comma-separated `services` query parameter, for example `services=shopping,companionship,quick-visit`.
+- `/helpers` reads the new multi-service query parameter, still supports the older single `service` parameter as a fallback, and displays all selected service filters in the active search summary.
+- `/helpers` continues to filter only by city because city is currently available on visible helper profile data. Service and date criteria are displayed clearly without implying real availability filtering that does not exist yet.
+- The header logo has been updated from the plain VP circle and removed the small “EVERYDAY SUPPORT” motto. The new lightweight custom SVG mark combines a warm heart/people symbol with the VnukPodNaem wordmark.
+- Site typography now uses a cleaner, readable Next font setup with Latin and Cyrillic support so English and Bulgarian share a consistent visual tone.
+- The homepage hero removed the nonessential top “EVERYDAY FAMILY SUPPORT” badge, the two small support boxes below the search card, and the explanatory text below the search button about bookings/payments.
+- Homepage cards, service selection, CTA buttons, and helper listing cards now use softer shadows, clearer hover/focus states, stronger selected states, refined borders, and more consistent rounded spacing.
+- The EN/BG language switch is now active across the currently implemented interface. It uses a lightweight in-repo translation layer, persists the selected language with localStorage and a cookie, updates the document language, and translates shared navigation, footer, homepage, helper filters/listings, public pages, auth/account/admin/helper application surfaces, and common dynamic labels where practical.
+- The language switch now shows only the active language at a time and toggles to the other language, avoiding the previous double-state control.
+- Current translation scope covers all currently built pages and shared UI. Future refinements may still improve wording, add more granular dynamic error translations, and replace the lightweight phrase map with a fuller route-level i18n structure if the product grows.

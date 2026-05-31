@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { formatServiceLabel } from "@/components/HomeSearchCard";
+import { useI18n } from "@/lib/i18n";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import {
   loadVisibleVerifiedHelperProfiles,
@@ -14,12 +15,12 @@ type HelpersStatus = "loading" | "loaded" | "unconfigured" | "error";
 
 type SearchCriteria = {
   city: string;
-  service: string;
+  services: string[];
   startDate: string;
   endDate: string;
 };
 
-function formatDateForDisplay(value: string) {
+function formatDateForDisplay(value: string, locale = "en") {
   if (!value) {
     return "";
   }
@@ -30,7 +31,7 @@ function formatDateForDisplay(value: string) {
     return value;
   }
 
-  return new Intl.DateTimeFormat("en", {
+  return new Intl.DateTimeFormat(locale, {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -39,6 +40,7 @@ function formatDateForDisplay(value: string) {
 
 function HelpersPageContent() {
   const searchParams = useSearchParams();
+  const { t, language } = useI18n();
   const [status, setStatus] = useState<HelpersStatus>("loading");
   const [helperProfiles, setHelperProfiles] = useState<PublicHelperProfile[]>(
     [],
@@ -48,7 +50,10 @@ function HelpersPageContent() {
   const criteria: SearchCriteria = useMemo(
     () => ({
       city: searchParams.get("city")?.trim() ?? "",
-      service: searchParams.get("service")?.trim() ?? "",
+      services: (searchParams.get("services") || searchParams.get("service") || "")
+        .split(",")
+        .map((service) => service.trim())
+        .filter(Boolean),
       startDate: searchParams.get("startDate")?.trim() ?? "",
       endDate: searchParams.get("endDate")?.trim() ?? "",
     }),
@@ -93,21 +98,23 @@ function HelpersPageContent() {
   }, [criteria.city, helperProfiles]);
 
   const hasSearchCriteria = Boolean(
-    criteria.city || criteria.service || criteria.startDate || criteria.endDate,
+    criteria.city ||
+      criteria.services.length > 0 ||
+      criteria.startDate ||
+      criteria.endDate,
   );
   const hasVisibleVerifiedHelpers = visibleHelperProfiles.length > 0;
 
   return (
     <section className="mx-auto max-w-5xl px-5 py-12 lg:px-8 lg:py-16">
       <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">
-        Caregivers
+        {t("Caregivers")}
       </p>
       <h1 className="mt-3 text-4xl font-bold tracking-tight text-forest sm:text-5xl">
-        Public caregiver marketplace
+        {t("Public caregiver marketplace")}
       </h1>
       <p className="mt-5 max-w-3xl text-lg leading-8 text-stone-700">
-        Browse visible, reviewed caregiver profiles. Submitted applications and
-        unverified applicants are never shown here.
+        {t("Browse visible, reviewed caregiver profiles. Submitted applications and unverified applicants are never shown here.")}
       </p>
 
       {hasSearchCriteria ? (
@@ -115,64 +122,65 @@ function HelpersPageContent() {
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <p className="text-sm font-bold uppercase tracking-[0.18em] text-clay">
-                Selected search
+                {t("Selected search")}
               </p>
               <h2 className="mt-2 text-2xl font-bold text-forest">
-                Caregiver search criteria
+                {t("Caregiver search criteria")}
               </h2>
             </div>
             <Link
               href="/"
               className="inline-flex min-h-11 items-center rounded-full bg-sage px-4 py-2 text-sm font-semibold text-forest transition hover:bg-cream"
             >
-              Change search
+              {t("Change search")}
             </Link>
           </div>
 
           <dl className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <div className="rounded-2xl bg-cream p-4">
               <dt className="text-xs font-bold uppercase tracking-[0.16em] text-stone-500">
-                City
+                {t("City")}
               </dt>
               <dd className="mt-1 font-semibold text-forest">
-                {criteria.city || "Any listed city"}
+                {criteria.city || t("Any listed city")}
               </dd>
             </div>
             <div className="rounded-2xl bg-cream p-4">
               <dt className="text-xs font-bold uppercase tracking-[0.16em] text-stone-500">
-                Service
+                {t("Service")}
               </dt>
               <dd className="mt-1 font-semibold text-forest">
-                {criteria.service
-                  ? formatServiceLabel(criteria.service)
-                  : "Any service"}
+                {criteria.services.length > 0
+                  ? criteria.services
+                      .map((service) => formatServiceLabel(service, t))
+                      .join(", ")
+                  : t("Any service")}
               </dd>
             </div>
             <div className="rounded-2xl bg-cream p-4">
               <dt className="text-xs font-bold uppercase tracking-[0.16em] text-stone-500">
-                Start date
+                {t("Start date")}
               </dt>
               <dd className="mt-1 font-semibold text-forest">
                 {criteria.startDate
-                  ? formatDateForDisplay(criteria.startDate)
-                  : "Not selected"}
+                  ? formatDateForDisplay(criteria.startDate, language)
+                  : t("Not selected")}
               </dd>
             </div>
             <div className="rounded-2xl bg-cream p-4">
               <dt className="text-xs font-bold uppercase tracking-[0.16em] text-stone-500">
-                End date
+                {t("End date")}
               </dt>
               <dd className="mt-1 font-semibold text-forest">
                 {criteria.endDate
-                  ? formatDateForDisplay(criteria.endDate)
-                  : "Not selected"}
+                  ? formatDateForDisplay(criteria.endDate, language)
+                  : t("Not selected")}
               </dd>
             </div>
           </dl>
 
           <p className="mt-4 rounded-2xl bg-sage px-4 py-3 text-sm font-semibold leading-6 text-stone-700">
-            Showing caregivers matching available profile data. Date and service
-            availability filtering will be added later.
+            {t("Showing caregivers matching available profile data. Date and service availability filtering will be added later.")}
           </p>
         </div>
       ) : null}
@@ -180,12 +188,12 @@ function HelpersPageContent() {
       <div className="mt-8 grid gap-5 lg:grid-cols-[1fr_0.72fr]">
         <div className="rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200">
           <h2 className="text-2xl font-bold text-forest">
-            Marketplace listing status
+            {t("Marketplace listing status")}
           </h2>
 
           {status === "loading" ? (
             <p className="mt-4 leading-7" role="status">
-              Checking for visible verified caregiver profiles…
+              {t("Checking for visible verified caregiver profiles…")}
             </p>
           ) : null}
 
@@ -212,12 +220,10 @@ function HelpersPageContent() {
               <p className="mt-4 text-lg leading-8">
                 {criteria.city
                   ? `No visible verified caregivers are listed in ${criteria.city} yet.`
-                  : "Public caregiver marketplace listings are not active yet because there are no visible verified caregiver profiles to show."}
+                  : t("Public caregiver marketplace listings are not active yet because there are no visible verified caregiver profiles to show.")}
               </p>
               <p className="mt-4 leading-7">
-                Helper applications are private review records. They do not
-                create public caregiver profiles, approve caregivers, or make
-                unverified applicants available for bookings.
+                {t("Helper applications are private review records. They do not create public caregiver profiles, approve caregivers, or make unverified applicants available for bookings.")}
               </p>
             </>
           ) : null}
@@ -227,12 +233,12 @@ function HelpersPageContent() {
               {visibleHelperProfiles.map((helperProfile) => (
                 <article
                   key={helperProfile.id}
-                  className="rounded-3xl border border-stone-200 p-4"
+                  className="rounded-3xl border border-stone-200 bg-white p-4 shadow-sm shadow-stone-200/60 transition hover:-translate-y-0.5 hover:border-moss/40 hover:shadow-md"
                 >
                   <p className="text-sm font-bold uppercase tracking-[0.16em] text-clay">
                     {helperProfile.verification_status === "trusted"
-                      ? "Trusted verified caregiver"
-                      : "Verified caregiver"}
+                      ? t("Trusted verified caregiver")
+                      : t("Verified caregiver")}
                   </p>
                   <h3 className="mt-2 text-xl font-bold text-forest">
                     Caregiver in {helperProfile.city}
@@ -241,16 +247,16 @@ function HelpersPageContent() {
                     {helperProfile.bio}
                   </p>
                   <p className="mt-3 text-sm font-semibold text-stone-600">
-                    Service radius:{" "}
+                    {t("Service radius:")}{" "}
                     {helperProfile.service_radius_km === null
-                      ? "Not listed"
+                      ? t("Not listed")
                       : `${helperProfile.service_radius_km} km`}
                   </p>
                   <Link
                     href={`/helpers/${helperProfile.id}`}
-                    className="mt-4 inline-flex min-h-11 items-center rounded-full bg-forest px-5 py-2 text-sm font-semibold text-white transition hover:bg-stone-800"
+                    className="mt-4 inline-flex min-h-11 items-center rounded-full bg-forest px-5 py-2 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-stone-800 active:translate-y-0"
                   >
-                    View caregiver details
+                    {t("View caregiver details")}
                   </Link>
                 </article>
               ))}
@@ -261,16 +267,16 @@ function HelpersPageContent() {
             href="/prohibited-services"
             className="mt-6 inline-flex min-h-12 items-center rounded-full bg-forest px-5 py-3 font-semibold text-white transition hover:bg-stone-800"
           >
-            See prohibited services
+            {t("See prohibited services")}
           </Link>
         </div>
         <aside className="rounded-[2rem] bg-sage p-6 text-stone-700">
-          <h2 className="text-xl font-bold text-forest">Listing safety rules</h2>
+          <h2 className="text-xl font-bold text-forest">{t("Listing safety rules")}</h2>
           <ul className="mt-4 space-y-3 leading-7">
-            <li>• Unverified caregiver applicants are not shown publicly.</li>
-            <li>• Submitted applications are private and are not marketplace profiles.</li>
-            <li>• Public visibility requires a visible caregiver profile with verified status.</li>
-            <li>• No booking payments, Stripe, applicant records, or guaranteed safety claims are shown here.</li>
+            <li>{t("• Unverified caregiver applicants are not shown publicly.")}</li>
+            <li>{t("• Submitted applications are private and are not marketplace profiles.")}</li>
+            <li>{t("• Public visibility requires a visible caregiver profile with verified status.")}</li>
+            <li>{t("• No booking payments, Stripe, applicant records, or guaranteed safety claims are shown here.")}</li>
           </ul>
         </aside>
       </div>
