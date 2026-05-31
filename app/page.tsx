@@ -1,153 +1,250 @@
 import Link from "next/link";
 
-const serviceExamples = [
-  { title: "Companionship", text: "Conversation, shared activities, and friendly presence within clear non-medical boundaries.", icon: "♡" },
-  { title: "Light errands", text: "Small local tasks and practical support that do not involve cash handling or valuables.", icon: "✓" },
-  { title: "Shopping support", text: "Help planning or accompanying routine shopping, without card PINs or private credentials.", icon: "□" },
-  { title: "Walks", text: "Calm outdoor accompaniment for everyday movement, not clinical supervision or emergency response.", icon: "↗" },
-  { title: "Check-ins", text: "Friendly scheduled visits or calls within the current early booking-request shell.", icon: "○" },
-  { title: "Technology help", text: "Basic phone, tablet, or video-call assistance without password collection.", icon: "⌁" },
+const serviceOptions = [
+  "Stay at home",
+  "Quick visit",
+  "Shopping",
+  "House work",
+  "Companionship",
+  "Accompaniment",
 ];
 
-const trustCards = [
-  "Allowed and prohibited service lists support the current early booking-request shell.",
-  "Basic helper review and visibility controls can reduce risk, but the platform will not promise absolute safety.",
-  "Helpers are independent marketplace participants, not platform employees.",
+const howItWorks = [
+  {
+    title: "Tell us what you need",
+    text: "Start with a city, date, and everyday support type. The homepage form sends you to caregiver listings for now.",
+  },
+  {
+    title: "Review caregivers",
+    text: "Browse visible reviewed caregiver profiles and choose a good match for your family situation.",
+  },
+  {
+    title: "Send a request",
+    text: "Signed-in client users can create booking requests from the account area. Final reservation and payment steps are not active yet in this shell.",
+  },
 ];
 
-const steps = [
-  { title: "Choose a need", text: "A family member or older adult selects a simple non-medical support category." },
-  { title: "Review boundaries", text: "The request stays inside practical everyday support, with medical and financial tasks excluded." },
-  { title: "Match later", text: "The current shell can record early booking requests; later phases can add helper acceptance, full lifecycle steps, payments, and dispute review." },
+const popularServices = [
+  {
+    title: "Stay at home",
+    text: "Calm presence at home, light conversation, and practical help during a planned visit.",
+  },
+  {
+    title: "Quick visit",
+    text: "A shorter check-in for simple errands, company, or help with small everyday tasks.",
+  },
+  {
+    title: "Shopping",
+    text: "Help planning a list, going to the store, or bringing back everyday essentials.",
+  },
+  {
+    title: "House work",
+    text: "Light home tasks that keep the day easier, such as tidying or simple household help.",
+  },
+  {
+    title: "Companionship",
+    text: "Friendly time together for walks, conversation, hobbies, or staying socially connected.",
+  },
+  {
+    title: "Accompaniment",
+    text: "Support getting to appointments, offices, shops, or family visits when an extra person helps.",
+  },
 ];
 
 export default function Home() {
   return (
     <div>
-      <section className="relative isolate bg-[radial-gradient(circle_at_top_left,#edf4ee,transparent_34rem),linear-gradient(180deg,#fffaf2_0%,#fbf7ef_70%)]">
-        <div className="absolute right-[-6rem] top-16 -z-10 size-72 rounded-full bg-sage blur-3xl" aria-hidden="true" />
-        <div className="mx-auto grid max-w-6xl gap-10 px-5 py-12 sm:py-16 lg:grid-cols-[1.08fr_0.92fr] lg:px-8 lg:py-20">
+      <section className="bg-gradient-to-br from-sage via-cream to-white">
+        <div className="mx-auto grid max-w-6xl gap-8 px-5 py-14 lg:grid-cols-[1.05fr_0.95fr] lg:px-8 lg:py-20">
           <div className="flex flex-col justify-center">
-            <p className="w-fit rounded-full bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-clay shadow-sm ring-1 ring-stone-200">
-              Early database-backed shell
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">
+              Everyday family support
             </p>
-            <h1 className="mt-5 max-w-3xl text-4xl font-bold tracking-tight text-forest sm:text-5xl lg:text-6xl">
-              Warm everyday support, clearly kept non-medical.
+            <h1 className="mt-4 max-w-4xl text-4xl font-bold tracking-tight text-forest sm:text-5xl lg:text-6xl">
+              Book trusted everyday support for your family.
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-stone-700 sm:text-xl sm:leading-9">
-              VnukPodNaem is a planned marketplace for families and older adults who need companionship, errands, walks, check-ins, technology help, or accompaniment from independent helpers.
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-stone-700 sm:text-xl">
+              Find help for visits, errands, shopping, companionship, home
+              tasks, and accompaniment.
             </p>
-            <div className="mt-8 grid gap-3 sm:flex sm:flex-wrap">
-              <Link href="/services" className="rounded-full bg-forest px-6 py-4 text-center font-semibold text-white shadow-sm transition hover:bg-stone-800">
+            <p className="mt-5 max-w-2xl rounded-2xl border border-stone-200 bg-white/70 px-4 py-3 text-sm font-semibold leading-6 text-stone-600">
+              Some services are restricted for safety and legal reasons. You
+              can review the calm service boundaries before sending a request.
+            </p>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Link
+                href="/helpers"
+                className="inline-flex min-h-12 items-center rounded-full bg-forest px-6 py-3 font-semibold text-white shadow-sm transition hover:bg-stone-800"
+              >
+                Browse caregivers
+              </Link>
+              <Link
+                href="/services"
+                className="inline-flex min-h-12 items-center rounded-full border border-stone-200 bg-white px-6 py-3 font-semibold text-forest shadow-sm transition hover:bg-sage"
+              >
                 Explore services
               </Link>
-              <Link href="/helper/apply" className="rounded-full border border-forest/30 bg-white px-6 py-4 text-center font-semibold text-forest shadow-sm transition hover:bg-sage">
-                Helper application path
-              </Link>
             </div>
-            <p className="mt-5 max-w-2xl text-sm leading-6 text-stone-600">
-              Current shell: Supabase-backed auth, client elderly profiles, booking requests, helper applications, helper profile editing, public helper visibility, and admin helper review are available when configured. Not launched yet: payments, helper acceptance, full booking lifecycle, disputes, Bulgarian localization, chat, notifications, ratings, subscriptions, and advanced admin workflows.
-            </p>
           </div>
 
-          <aside className="relative rounded-[2rem] bg-white p-5 shadow-xl shadow-stone-300/30 ring-1 ring-stone-200 sm:p-7" aria-labelledby="boundary-heading">
-            <div className="absolute -right-3 -top-3 hidden rounded-2xl bg-clay px-4 py-3 text-sm font-bold text-white shadow-lg sm:block">
-              Non-medical only
-            </div>
-            <div className="rounded-[1.5rem] bg-sage p-5">
-              <div className="flex items-center gap-3">
-                <span className="grid size-12 place-items-center rounded-full bg-white text-2xl text-forest shadow-sm" aria-hidden="true">♡</span>
-                <div>
-                  <h2 id="boundary-heading" className="text-xl font-bold text-forest">Built around careful boundaries</h2>
-                  <p className="text-sm font-semibold text-moss">Practical help, not clinical care</p>
-                </div>
-              </div>
-              <p className="mt-5 leading-7 text-stone-700">
-                The platform does not provide medication management, injections, wound care, clinical tasks, emergency response, cash handling, card PIN requests, or password collection.
-              </p>
-            </div>
-            <div className="mt-5 grid gap-3">
-              {trustCards.map((card) => (
-                <div key={card} className="flex gap-3 rounded-2xl border border-stone-100 bg-cream/70 p-4 text-sm leading-6 text-stone-700">
-                  <span className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full bg-forest text-xs font-bold text-white" aria-hidden="true">✓</span>
-                  <p>{card}</p>
-                </div>
-              ))}
-            </div>
-          </aside>
+          <div className="rounded-[2rem] bg-white p-5 shadow-xl shadow-stone-300/30 ring-1 ring-stone-200 sm:p-6">
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">
+              Start a search
+            </p>
+            <h2 className="mt-3 text-2xl font-bold text-forest">
+              What kind of help do you need?
+            </h2>
+            <form action="/helpers" method="get" className="mt-6 grid gap-4">
+              <label className="grid gap-2 text-sm font-semibold text-stone-700">
+                City or location
+                <input
+                  name="location"
+                  type="text"
+                  placeholder="Sofia, Plovdiv, Varna…"
+                  autoComplete="address-level2"
+                  className="min-h-12 rounded-2xl border border-stone-200 bg-white px-4 py-3 text-base font-normal text-stone-900 shadow-sm focus:border-clay focus:outline-none"
+                />
+              </label>
+
+              <label className="grid gap-2 text-sm font-semibold text-stone-700">
+                Date or date range
+                <input
+                  name="date"
+                  type="text"
+                  placeholder="Today, next Friday, June 12–14…"
+                  className="min-h-12 rounded-2xl border border-stone-200 bg-white px-4 py-3 text-base font-normal text-stone-900 shadow-sm focus:border-clay focus:outline-none"
+                />
+              </label>
+
+              <label className="grid gap-2 text-sm font-semibold text-stone-700">
+                Service type
+                <select
+                  name="service"
+                  defaultValue=""
+                  className="min-h-12 rounded-2xl border border-stone-200 bg-white px-4 py-3 text-base font-normal text-stone-900 shadow-sm focus:border-clay focus:outline-none"
+                >
+                  <option value="" disabled>
+                    Choose a service
+                  </option>
+                  {serviceOptions.map((service) => (
+                    <option key={service} value={service}>
+                      {service}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <button
+                type="submit"
+                className="mt-2 inline-flex min-h-12 items-center justify-center rounded-full bg-forest px-6 py-3 font-semibold text-white shadow-sm transition hover:bg-stone-800"
+              >
+                Browse caregivers
+              </button>
+            </form>
+            <p className="mt-4 text-sm leading-6 text-stone-600">
+              This search is visual and query-based only for now. It does not
+              create a booking record, reserve time, or take payment.
+            </p>
+          </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-5 py-14 lg:px-8" aria-labelledby="services-heading">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div className="max-w-3xl">
-            <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">Service categories</p>
-            <h2 id="services-heading" className="mt-3 text-3xl font-bold tracking-tight text-forest sm:text-4xl">Everyday help families can understand quickly</h2>
-          </div>
-          <Link href="/allowed-services" className="font-semibold text-forest underline">See allowed scope</Link>
-        </div>
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {serviceExamples.map((service) => (
-            <article key={service.title} className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-stone-200 transition hover:-translate-y-0.5 hover:shadow-md">
-              <span className="grid size-12 place-items-center rounded-2xl bg-sage text-2xl font-bold text-forest" aria-hidden="true">{service.icon}</span>
-              <h3 className="mt-5 text-xl font-bold text-forest">{service.title}</h3>
-              <p className="mt-3 leading-7 text-stone-700">{service.text}</p>
+      <section className="mx-auto max-w-6xl px-5 py-14 lg:px-8" aria-labelledby="how-it-works">
+        <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">
+          How it works
+        </p>
+        <h2 id="how-it-works" className="mt-3 text-3xl font-bold tracking-tight text-forest sm:text-4xl">
+          Simple steps before a final reservation
+        </h2>
+        <div className="mt-8 grid gap-5 md:grid-cols-3">
+          {howItWorks.map((step, index) => (
+            <article key={step.title} className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-stone-200">
+              <span className="grid size-11 place-items-center rounded-full bg-forest text-sm font-bold text-white">
+                {index + 1}
+              </span>
+              <h3 className="mt-5 text-xl font-bold text-forest">{step.title}</h3>
+              <p className="mt-3 leading-7 text-stone-700">{step.text}</p>
             </article>
           ))}
         </div>
       </section>
 
-      <section className="bg-white/75" aria-labelledby="how-heading">
+      <section className="bg-white/75" aria-labelledby="popular-services">
         <div className="mx-auto max-w-6xl px-5 py-14 lg:px-8">
-          <div className="max-w-3xl">
-            <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">How it works later</p>
-            <h2 id="how-heading" className="mt-3 text-3xl font-bold tracking-tight text-forest sm:text-4xl">A simple process before complex marketplace features</h2>
-            <p className="mt-4 text-lg leading-8 text-stone-700">
-              This shell is intentionally static. It explains the future flow without pretending that real accounts, bookings, payments, or admin review are active.
-            </p>
-          </div>
-          <div className="mt-8 grid gap-5 md:grid-cols-3">
-            {steps.map((step, index) => (
-              <article key={step.title} className="relative rounded-3xl border border-stone-200 bg-cream p-6">
-                <span className="grid size-11 place-items-center rounded-full bg-forest text-sm font-bold text-white">{index + 1}</span>
-                <h3 className="mt-5 text-xl font-bold text-forest">{step.title}</h3>
-                <p className="mt-3 leading-7 text-stone-700">{step.text}</p>
+          <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">
+            Popular services
+          </p>
+          <h2 id="popular-services" className="mt-3 text-3xl font-bold tracking-tight text-forest sm:text-4xl">
+            Everyday help that is easy to request
+          </h2>
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {popularServices.map((service) => (
+              <article key={service.title} className="rounded-3xl bg-cream p-6 ring-1 ring-stone-200">
+                <h3 className="text-xl font-bold text-forest">{service.title}</h3>
+                <p className="mt-3 leading-7 text-stone-700">{service.text}</p>
               </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-6xl gap-5 px-5 py-14 lg:grid-cols-2 lg:px-8" aria-label="Audience information">
+      <section className="mx-auto grid max-w-6xl gap-5 px-5 py-14 lg:grid-cols-2 lg:px-8" aria-label="Family and caregiver information">
         <article className="rounded-[2rem] bg-forest p-7 text-white shadow-lg shadow-stone-300/30">
-          <p className="text-sm font-bold uppercase tracking-[0.2em] text-sage">For families</p>
-          <h2 className="mt-3 text-3xl font-bold">More clarity before asking for help</h2>
-          <p className="mt-4 leading-8 text-stone-100">
-            Families should be able to see what is allowed, what is prohibited, and what future verification and complaint workflows are expected to cover—without medical promises or safety guarantees.
+          <p className="text-sm font-bold uppercase tracking-[0.2em] text-sage">
+            For families
           </p>
+          <h2 className="mt-3 text-3xl font-bold">Find practical support with less friction</h2>
+          <p className="mt-4 leading-8 text-stone-100">
+            Start with the kind of everyday help you need, browse caregivers,
+            and use your account area to manage profiles and booking requests.
+          </p>
+          <Link href="/helpers" className="mt-6 inline-flex min-h-12 items-center rounded-full bg-white px-5 py-3 font-semibold text-forest transition hover:bg-cream">
+            Browse caregivers
+          </Link>
         </article>
         <article className="rounded-[2rem] bg-white p-7 shadow-sm ring-1 ring-stone-200">
-          <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">For helpers</p>
-          <h2 className="mt-3 text-3xl font-bold text-forest">Independent, scoped participation</h2>
-          <p className="mt-4 leading-8 text-stone-700">
-            Future helpers will apply as independent marketplace participants. This app does not create jobs, employee relationships, payouts, live booking payments, or automatic public helper visibility.
+          <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">
+            For caregivers
           </p>
+          <h2 className="mt-3 text-3xl font-bold text-forest">Apply after creating your account</h2>
+          <p className="mt-4 leading-8 text-stone-700">
+            Everyone starts with a normal account. If you want to offer support,
+            use the Become a caregiver flow from your profile. Caregivers are
+            reviewed before they can offer services.
+          </p>
+          <Link href="/signup" className="mt-6 inline-flex min-h-12 items-center rounded-full bg-forest px-5 py-3 font-semibold text-white transition hover:bg-stone-800">
+            Become a caregiver
+          </Link>
         </article>
       </section>
 
-      <section className="mx-auto max-w-6xl px-5 pb-16 lg:px-8">
+      <section className="mx-auto max-w-6xl px-5 pb-16 lg:px-8" aria-labelledby="trust-review">
         <div className="rounded-[2rem] bg-sage p-7 sm:p-9">
           <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
             <div>
-              <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">Current status</p>
-              <h2 className="mt-3 text-3xl font-bold text-forest">Static MVP shell for review</h2>
+              <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">
+                Trust and review process
+              </p>
+              <h2 id="trust-review" className="mt-3 text-3xl font-bold text-forest">
+                Reviewed caregivers, clear limits, and a careful rollout
+              </h2>
               <p className="mt-3 max-w-3xl leading-7 text-stone-700">
-                Review the public pages, service boundaries, and placeholders before any database, Stripe, payment, or admin functionality is added.
+                Caregiver approval is handled through the existing application
+                and admin review flow. Some services are restricted for safety
+                and legal reasons. Final reservation and payment steps are not
+                active yet in this shell.
+              </p>
+              <p className="mt-3 max-w-3xl text-sm leading-6 text-stone-600">
+                For details, read the <Link href="/safety" className="font-semibold text-forest underline">safety notes</Link> before creating a request.
               </p>
             </div>
             <div className="grid gap-3 sm:flex lg:grid">
-              <Link href="/safety" className="rounded-full bg-forest px-6 py-4 text-center font-semibold text-white shadow-sm transition hover:bg-stone-800">Read safety notes</Link>
-              <Link href="/prohibited-services" className="rounded-full bg-white px-6 py-4 text-center font-semibold text-forest shadow-sm transition hover:bg-cream">View boundaries</Link>
+              <Link href="/safety" className="rounded-full bg-forest px-6 py-4 text-center font-semibold text-white shadow-sm transition hover:bg-stone-800">
+                Read safety notes
+              </Link>
+              <Link href="/allowed-services" className="rounded-full bg-white px-6 py-4 text-center font-semibold text-forest shadow-sm transition hover:bg-cream">
+                See service scope
+              </Link>
             </div>
           </div>
         </div>

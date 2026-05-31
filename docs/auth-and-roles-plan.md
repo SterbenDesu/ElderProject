@@ -242,3 +242,21 @@ Signed-out visitors on `/helpers/[id]` see a prompt to log in or sign up as a cl
 Specific-helper requests still use the same owner-scoped browser Supabase session and public environment variables only. The app inserts a `bookings` row with `status = requested` and stores the selected visible helper in `bookings.helper_profile_id`. The `20260530140000_tighten_booking_helper_rls.sql` migration tightens the client booking insert/update policies so a non-null `helper_profile_id` must reference a `helper_profiles` row where `is_visible = true` and `verification_status` is `verified_basic` or `trusted`, while preserving client ownership, elderly-profile ownership, and allowed service-category checks. Helper acceptance, helper notifications, final confirmation, payment collection, Stripe/payment processing, disputes, Bulgarian localization, and live booking payments are not implemented yet.
 
 `/dashboard/bookings` now labels each booking as either a general/unassigned request or a request for a specific helper. When `helper_profile_id` is present, it attempts to show only safe public helper details from visible verified helper profiles. If that helper is later hidden or cannot be read under RLS, the client list keeps the booking visible but does not expose private helper data.
+
+## V2 universal signup implementation note (2026-05-31)
+
+Universal signup has been implemented in the app UI.
+
+- `/signup` no longer asks users to choose account type, client role, helper role, or caregiver role.
+- Signup now collects first name, last name, phone number, gender, email, password, repeat password, and Terms/Privacy acceptance.
+- Repeat password matching is enforced in the client UI before calling Supabase signup.
+- Terms/Privacy acceptance remains required before account creation.
+- All new signups are currently created with the default internal profile role `client` by passing the existing safe `client_caregiver` signup mapping.
+- The role label is not presented to users during signup.
+- First and last name are stored as `profiles.display_name`.
+- Phone is stored in `profiles.phone`.
+- Gender is stored in Supabase auth metadata for now because the current `profiles` table does not include a gender column. No migration was added for gender in this refactor.
+- Users who want to offer services now apply after account creation through the existing `/helper/apply` flow.
+- Admin approval remains required before caregiver functionality becomes available.
+- The login page now redirects successful sign-ins to `/` so the avatar/initials menu confirms the signed-in state.
+- Forgot password is a placeholder only. It does not call Supabase password reset or send reset emails yet.
