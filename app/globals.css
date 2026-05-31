@@ -19,6 +19,8 @@ body {
   margin: 0;
   background: #fbf7ef;
   color: #24332f;
+  font-family: var(--font-nunito-sans), ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "liga" 1, "kern" 1;
   text-rendering: optimizeLegibility;
 }
 
@@ -33,4 +35,9 @@ a {
 :focus-visible {
   outline: 3px solid #b87453;
   outline-offset: 3px;
+}
+
+
+h1, h2, h3, .font-extrabold {
+  letter-spacing: -0.025em;
 }

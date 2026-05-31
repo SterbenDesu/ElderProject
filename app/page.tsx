@@ -1,12 +1,6 @@
 import Link from "next/link";
 import { HomeSearchCard } from "@/components/HomeSearchCard";
 
-const heroHighlights = [
-  "Reviewed caregivers before they become visible",
-  "Support with visits, errands, shopping, and companionship",
-  "Simple search first — final reservation steps come later",
-];
-
 const howItWorks = [
   {
     title: "Share the day you have in mind",
@@ -84,10 +78,7 @@ export default function Home() {
         />
         <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 lg:grid-cols-[1.02fr_0.98fr] lg:px-8 lg:py-20">
           <div className="relative z-10 flex flex-col justify-center">
-            <p className="w-fit rounded-full bg-white/75 px-4 py-2 text-sm font-bold uppercase tracking-[0.18em] text-clay shadow-sm ring-1 ring-stone-200/70">
-              Everyday family support
-            </p>
-            <h1 className="mt-5 max-w-4xl text-4xl font-bold tracking-tight text-forest sm:text-5xl lg:text-6xl">
+            <h1 className="max-w-4xl text-4xl font-extrabold tracking-[-0.04em] text-forest sm:text-5xl lg:text-6xl">
               Find trusted everyday support for the people you love.
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-stone-700 sm:text-xl">
@@ -96,28 +87,16 @@ export default function Home() {
               accompaniment.
             </p>
 
-            <div className="mt-6 grid gap-3 text-base text-stone-700 sm:grid-cols-3 lg:max-w-2xl">
-              {heroHighlights.map((highlight) => (
-                <div
-                  key={highlight}
-                  className="rounded-2xl border border-white/80 bg-white/70 p-4 shadow-sm shadow-stone-200/60"
-                >
-                  <span className="mb-3 block size-2 rounded-full bg-clay" />
-                  <p className="leading-6">{highlight}</p>
-                </div>
-              ))}
-            </div>
-
             <div className="mt-7 flex flex-wrap gap-3">
               <Link
                 href="/helpers"
-                className="inline-flex min-h-12 items-center rounded-full bg-forest px-6 py-3 text-base font-semibold text-white shadow-lg shadow-forest/20 transition hover:bg-stone-800"
+                className="inline-flex min-h-12 items-center rounded-full bg-forest px-6 py-3 text-base font-extrabold text-white shadow-lg shadow-forest/20 transition hover:-translate-y-0.5 hover:bg-stone-800 hover:shadow-xl active:translate-y-0"
               >
                 Browse caregivers
               </Link>
               <Link
                 href="/services"
-                className="inline-flex min-h-12 items-center rounded-full border border-stone-200 bg-white px-6 py-3 text-base font-semibold text-forest shadow-sm transition hover:bg-sage"
+                className="inline-flex min-h-12 items-center rounded-full border border-stone-200 bg-white px-6 py-3 text-base font-extrabold text-forest shadow-sm transition hover:-translate-y-0.5 hover:bg-sage hover:shadow-md active:translate-y-0"
               >
                 Explore services
               </Link>
@@ -131,25 +110,6 @@ export default function Home() {
 
           <div className="relative z-10 grid content-center gap-5">
             <HomeSearchCard />
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="rounded-[1.75rem] bg-white p-5 shadow-sm ring-1 ring-stone-200">
-                <p className="text-sm font-bold uppercase tracking-[0.18em] text-moss">
-                  Gentle support
-                </p>
-                <p className="mt-2 text-lg font-bold text-forest">
-                  Practical help that feels personal and easy to arrange.
-                </p>
-              </div>
-              <div className="rounded-[1.75rem] bg-forest p-5 text-white shadow-lg shadow-stone-300/30">
-                <p className="text-sm font-bold uppercase tracking-[0.18em] text-sage">
-                  Family peace of mind
-                </p>
-                <p className="mt-2 text-lg font-bold">
-                  Caregivers are reviewed before becoming visible.
-                </p>
-              </div>
-            </div>
           </div>
         </div>
       </section>
@@ -165,7 +125,7 @@ export default function Home() {
             </p>
             <h2
               id="how-it-works"
-              className="mt-3 text-3xl font-bold tracking-tight text-forest sm:text-4xl"
+              className="mt-3 text-3xl font-extrabold tracking-[-0.03em] text-forest sm:text-4xl"
             >
               A simple path from need to next step
             </h2>
@@ -180,12 +140,12 @@ export default function Home() {
           {howItWorks.map((step, index) => (
             <article
               key={step.title}
-              className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-stone-200"
+              className="rounded-[2rem] bg-white p-6 shadow-sm shadow-stone-200/60 ring-1 ring-stone-200 transition hover:-translate-y-1 hover:shadow-lg hover:shadow-stone-200/80"
             >
               <span className="grid size-12 place-items-center rounded-2xl bg-sage text-base font-bold text-forest">
                 {index + 1}
               </span>
-              <h3 className="mt-5 text-xl font-bold text-forest">
+              <h3 className="mt-5 text-xl font-extrabold text-forest">
                 {step.title}
               </h3>
               <p className="mt-3 leading-7 text-stone-700">{step.text}</p>
@@ -205,7 +165,7 @@ export default function Home() {
             </p>
             <h2
               id="popular-services"
-              className="mt-3 text-3xl font-bold tracking-tight text-forest sm:text-4xl"
+              className="mt-3 text-3xl font-extrabold tracking-[-0.03em] text-forest sm:text-4xl"
             >
               Everyday help that is easy to understand
             </h2>
@@ -218,12 +178,12 @@ export default function Home() {
             {popularServices.map((service) => (
               <article
                 key={service.title}
-                className="group rounded-[2rem] bg-cream p-6 shadow-sm ring-1 ring-stone-200 transition hover:-translate-y-1 hover:shadow-lg hover:shadow-stone-200/70"
+                className="group rounded-[2rem] bg-cream p-6 shadow-sm shadow-stone-200/60 ring-1 ring-stone-200 transition hover:-translate-y-1 hover:bg-white hover:shadow-lg hover:shadow-stone-200/80"
               >
                 <span className="grid size-12 place-items-center rounded-2xl bg-white text-2xl shadow-sm">
                   {service.icon}
                 </span>
-                <h3 className="mt-5 text-xl font-bold text-forest">
+                <h3 className="mt-5 text-xl font-extrabold text-forest">
                   {service.title}
                 </h3>
                 <p className="mt-3 leading-7 text-stone-700">{service.text}</p>
@@ -260,7 +220,7 @@ export default function Home() {
             {trustReasons.map((reason) => (
               <article
                 key={reason.title}
-                className="rounded-[1.75rem] bg-white/10 p-5 ring-1 ring-white/20"
+                className="rounded-[1.75rem] bg-white/10 p-5 ring-1 ring-white/20 transition hover:bg-white/15"
               >
                 <h3 className="text-xl font-bold">{reason.title}</h3>
                 <p className="mt-2 leading-7 text-stone-100">{reason.text}</p>

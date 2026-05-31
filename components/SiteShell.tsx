@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { AuthNav } from "@/components/AuthNav";
 import { LanguageSelector } from "@/components/LanguageSelector";
+import { I18nProvider } from "@/lib/i18n";
 
 const navigationLinks = [
   { href: "/services", label: "Services" },
@@ -25,7 +26,7 @@ function NavLink({ href, label }: { href: string; label: string }) {
   return (
     <Link
       href={href}
-      className="rounded-full px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-sage hover:text-forest focus-visible:bg-sage md:px-3 md:py-2"
+      className="rounded-full px-4 py-3 text-sm font-bold text-stone-700 transition hover:bg-white hover:text-forest hover:shadow-sm focus-visible:bg-white md:px-3 md:py-2"
     >
       {label}
     </Link>
@@ -34,6 +35,7 @@ function NavLink({ href, label }: { href: string; label: string }) {
 
 export function SiteShell({ children }: { children: ReactNode }) {
   return (
+    <I18nProvider>
     <div className="min-h-screen overflow-hidden bg-cream text-stone-900">
       <header className="sticky top-0 z-40 border-b border-stone-200/80 bg-cream/90 shadow-sm shadow-stone-200/40 backdrop-blur">
         <nav
@@ -42,18 +44,35 @@ export function SiteShell({ children }: { children: ReactNode }) {
         >
           <Link
             href="/"
-            className="group flex min-h-12 items-center gap-3 rounded-full pr-3 text-forest"
+            className="group flex min-h-12 items-center gap-3 rounded-full pr-3 text-forest transition hover:text-stone-800"
+            aria-label="VnukPodNaem home"
           >
-            <span className="grid size-10 place-items-center rounded-full bg-forest text-base font-bold text-white shadow-sm transition group-hover:bg-stone-800">
-              VP
+            <span className="grid size-11 place-items-center rounded-2xl bg-gradient-to-br from-forest via-moss to-clay text-white shadow-md shadow-stone-300/50 ring-1 ring-white/80 transition group-hover:scale-[1.02]">
+              <svg
+                viewBox="0 0 48 48"
+                role="img"
+                aria-hidden="true"
+                className="size-8"
+              >
+                <path
+                  d="M24 9c6.2-6.1 16.5-1.8 16.5 7.3 0 8.7-9.8 14.7-16.5 21.2C17.3 31 7.5 25 7.5 16.3 7.5 7.2 17.8 2.9 24 9Z"
+                  fill="currentColor"
+                  opacity="0.96"
+                />
+                <path
+                  d="M15.5 25.2c4.6-2 8-1.1 11.3 1.1 2.2 1.5 4.1 1.9 6.8.7"
+                  fill="none"
+                  stroke="#fbf7ef"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="3.2"
+                />
+                <circle cx="18.5" cy="16.8" r="3.2" fill="#fbf7ef" />
+                <circle cx="29.5" cy="16.8" r="3.2" fill="#fbf7ef" />
+              </svg>
             </span>
-            <span>
-              <span className="block text-lg font-bold tracking-tight">
-                VnukPodNaem
-              </span>
-              <span className="hidden text-xs font-semibold uppercase tracking-[0.18em] text-moss sm:block">
-                Everyday support
-              </span>
+            <span className="block text-xl font-extrabold tracking-[-0.03em] text-forest">
+              VnukPodNaem
             </span>
           </Link>
 
@@ -122,5 +141,6 @@ export function SiteShell({ children }: { children: ReactNode }) {
         </div>
       </footer>
     </div>
+    </I18nProvider>
   );
 }

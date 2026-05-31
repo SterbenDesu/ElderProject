@@ -1,81 +1,36 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import {
-  isSupportedLanguage,
-  languageStorageKey,
-  translations,
-  type SupportedLanguage,
-} from "@/lib/i18n";
+import { translations, type SupportedLanguage, useI18n } from "@/lib/i18n";
 
-const languageOptions: Array<{
-  value: SupportedLanguage;
-  shortLabel: string;
-  flag: string;
-}> = [
-  { value: "en", shortLabel: "EN", flag: "🇬🇧" },
-  { value: "bg", shortLabel: "BG", flag: "🇧🇬" },
-];
+const languageOptions: Record<
+  SupportedLanguage,
+  { next: SupportedLanguage; label: string; compactLabel: string }
+> = {
+  en: { next: "bg", label: "EN", compactLabel: "English" },
+  bg: { next: "en", label: "BG", compactLabel: "Български" },
+};
 
 export function LanguageSelector({ compact = false }: { compact?: boolean }) {
-  const [language, setLanguage] = useState<SupportedLanguage>("en");
-
-  useEffect(() => {
-    const storedLanguage = window.localStorage.getItem(languageStorageKey);
-
-    if (isSupportedLanguage(storedLanguage)) {
-      setLanguage(storedLanguage);
-    }
-  }, []);
-
-  function handleLanguageChange(nextLanguage: SupportedLanguage) {
-    setLanguage(nextLanguage);
-    window.localStorage.setItem(languageStorageKey, nextLanguage);
-    window.dispatchEvent(
-      new CustomEvent("vnukpodnaem:language-change", {
-        detail: { language: nextLanguage },
-      }),
-    );
-  }
+  const { language, setLanguage } = useI18n();
+  const activeOption = languageOptions[language];
+  const nextLanguage = activeOption.next;
 
   return (
-    <div
+    <button
+      type="button"
+      onClick={() => setLanguage(nextLanguage)}
       className={
         compact
-          ? "grid gap-2"
-          : "flex min-h-12 items-center gap-1 rounded-full border border-stone-200 bg-white p-1 shadow-sm"
+          ? "flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-bold text-forest shadow-sm transition hover:border-moss/50 hover:bg-sage"
+          : "flex min-h-11 items-center gap-2 rounded-full border border-stone-200 bg-white px-3.5 py-2 text-sm font-extrabold text-forest shadow-sm transition hover:border-moss/50 hover:bg-sage hover:shadow-md"
       }
       aria-label={translations[language].header.languageLabel}
+      title={translations[language].header.switchTo}
     >
-      {languageOptions.map((option) => {
-        const isSelected = option.value === language;
-
-        return (
-          <button
-            key={option.value}
-            type="button"
-            onClick={() => handleLanguageChange(option.value)}
-            className={
-              compact
-                ? `flex min-h-11 items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition ${
-                    isSelected
-                      ? "bg-forest text-white"
-                      : "bg-cream text-stone-700 hover:bg-sage hover:text-forest"
-                  }`
-                : `flex min-h-10 items-center gap-1.5 rounded-full px-3 py-2 text-sm font-bold transition ${
-                    isSelected
-                      ? "bg-forest text-white shadow-sm"
-                      : "text-stone-600 hover:bg-sage hover:text-forest"
-                  }`
-            }
-            aria-pressed={isSelected}
-            title={translations[option.value].languageName}
-          >
-            <span aria-hidden="true">{option.flag}</span>
-            <span>{option.shortLabel}</span>
-          </button>
-        );
-      })}
-    </div>
+      <span className="grid size-6 place-items-center rounded-full bg-sage text-[0.68rem] font-black text-forest">
+        {activeOption.label}
+      </span>
+      <span>{compact ? activeOption.compactLabel : activeOption.label}</span>
+    </button>
   );
 }
