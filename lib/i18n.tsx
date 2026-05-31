@@ -65,22 +65,33 @@ function persistLanguage(language: SupportedLanguage) {
   document.documentElement.lang = language;
 }
 
+function normalizePhrase(text: string) {
+  return text.replace(/\s+/g, " ").trim();
+}
+
 function restoreEnglishText(text: string) {
+  const normalizedText = normalizePhrase(text);
   const englishMatch = Object.entries(phraseTranslations).find(
-    ([, translatedText]) => translatedText === text,
+    ([englishText, translatedText]) =>
+      normalizePhrase(translatedText) === normalizedText ||
+      normalizePhrase(englishText) === normalizedText,
   );
 
   return englishMatch?.[0] ?? text;
 }
 
 export function translateText(text: string, language: SupportedLanguage) {
-  if (language === "en") {
-    return restoreEnglishText(text);
-  }
-
   const englishText = restoreEnglishText(text);
 
-  return phraseTranslations[englishText] ?? text;
+  if (language === "en") {
+    return englishText;
+  }
+
+  return (
+    phraseTranslations[englishText] ??
+    phraseTranslations[normalizePhrase(englishText)] ??
+    text
+  );
 }
 
 function readOriginalAttribute(element: HTMLElement, attributeName: string) {

@@ -14,7 +14,7 @@ export default function SafetyPage() {
         <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">Safety</p>
         <h1 className="mt-3 text-4xl font-bold tracking-tight text-forest sm:text-5xl">Trust-focused boundaries for an early marketplace shell</h1>
         <p className="mt-5 text-lg leading-8 text-stone-700">
-          VnukPodNaem is planned as a technology marketplace for non-medical everyday assistance. The current testable shell has basic database-backed auth, client elderly profiles, booking requests, helper applications, helper profile editing, public helper visibility, and admin helper review when Supabase is configured. It is not launched, and payments, helper acceptance, disputes, chat, notifications, ratings, subscriptions, Bulgarian localization, and advanced admin workflows are not implemented.
+          Vnuk Pod Naem is planned as a technology marketplace for non-medical everyday assistance. The current testable shell has basic database-backed auth, client elderly profiles, booking requests, helper applications, helper profile editing, public helper visibility, and admin helper review when Supabase is configured. It is not launched, and payments, helper acceptance, disputes, chat, notifications, ratings, subscriptions, Bulgarian localization, and advanced admin workflows are not implemented.
         </p>
       </div>
 
@@ -30,7 +30,7 @@ export default function SafetyPage() {
       <div className="mt-10 rounded-[2rem] bg-forest p-7 text-white">
         <h2 className="text-2xl font-bold">Important positioning</h2>
         <div className="mt-4 grid gap-4 text-stone-100 md:grid-cols-3">
-          <p className="leading-7">Helpers are independent marketplace participants, not employees of VnukPodNaem.</p>
+          <p className="leading-7">Helpers are independent marketplace participants, not employees of Vnuk Pod Naem.</p>
           <p className="leading-7">The platform is not a medical provider, licensed care provider, or emergency service.</p>
           <p className="leading-7">Users should never request card PINs, passwords, cash handling, or access to valuables.</p>
         </div>

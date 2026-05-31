@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { useI18n } from "@/lib/i18n";
 import { loadProfile, type ProfileRole } from "@/lib/supabase/profiles";
 
 type AuthStatus = "loading" | "signed-in" | "signed-out" | "unconfigured";
@@ -47,6 +48,7 @@ export function AuthNav({
   loggedOutLinks?: HeaderLink[];
 }) {
   const router = useRouter();
+  const { t } = useI18n();
   const [status, setStatus] = useState<AuthStatus>("loading");
   const [account, setAccount] = useState<AccountSummary>({
     email: null,
@@ -167,7 +169,7 @@ export function AuthNav({
             href={link.href}
             className="rounded-full px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-sage hover:text-forest focus-visible:bg-sage md:px-3 md:py-2"
           >
-            {link.label}
+            {t(link.label)}
           </Link>
         ))}
       </>
@@ -175,7 +177,7 @@ export function AuthNav({
   }
 
   if (status === "loading") {
-    return <span className="px-4 py-2.5 text-sm font-semibold text-stone-500">Checking account…</span>;
+    return <span className="px-4 py-2.5 text-sm font-semibold text-stone-500">{t("Checking account…")}</span>;
   }
 
   if (status === "signed-in") {
@@ -188,29 +190,29 @@ export function AuthNav({
             <span className="grid size-9 place-items-center rounded-full bg-forest text-sm font-bold text-white">
               {initials}
             </span>
-            <span className="pr-2">Account</span>
+            <span className="pr-2">{t("Account")}</span>
           </summary>
           <div className={`absolute right-0 mt-3 ${menuWidth} rounded-3xl border border-stone-200 bg-white p-3 shadow-xl shadow-stone-300/40`}>
             <div className="border-b border-stone-100 px-3 pb-3">
               <p className="text-sm font-bold text-forest">
-                {account.displayName || "My profile"}
+                {account.displayName || t("My profile")}
               </p>
               {account.email ? (
                 <p className="mt-1 break-words text-xs text-stone-500">{account.email}</p>
               ) : null}
             </div>
             <div className="mt-2 grid gap-1">
-              <DropdownLink href="/dashboard">My profile</DropdownLink>
-              <DropdownLink href="/helpers">Browse caregivers</DropdownLink>
-              <DropdownLink href="/helper/apply">Become a caregiver</DropdownLink>
-              {account.role === "admin" ? <DropdownLink href="/admin">Admin</DropdownLink> : null}
+              <DropdownLink href="/dashboard">{t("My profile")}</DropdownLink>
+              <DropdownLink href="/helpers">{t("Browse caregivers")}</DropdownLink>
+              <DropdownLink href="/helper/apply">{t("Become a caregiver")}</DropdownLink>
+              {account.role === "admin" ? <DropdownLink href="/admin">{t("Admin")}</DropdownLink> : null}
               <button
                 type="button"
                 onClick={handleSignOut}
                 disabled={isSigningOut}
                 className="rounded-2xl px-4 py-3 text-left text-sm font-semibold text-clay transition hover:bg-cream disabled:cursor-not-allowed disabled:opacity-70"
               >
-                {isSigningOut ? "Signing out…" : "Sign out"}
+                {isSigningOut ? t("Signing out…") : t("Sign out")}
               </button>
             </div>
             {message ? <p className="mt-2 px-3 text-xs font-semibold text-clay">{message}</p> : null}
@@ -229,7 +231,7 @@ export function AuthNav({
   return (
     <div className={wrapperClass}>
       <Link href="/login" className={loginClass}>
-        Sign in
+        {t("Sign in")}
       </Link>
       {status === "unconfigured" && message ? <p className="text-xs font-semibold text-clay">{message}</p> : null}
     </div>

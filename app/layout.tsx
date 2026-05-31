@@ -10,7 +10,7 @@ const nunitoSans = Nunito_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "VnukPodNaem | Everyday family support marketplace",
+  title: "Vnuk Pod Naem | Everyday family support marketplace",
   description:
     "Book trusted everyday support for visits, errands, shopping, companionship, home tasks, and accompaniment.",
 };

@@ -18,7 +18,7 @@ export default function ServicesPage() {
           <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">Services</p>
           <h1 className="mt-3 text-4xl font-bold tracking-tight text-forest sm:text-5xl">Non-medical everyday support categories</h1>
           <p className="mt-5 max-w-3xl text-lg leading-8 text-stone-700">
-            VnukPodNaem is planned as a marketplace for practical, non-medical help. Each service should be easy to understand, limited in scope, and suitable for independent helpers.
+            Vnuk Pod Naem is planned as a marketplace for practical, non-medical help. Each service should be easy to understand, limited in scope, and suitable for independent helpers.
           </p>
         </div>
         <aside className="rounded-3xl bg-sage p-6 text-stone-700">
