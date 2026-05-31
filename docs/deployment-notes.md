@@ -6,6 +6,12 @@ Use this file as the source of truth for deployment setup and deployment status.
 
 Recommended provider: **Vercel** for the Next.js web app.
 
+## V2 product direction transition note
+
+- Current deployed shell may still contain old role-selection UX until future refactor tasks are completed.
+- Future tasks will align signup, profile/dashboard, homepage copy, and navigation with the new V2 universal profile product model.
+- During this transition, deployment verification should distinguish between current implemented behavior and the intended V2 documentation direction.
+
 ## Current deployment status
 
 Not deployed yet. The repository now contains a Next.js app shell with Supabase email/password authentication, database-backed client elderly profiles, booking requests, helper applications, helper profile editing, public helper visibility, and admin helper review when Supabase public environment variables are configured. It is still an early shell, not a launched/full MVP. All required Supabase SQL migrations must be applied manually in the Supabase dashboard before database-backed workflows are considered ready.

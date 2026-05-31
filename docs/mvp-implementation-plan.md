@@ -4,6 +4,20 @@
 
 VnukPodNaem is an English-first, non-medical elderly support marketplace for families, caregivers, elderly people, and verified helpers. The product connects clients with helpers for companionship, errands, shopping, walks, check-ins, technology help, and accompaniment. The platform is positioned as a technology marketplace, not a medical provider, licensed care provider, or direct employer. The MVP should prove the core flow: a caregiver can request a safe, clearly scoped non-medical service from a verified helper, completion can be confirmed or disputed, and admin users can review helper verification and safety issues.
 
+## V2 UX/account model pivot
+
+The product direction has shifted from role-selected signup to a universal user profile model. Future implementation tasks should treat this as the guiding UX/account direction while preserving existing working foundations where possible.
+
+- Universal signup comes before caregiver application. Everyone should register as a standard user first.
+- Role selection should be removed from signup in a future implementation step. Signup UI must not ask users to choose client/helper/caregiver role.
+- The profile/avatar menu should become the main account control after login, including profile actions and the “Become a caregiver” entry point.
+- The current database role model may remain internally for authorization, but the UI should not expose role selection to users.
+- The existing `helper_applications` and admin approval flow should be adapted, not discarded.
+- `elderly_profiles` and `bookings` may need UX reconsideration after the profile model changes, especially whether booking should start from the user profile first or require a separate elderly profile object.
+- The current shell should be refactored carefully in phases, not rewritten at once.
+- Public copy should shift toward services offered, booking, trust, and ease of use, while keeping safety/legal boundaries in dedicated safety, terms, caregiver application, and booking confirmation areas.
+- Admin access should be hidden from normal navigation and visible only to admin users.
+
 ## 2. Recommended stack
 
 Use the recommended beginner-friendly production stack from `PROJECT_BRIEF.md`:
@@ -86,7 +100,7 @@ Each phase should be implemented as a small Codex task. Do not start a later pha
 - Configure Supabase Auth.
 - Add `/login` and `/signup` forms.
 - Add a `profiles` concept connected to authenticated users.
-- Add role values for `client_caregiver`, `helper_applicant`, `verified_helper`, and `admin`.
+- Keep internal role values for authorization, but default new users to `client` or an equivalent normal-user role and do not expose role selection in signup.
 - Add route protection for dashboard and admin areas.
 - Add basic empty/loading/error states.
 
@@ -390,12 +404,12 @@ Essential fields:
 - `created_at`
 - `updated_at`
 
-Draft role values:
+Draft internal role values:
 
-- `client_caregiver`
-- `helper_applicant`
-- `verified_helper`
-- `admin`
+- `client` or equivalent normal-user role for new signups.
+- `helper_applicant` after a user submits a caregiver application.
+- `verified_helper` only after admin approval.
+- `admin` manually controlled and hidden from normal UI.
 
 Draft account status values:
 
