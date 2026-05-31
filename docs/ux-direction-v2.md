@@ -183,8 +183,10 @@ Do not build these without a future explicit product-approved task:
 The first visible V2 app refactor is now implemented in the Next.js shell.
 
 - The homepage now leads with service-first booking/search copy instead of making safety warnings the dominant message.
+- The homepage now uses a warmer marketplace-style visual direction with softer backgrounds, rounded cards, human service copy, and stronger visual hierarchy.
+- Homepage emphasis is trust, clarity, elder-friendly readability, and a clear central search action rather than internal system status.
 - The homepage includes a simple visual search module with city/location, date or date range, service type, and a Browse caregivers button.
-- The homepage search module is query-based only for now. It sends users to `/helpers` and preserves simple values in URL query parameters through the browser's normal GET form behavior.
+- The homepage search module is visual/query-based only for now. It sends users to `/helpers` and preserves simple values in URL query parameters through the browser's normal GET form behavior.
 - Real caregiver filtering, scheduling, final reservation, helper acceptance, and payment processing are not implemented yet.
 - Safety/legal boundaries still exist, but the homepage now links to `/safety` and uses calmer supporting copy.
 - Top navigation now uses simpler public links: Services, Caregivers, Safety, and Become a caregiver for signed-out users.
