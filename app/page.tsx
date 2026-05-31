@@ -1,13 +1,5 @@
 import Link from "next/link";
-
-const serviceOptions = [
-  "Stay at home",
-  "Quick visit",
-  "Shopping",
-  "House work",
-  "Companionship",
-  "Accompaniment",
-];
+import { HomeSearchCard } from "@/components/HomeSearchCard";
 
 const heroHighlights = [
   "Reviewed caregivers before they become visible",
@@ -137,97 +129,16 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="relative z-10">
-            <div
-              aria-hidden="true"
-              className="absolute -right-4 -top-4 hidden rounded-full bg-clay px-5 py-3 text-sm font-bold text-white shadow-lg shadow-clay/20 sm:block"
-            >
-              Warm, local help
-            </div>
-            <div className="rounded-[2.25rem] border border-white/90 bg-white/90 p-4 shadow-2xl shadow-stone-300/50 backdrop-blur sm:p-6">
-              <div className="rounded-[1.75rem] bg-gradient-to-br from-sage via-cream to-white p-5 sm:p-6">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-sm font-bold uppercase tracking-[0.18em] text-clay">
-                      Start your search
-                    </p>
-                    <h2 className="mt-3 text-2xl font-bold text-forest sm:text-3xl">
-                      What kind of help do you need?
-                    </h2>
-                  </div>
-                  <div
-                    aria-hidden="true"
-                    className="grid size-14 shrink-0 place-items-center rounded-2xl bg-white text-2xl shadow-sm"
-                  >
-                    🤝
-                  </div>
-                </div>
-                <p className="mt-3 text-base leading-7 text-stone-700">
-                  Choose the basics now. The search opens caregiver listings and
-                  keeps your values in the page address.
-                </p>
+          <div className="relative z-10 grid content-center gap-5">
+            <HomeSearchCard />
 
-                <form action="/helpers" method="get" className="mt-6 grid gap-4">
-                  <label className="grid gap-2 rounded-3xl bg-white p-4 text-sm font-semibold text-stone-700 shadow-sm ring-1 ring-stone-200/80">
-                    City or location
-                    <input
-                      name="location"
-                      type="text"
-                      placeholder="Sofia, Plovdiv, Varna…"
-                      autoComplete="address-level2"
-                      className="min-h-[3.25rem] rounded-2xl border border-stone-200 bg-cream/60 px-4 py-3 text-base font-normal text-stone-900 shadow-inner shadow-stone-100 focus:border-clay focus:bg-white focus:outline-none"
-                    />
-                  </label>
-
-                  <label className="grid gap-2 rounded-3xl bg-white p-4 text-sm font-semibold text-stone-700 shadow-sm ring-1 ring-stone-200/80">
-                    Date or date range
-                    <input
-                      name="date"
-                      type="text"
-                      placeholder="Today, next Friday, June 12–14…"
-                      className="min-h-[3.25rem] rounded-2xl border border-stone-200 bg-cream/60 px-4 py-3 text-base font-normal text-stone-900 shadow-inner shadow-stone-100 focus:border-clay focus:bg-white focus:outline-none"
-                    />
-                  </label>
-
-                  <label className="grid gap-2 rounded-3xl bg-white p-4 text-sm font-semibold text-stone-700 shadow-sm ring-1 ring-stone-200/80">
-                    Service type
-                    <select
-                      name="service"
-                      defaultValue=""
-                      className="min-h-[3.25rem] rounded-2xl border border-stone-200 bg-cream/60 px-4 py-3 text-base font-normal text-stone-900 shadow-inner shadow-stone-100 focus:border-clay focus:bg-white focus:outline-none"
-                    >
-                      <option value="" disabled>
-                        Choose a service
-                      </option>
-                      {serviceOptions.map((service) => (
-                        <option key={service} value={service}>
-                          {service}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-
-                  <button
-                    type="submit"
-                    className="mt-2 inline-flex min-h-14 items-center justify-center rounded-full bg-forest px-6 py-4 text-base font-semibold text-white shadow-lg shadow-forest/20 transition hover:bg-stone-800"
-                  >
-                    Browse matching caregivers
-                  </button>
-                </form>
-                <p className="mt-4 text-sm leading-6 text-stone-600">
-                  Search is visual and query-based for now; it does not create a
-                  booking, reserve time, or take payment.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="rounded-[1.75rem] bg-white p-5 shadow-sm ring-1 ring-stone-200">
                 <p className="text-sm font-bold uppercase tracking-[0.18em] text-moss">
                   Gentle support
                 </p>
                 <p className="mt-2 text-lg font-bold text-forest">
-                  Practical help that feels personal, not clinical.
+                  Practical help that feels personal and easy to arrange.
                 </p>
               </div>
               <div className="rounded-[1.75rem] bg-forest p-5 text-white shadow-lg shadow-stone-300/30">
@@ -235,7 +146,7 @@ export default function Home() {
                   Family peace of mind
                 </p>
                 <p className="mt-2 text-lg font-bold">
-                  Clear steps, readable choices, and calm service limits.
+                  Caregivers are reviewed before becoming visible.
                 </p>
               </div>
             </div>

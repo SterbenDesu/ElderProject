@@ -194,3 +194,19 @@ The first visible V2 app refactor is now implemented in the Next.js shell.
 - `/dashboard` is now framed as My profile / account hub instead of an internal development dashboard.
 - The visible caregiver entry point uses the existing `/helper/apply` application flow; no new caregiver application schema was added.
 - The forgot-password experience on `/login` is a placeholder only and intentionally does not send Supabase reset emails yet.
+
+## Homepage structured search correction implemented (2026-05-31)
+
+The homepage search has been corrected to behave like a structured marketplace entry point instead of an open text form.
+
+- The hero now uses a controlled warm layout with clear copy, a prominent search card, and no accidental decorative badge overlapping functional content.
+- Service, city, and date range are the primary search entry points.
+- Service selection uses tap-friendly selectable cards for Stay at home, Quick visit, Shopping, House work, Companionship, and Accompaniment.
+- City selection uses a dropdown backed by a maintainable Bulgaria city data file. The list includes major cities and regional centers, but it should not be treated as a complete national city dataset yet.
+- Date range selection uses native browser date inputs for start date and end date.
+- Submitting the homepage search navigates to `/helpers` with `city`, `service`, `startDate`, and `endDate` URL query parameters.
+- `/helpers` can display selected query criteria at the top of the listing page.
+- `/helpers` may filter visible caregiver profiles by city because `helper_profiles.city` already exists.
+- Real service availability and date availability filtering are not implemented yet and must not be implied until caregiver service/availability data exists.
+- The header now includes an EN/BG language selector foundation near the account/avatar area and stores the selected language in localStorage.
+- The language selector is a foundation only. Full-site Bulgarian/English translation remains a later task.
