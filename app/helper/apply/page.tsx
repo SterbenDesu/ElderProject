@@ -11,6 +11,7 @@ import {
   type HelperApplication,
 } from "@/lib/supabase/helperApplications";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { useI18n } from "@/lib/i18n";
 import { loadProfile, type Profile } from "@/lib/supabase/profiles";
 
 type PageStatus = "loading" | "signed-out" | "ready" | "unconfigured" | "error";
@@ -49,6 +50,7 @@ function getDebuggableDatabaseMessage(context: string, errorMessage: string) {
 }
 
 export default function ApplyPage() {
+  const { t } = useI18n();
   const [pageStatus, setPageStatus] = useState<PageStatus>("loading");
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -198,11 +200,32 @@ export default function ApplyPage() {
 
   return (
     <section className="mx-auto max-w-5xl px-5 py-12 lg:px-8 lg:py-16">
-      <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">Helper application</p>
-      <h1 className="mt-3 text-4xl font-bold tracking-tight text-forest sm:text-5xl">Apply as a helper</h1>
+      <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">Caregiver application</p>
+      <h1 className="mt-3 text-4xl font-bold tracking-tight text-forest sm:text-5xl">Apply to become a caregiver</h1>
       <p className="mt-5 max-w-3xl text-lg leading-8 text-stone-700">
-        Save a draft or submit your caregiver application. This page does not approve caregivers, create public marketplace listings, or create employment relationships.
+        Submit a caregiver application for admin review. If approved, your caregiver profile can appear on the certified caregivers list.
       </p>
+      <div className="mt-8 rounded-[2rem] border border-moss/20 bg-sage/70 p-5 text-stone-700 shadow-sm">
+        <h2 className="text-xl font-bold text-forest">Before you submit</h2>
+        <div className="mt-4 grid gap-5 md:grid-cols-2">
+          <div>
+            <h3 className="font-bold text-forest">Application review</h3>
+            <ul className="mt-3 list-disc space-y-2 pl-5 leading-7">
+              <li>You keep a normal account while applying.</li>
+              <li>Admins review submitted caregiver applications.</li>
+              <li>Approval is required before a caregiver profile can appear publicly.</li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="font-bold text-forest">Safety and service boundaries</h3>
+            <ul className="mt-3 list-disc space-y-2 pl-5 leading-7">
+              {safetyGuidance.slice(0, 5).map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
 
       {pageStatus === "loading" ? (
         <div className="mt-8 rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200" role="status">
@@ -219,17 +242,17 @@ export default function ApplyPage() {
 
       {pageStatus === "signed-out" ? (
         <div className="mt-8 rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200">
-          <h2 className="text-2xl font-bold text-forest">Log in or sign up first</h2>
+          <h2 className="text-2xl font-bold text-forest">Sign in to submit an application</h2>
           <p className="mt-4 text-lg leading-8">
-            Caregiver applications are connected to your account profile. Please sign in or create a normal account before saving a draft or submitting an application.
+            Caregiver applications are connected to your normal account. Please sign in or create an account before saving a draft or submitting an application.
           </p>
           {message ? <p className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900">Session message: {message}</p> : null}
           <div className="mt-6 flex flex-wrap gap-3">
             <Link href="/login" className="inline-flex min-h-12 items-center rounded-full bg-forest px-5 py-3 font-semibold text-white transition hover:bg-stone-800">
-              Log in
+              Sign in
             </Link>
             <Link href="/signup" className="inline-flex min-h-12 items-center rounded-full border border-forest px-5 py-3 font-semibold text-forest transition hover:bg-sage">
-              Sign up
+              Create account
             </Link>
           </div>
         </div>
@@ -246,12 +269,12 @@ export default function ApplyPage() {
       ) : null}
 
       {pageStatus === "ready" && user && profile ? (
-        <div className="mt-8 grid gap-5 lg:grid-cols-[1fr_0.72fr]">
-          <form className="rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200">
+        <div className="mt-8 flex justify-center">
+          <form className="w-full max-w-3xl rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h2 className="text-2xl font-bold text-forest">Application details</h2>
-                <p className="mt-2 text-sm text-stone-600">Signed in as {user.email}. Account status: {profile.role}.</p>
+                <p className="mt-2 text-sm text-stone-600">{t("Signed in as")} {user.email}. {t("Your account remains a normal account during review.")}</p>
               </div>
               <span className="rounded-full bg-sage px-4 py-2 text-sm font-bold text-forest">
                 Status: {application ? formatHelperApplicationStatus(application.status) : "Not started"}
@@ -260,7 +283,7 @@ export default function ApplyPage() {
 
             {isReadOnly ? (
               <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900" role="alert">
-                This application is {application ? formatHelperApplicationStatus(application.status).toLowerCase() : "not editable"}. It is read-only here, applicants cannot approve themselves, and admin review tools are only available to admin users.
+                This application is {application ? formatHelperApplicationStatus(application.status).toLowerCase() : "not editable"}. It is read-only here because admin review happens separately.
               </div>
             ) : null}
 
@@ -307,26 +330,10 @@ export default function ApplyPage() {
                 {savingAction === "submitted" ? "Submitting…" : "Submit application"}
               </button>
             </div>
+            <p className="mt-6 text-center text-sm font-semibold text-stone-600">
+              {t("Already have an account?")} <Link href="/login" className="text-forest underline">{t("Sign in.")}</Link>
+            </p>
           </form>
-
-          <aside className="space-y-5">
-            <div className="rounded-[2rem] bg-sage p-6 text-stone-700">
-              <h2 className="text-xl font-bold text-forest">Safety and service boundaries</h2>
-              <ul className="mt-4 space-y-3 leading-7">
-                {safetyGuidance.map((item) => (
-                  <li key={item}>• {item}</li>
-                ))}
-              </ul>
-            </div>
-            <div className="rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200">
-              <h2 className="text-xl font-bold text-forest">What this page does not do</h2>
-              <ul className="mt-4 space-y-3 leading-7">
-                <li>• It does not approve helpers or guarantee approval.</li>
-                <li>• It does not publish public helper marketplace profiles.</li>
-                <li>• It does not add booking payments, Stripe, or live payment processing.</li>
-              </ul>
-            </div>
-          </aside>
         </div>
       ) : null}
     </section>

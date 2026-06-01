@@ -194,7 +194,7 @@ export function HomeSearchCard() {
                 const isSelected = selectedServices.includes(service.value);
 
                 return (
-                  <label key={service.value} className="cursor-pointer">
+                  <label key={service.value} className="h-full cursor-pointer">
                     <input
                       type="checkbox"
                       name="services"
@@ -203,7 +203,7 @@ export function HomeSearchCard() {
                       onChange={() => toggleService(service.value)}
                       className="peer sr-only"
                     />
-                    <span className="group flex min-h-[4.75rem] items-center gap-3 rounded-2xl border border-stone-200 bg-white px-4 py-3 text-sm font-extrabold text-stone-700 shadow-sm shadow-stone-200/60 transition duration-150 peer-checked:border-forest peer-checked:bg-forest peer-checked:text-white peer-checked:shadow-lg peer-checked:shadow-forest/20 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-clay hover:border-moss/50 hover:bg-sage hover:shadow-md active:translate-y-0">
+                    <span className="group grid h-20 grid-cols-[2.5rem_1fr_1.5rem] items-center gap-3 rounded-2xl border border-stone-200 bg-white px-4 py-3 text-sm font-extrabold text-stone-700 shadow-sm shadow-stone-200/60 transition duration-150 peer-checked:border-forest peer-checked:bg-forest peer-checked:text-white peer-checked:shadow-lg peer-checked:shadow-forest/20 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-clay hover:border-moss/50 hover:bg-sage hover:shadow-md active:translate-y-0">
                       <span
                         className={`grid size-10 shrink-0 place-items-center rounded-xl ring-1 ring-stone-100 transition group-hover:bg-white group-hover:text-forest ${
                           isSelected
@@ -213,7 +213,7 @@ export function HomeSearchCard() {
                       >
                         <ServiceIcon name={service.icon} />
                       </span>
-                      <span className="leading-5">{t(service.label)}</span>
+                      <span className="line-clamp-2 min-w-0 leading-5">{t(service.label)}</span>
                       <span
                         aria-hidden="true"
                         className={`ml-auto grid size-6 shrink-0 place-items-center rounded-full border border-current transition ${

@@ -12,7 +12,6 @@ import {
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { loadOwnElderlyProfiles, type ElderlyProfile } from "@/lib/supabase/elderlyProfiles";
 import {
-  formatHelperVerificationStatus,
   loadVisibleVerifiedHelperProfileById,
   type PublicHelperProfile,
 } from "@/lib/supabase/helperProfiles";
@@ -309,15 +308,15 @@ export default function HelperDetailPage() {
 
   return (
     <section className="mx-auto max-w-6xl px-5 py-12 lg:px-8 lg:py-16">
-      <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">Helper details</p>
-      <h1 className="mt-3 text-4xl font-bold tracking-tight text-forest sm:text-5xl">Public helper profile</h1>
+      <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">Caregiver profile</p>
+      <h1 className="mt-3 text-4xl font-bold tracking-tight text-forest sm:text-5xl">Certified caregiver</h1>
       <p className="mt-5 max-w-3xl text-lg leading-8 text-stone-700">
-        Only visible, verified helper profiles are shown publicly. The page does not show helper email addresses, private profile IDs, applications, or admin-only fields.
+        Review the caregiver profile details. Private contact information, applications, and admin-only fields are not shown publicly.
       </p>
 
       {pageStatus === "loading" ? (
         <div className="mt-8 rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200" role="status">
-          Loading visible helper profile…
+          Loading caregiver profile…
         </div>
       ) : null}
 
@@ -330,10 +329,10 @@ export default function HelperDetailPage() {
 
       {(pageStatus === "error" || pageStatus === "unavailable") ? (
         <div className="mt-8 rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200" role={pageStatus === "error" ? "alert" : undefined}>
-          <h2 className="text-2xl font-bold text-forest">Helper unavailable</h2>
+          <h2 className="text-2xl font-bold text-forest">Caregiver unavailable</h2>
           <p className="mt-4 leading-7">{message}</p>
           <Link href="/helpers" className="mt-6 inline-flex min-h-12 items-center rounded-full bg-forest px-5 py-3 font-semibold text-white transition hover:bg-stone-800">
-            Back to helper listings
+            Back to certified caregivers
           </Link>
         </div>
       ) : null}
@@ -342,10 +341,17 @@ export default function HelperDetailPage() {
         <div className="mt-8 grid gap-5 lg:grid-cols-[1fr_0.8fr]">
           <div className="space-y-5">
             <article className="rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200">
-              <p className="text-sm font-bold uppercase tracking-[0.16em] text-clay">
-                {formatHelperVerificationStatus(helperProfile.verification_status)}
+              <div className="grid gap-6 md:grid-cols-[12rem_1fr] md:items-start">
+                <div className="flex aspect-square items-center justify-center rounded-[1.75rem] bg-gradient-to-br from-sage via-cream to-white ring-1 ring-moss/20">
+                  <div className="grid size-20 place-items-center rounded-full bg-white text-forest shadow-sm ring-1 ring-stone-200">
+                    <svg viewBox="0 0 48 48" className="size-11" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="24" cy="18" r="8" /><path d="M10 40c2.6-8 8-12 14-12s11.4 4 14 12" /></svg>
+                  </div>
+                </div>
+                <div>
+              <p className="inline-flex rounded-full bg-sage px-3 py-1 text-xs font-extrabold uppercase tracking-[0.14em] text-forest">
+                Certified caregiver
               </p>
-              <h2 className="mt-3 text-3xl font-bold text-forest">Helper in {helperProfile.city}</h2>
+              <h2 className="mt-3 text-3xl font-bold text-forest">Caregiver in {helperProfile.city}</h2>
               <dl className="mt-6 grid gap-4 text-sm sm:grid-cols-2">
                 <div>
                   <dt className="font-bold text-forest">City</dt>
@@ -356,10 +362,12 @@ export default function HelperDetailPage() {
                   <dd className="mt-1">{helperProfile.service_radius_km === null ? "Not listed" : `${helperProfile.service_radius_km} km`}</dd>
                 </div>
                 <div className="sm:col-span-2">
-                  <dt className="font-bold text-forest">Bio</dt>
+                  <dt className="font-bold text-forest">Full profile</dt>
                   <dd className="mt-1 whitespace-pre-wrap leading-7">{helperProfile.bio}</dd>
                 </div>
               </dl>
+                </div>
+              </div>
               <div className="mt-6 rounded-3xl bg-cream p-5 text-sm leading-6 text-stone-700">
                 <h3 className="font-bold text-forest">Non-medical service boundary</h3>
                 <p className="mt-2">
@@ -369,9 +377,9 @@ export default function HelperDetailPage() {
             </article>
 
             <div className="rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200">
-              <h2 className="text-2xl font-bold text-forest">Request this helper</h2>
+              <h2 className="text-2xl font-bold text-forest">Request this caregiver</h2>
               <p className="mt-2 text-sm leading-6 text-stone-600">
-                A request saves this helper profile on the booking with status Requested. No payment is collected, and helper acceptance is not implemented yet.
+                A request saves this caregiver profile with status Requested. No payment is collected, and caregiver acceptance is not implemented yet.
               </p>
 
               {authStatus === "checking" ? <p className="mt-5 rounded-3xl bg-cream p-5 text-sm font-semibold" role="status">Checking your login session…</p> : null}
@@ -379,10 +387,10 @@ export default function HelperDetailPage() {
               {authStatus === "signed-out" ? (
                 <div className="mt-5 rounded-3xl border border-amber-200 bg-amber-50 p-5 text-amber-900">
                   <h3 className="font-bold">Login required</h3>
-                  <p className="mt-2 text-sm leading-6">Log in or sign up as a client/caregiver account before requesting a helper.</p>
+                  <p className="mt-2 text-sm leading-6">Sign in with a normal account before requesting a caregiver.</p>
                   <div className="mt-4 flex flex-wrap gap-3">
                     <Link href="/login" className="inline-flex min-h-11 items-center rounded-full bg-forest px-5 py-2 text-sm font-semibold text-white transition hover:bg-stone-800">Login</Link>
-                    <Link href="/signup" className="inline-flex min-h-11 items-center rounded-full border border-stone-200 bg-white px-5 py-2 text-sm font-semibold text-forest transition hover:bg-sage">Sign up as client/caregiver</Link>
+                    <Link href="/signup" className="inline-flex min-h-11 items-center rounded-full border border-stone-200 bg-white px-5 py-2 text-sm font-semibold text-forest transition hover:bg-sage">Create account</Link>
                   </div>
                 </div>
               ) : null}
@@ -477,7 +485,7 @@ export default function HelperDetailPage() {
                   </div>
 
                   <button type="button" onClick={() => void handleCreateRequest()} disabled={isSaving || elderlyProfiles.length === 0 || serviceCategories.length === 0} className="mt-6 inline-flex min-h-12 items-center rounded-full bg-forest px-5 py-3 font-semibold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-60">
-                    {isSaving ? "Creating request…" : "Request this helper"}
+                    {isSaving ? "Creating request…" : "Request this caregiver"}
                   </button>
                 </>
               ) : null}

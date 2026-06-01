@@ -138,3 +138,21 @@ The migration does not disable RLS, does not weaken public helper policies, and 
 Apply `supabase/migrations/20260530140000_tighten_booking_helper_rls.sql` manually after the helper profile management migration. This migration drops and recreates only the client booking insert/update policies so existing ownership checks remain in place while non-null `bookings.helper_profile_id` values must reference a `helper_profiles` row where `is_visible = true` and `verification_status` is `verified_basic` or `trusted`.
 
 This is a shell safety cleanup only. It does not add payments, helper acceptance, full booking lifecycle, disputes, Bulgarian localization, chat, notifications, ratings, subscriptions, or advanced admin workflows.
+
+## 2026-06-01 helper approval visibility migration
+
+Apply `supabase/migrations/20260601100000_helper_approval_visible_default.sql` after the previous helper review and helper profile management migrations.
+
+Behavior after applying it:
+
+1. Admin approval through `review_helper_application` sets the applicant profile role to `verified_helper`.
+2. The approval creates or updates a `helper_profiles` row with `verification_status = 'verified_basic'`.
+3. The approved helper profile is set to `is_visible = true` by default so it can appear on `/helpers`.
+4. Admins can still hide or unpublish an approved helper later with `set_helper_profile_visibility` when that RPC is installed.
+
+Manual SQL application steps:
+
+1. Open the Supabase SQL editor for the project.
+2. Paste the full contents of `supabase/migrations/20260601100000_helper_approval_visible_default.sql`.
+3. Run the SQL once.
+4. Verify that approving a submitted helper application returns `helper_profile_is_visible: true` and the helper appears on the certified caregivers page when public RLS policies are applied.
