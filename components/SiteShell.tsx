@@ -11,7 +11,7 @@ const navigationLinks = [
 ];
 
 const loggedOutOnlyLinks = [
-  { href: "/signup", label: "Become a caregiver" },
+  { href: "/helper/apply", label: "Become a caregiver" },
 ];
 
 const footerLinks = [
@@ -26,7 +26,7 @@ function NavLink({ href, label }: { href: string; label: string }) {
   return (
     <Link
       href={href}
-      className="rounded-full px-4 py-3 text-sm font-bold text-stone-700 transition hover:bg-white hover:text-forest hover:shadow-sm focus-visible:bg-white md:px-3 md:py-2"
+      className="rounded-full px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-white hover:text-forest hover:shadow-sm focus-visible:bg-white md:px-3 md:py-2"
     >
       {label}
     </Link>
@@ -114,29 +114,36 @@ export function SiteShell({ children }: { children: ReactNode }) {
         </nav>
       </header>
       <main>{children}</main>
-      <footer className="border-t border-stone-200 bg-white/80">
-        <div className="mx-auto grid max-w-6xl gap-8 px-5 py-10 text-sm text-stone-600 sm:grid-cols-[1.3fr_0.7fr] lg:px-8">
+      <footer className="border-t border-stone-200 bg-white/85">
+        <div className="mx-auto grid max-w-6xl gap-8 px-5 py-10 text-sm text-stone-600 md:grid-cols-[1.5fr_0.8fr_0.8fr] lg:px-8">
           <div>
             <p className="text-lg font-bold text-forest">Vnuk Pod Naem</p>
-            <p className="mt-3 max-w-2xl leading-7">
-              A marketplace shell for trusted everyday support: visits,
-              errands, shopping, companionship, home tasks, and accompaniment.
-              Signup is universal, caregiver applications happen after account
-              creation, and reviewed caregivers can become visible through admin
-              approval. Final reservation, scheduling, and payment processing
-              are not active yet.
+            <p className="mt-3 max-w-xl leading-7">
+              A marketplace for trusted everyday support: visits, errands,
+              shopping, companionship, home tasks, and accompaniment. Everyone
+              starts with a normal account, and caregivers appear publicly only
+              after admin review.
             </p>
           </div>
-          <div className="flex flex-wrap gap-2 sm:justify-end">
-            {footerLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="rounded-full px-3 py-2 font-semibold text-stone-700 transition hover:bg-sage hover:text-forest"
-              >
-                {link.label}
-              </Link>
-            ))}
+          <div>
+            <h2 className="text-sm font-bold uppercase tracking-[0.16em] text-forest">Navigation</h2>
+            <div className="mt-3 grid gap-2">
+              {footerLinks.slice(0, 3).map((link) => (
+                <Link key={link.href} href={link.href} className="font-semibold text-stone-700 transition hover:text-forest">
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+          <div>
+            <h2 className="text-sm font-bold uppercase tracking-[0.16em] text-forest">Legal</h2>
+            <div className="mt-3 grid gap-2">
+              {footerLinks.slice(3).map((link) => (
+                <Link key={link.href} href={link.href} className="font-semibold text-stone-700 transition hover:text-forest">
+                  {link.label}
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </footer>

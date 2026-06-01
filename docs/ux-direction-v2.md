@@ -239,3 +239,13 @@ This pass keeps the current visual direction and focuses on language completenes
 - Emoji use is not allowed in the UI. Service cards use simple professional inline SVG-style icons with consistent sizing, stroke style, container size, and alignment.
 - Homepage service cards keep multi-select behavior but use consistent plus/check indicators with matching size, shape, position, selected state, and no layout shift.
 - Homepage copy blocks should avoid cramped text. Prefer readable line height, comfortable max widths, and consistent spacing between headings, body text, cards, and calls to action.
+
+## Visual refinement pass (2026-06-01)
+
+- The public caregiver marketplace is now titled “Certified caregivers” / “Сертифицирани помощници” and should read as a user-facing listing page, not an internal marketplace status panel.
+- Certified caregivers are presented as a responsive card grid. Cards use a square photo/placeholder area, soft green framing, a certified badge, location, age placeholder when no age field exists, a short profile summary, and a profile link. Longer bio/profile details belong on the individual caregiver detail page.
+- Approved caregivers should appear on the public certified caregivers page by default when admin approval creates or updates their verified caregiver profile. Admin visibility controls, where supported, are treated as hide/unpublish controls after approval rather than a second required approval step.
+- Marketplace safety and listing guidance should appear as calm top banners above grids or forms, not as competing right-side panels.
+- The caregiver application page is a centered application form for admin review. It should explain that users keep a normal account, submit an application, and can appear publicly only after admin approval.
+- The footer should stay stable across English and Bulgarian using a column layout: brand/about, navigation, and legal.
+- Every current-shell UI pass requires a visible translation audit across shared navigation, footer, public pages, account surfaces, helper/caregiver pages, admin surfaces, empty states, and form helper text.

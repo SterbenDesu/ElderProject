@@ -351,3 +351,20 @@ Not implemented in this refactor:
 - Bulgarian localization.
 - Native mobile app work.
 - Real password reset emails. The forgot-password UI is placeholder only.
+
+## 2026-06-01 certified caregivers UI and approval visibility
+
+Required migration update:
+
+- Apply `supabase/migrations/20260601100000_helper_approval_visible_default.sql` after existing helper review/profile migrations.
+
+Verification steps:
+
+1. Build command: `npm run build`.
+2. Start command: `npm start` after building, or the configured host start command.
+3. Approve a submitted caregiver application as an admin.
+4. Confirm the resulting helper profile is `verified_basic` and `is_visible = true`.
+5. Open `/helpers` and confirm the approved caregiver appears in the Certified caregivers card grid.
+6. Use the admin visibility control to hide/unpublish the caregiver if the profile should be removed from public listing.
+
+Environment variables remain documented by name only in the existing deployment notes; no new secrets are required for this UI pass.
