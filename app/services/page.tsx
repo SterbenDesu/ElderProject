@@ -24,7 +24,7 @@ export default function ServicesPage() {
         <aside className="rounded-3xl bg-sage p-6 text-stone-700">
           <h2 className="text-xl font-bold text-forest">Not active yet</h2>
           <p className="mt-3 leading-7">
-            These categories support the current testable shell. Basic database-backed client booking requests are available for signed-in client accounts, while search, helper acceptance, payments, disputes, chat, notifications, ratings, subscriptions, Bulgarian localization, and advanced marketplace workflows are not implemented.
+            These categories support the current testable shell. Basic database-backed client booking requests are available for signed-in client accounts, while search, helper acceptance, payments, disputes, chat, notifications, ratings, subscriptions, and advanced marketplace workflows are not implemented.
           </p>
         </aside>
       </div>

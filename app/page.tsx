@@ -76,7 +76,7 @@ export default function Home() {
           aria-hidden="true"
           className="absolute right-0 top-10 size-72 rounded-full bg-clay/10 blur-3xl"
         />
-        <div className="mx-auto grid max-w-6xl gap-12 px-5 py-14 lg:grid-cols-[1.02fr_0.98fr] lg:px-8 lg:py-20">
+        <div className="mx-auto grid max-w-7xl gap-8 px-5 py-14 lg:grid-cols-[minmax(0,0.92fr)_minmax(31rem,1.08fr)] lg:px-8 lg:py-20 xl:grid-cols-[minmax(0,0.9fr)_minmax(36rem,1.1fr)]">
           <div className="relative z-10 flex flex-col justify-center">
             <h1 className="max-w-4xl text-4xl font-extrabold tracking-[-0.04em] text-forest sm:text-5xl lg:text-6xl">
               Find trusted everyday support for the people you love.
@@ -108,7 +108,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="relative z-10 grid content-center gap-5">
+          <div className="relative z-10 grid w-full content-center gap-5 justify-self-center lg:max-w-[38rem] lg:justify-self-end">
             <HomeSearchCard />
           </div>
         </div>
