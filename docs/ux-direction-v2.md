@@ -249,3 +249,10 @@ This pass keeps the current visual direction and focuses on language completenes
 - The caregiver application page is a centered application form for admin review. It should explain that users keep a normal account, submit an application, and can appear publicly only after admin approval.
 - The footer should stay stable across English and Bulgarian using a column layout: brand/about, navigation, and legal.
 - Every current-shell UI pass requires a visible translation audit across shared navigation, footer, public pages, account surfaces, helper/caregiver pages, admin surfaces, empty states, and form helper text.
+
+## Translation coverage and homepage search width refinement (2026-06-01)
+
+- Remaining EN/BG translation gaps were audited across the current public shell, auth pages, dashboard pages, helper pages, admin page, and legal/safety pages.
+- Terms, Privacy, and Safety card copy is expected to switch consistently between English and Bulgarian with no mixed-language static UI text.
+- Homepage hero/search card desktop width was adjusted so service labels have enough space to display fully or wrap cleanly.
+- EN/BG translation coverage is expected to include all current static UI text; user-generated profile, booking, application, and database content remains displayed as entered.

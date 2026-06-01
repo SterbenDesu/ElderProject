@@ -20,7 +20,7 @@ export default function TermsPage() {
         </article>
         <article className="rounded-3xl bg-sage p-5">
           <h2 className="font-bold text-forest">Future payments</h2>
-          <p className="mt-2 leading-7 text-stone-700">No payment processing, refunds, payout handling, payment-provider integration, helper acceptance, full booking lifecycle, disputes, chat, notifications, ratings, subscriptions, or Bulgarian localization is implemented yet.</p>
+          <p className="mt-2 leading-7 text-stone-700">No payment processing, refunds, payout handling, payment-provider integration, helper acceptance, full booking lifecycle, disputes, chat, notifications, ratings, or subscriptions are implemented yet.</p>
         </article>
       </div>
     </section>

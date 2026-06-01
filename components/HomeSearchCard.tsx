@@ -170,7 +170,7 @@ export function HomeSearchCard() {
   }
 
   return (
-    <div className="rounded-[2rem] border border-white/90 bg-white/95 p-5 shadow-2xl shadow-stone-300/45 backdrop-blur transition hover:shadow-stone-300/60 sm:p-6">
+    <div className="w-full rounded-[2rem] border border-white/90 bg-white/95 p-5 shadow-2xl shadow-stone-300/45 backdrop-blur transition hover:shadow-stone-300/60 sm:p-6">
       <div className="rounded-[1.5rem] bg-gradient-to-br from-sage via-cream to-white p-5 ring-1 ring-white/80 sm:p-7">
         <p className="text-sm font-extrabold uppercase tracking-[0.18em] text-clay">
           {t("Find support")}
@@ -203,7 +203,7 @@ export function HomeSearchCard() {
                       onChange={() => toggleService(service.value)}
                       className="peer sr-only"
                     />
-                    <span className="group grid h-20 grid-cols-[2.5rem_1fr_1.5rem] items-center gap-3 rounded-2xl border border-stone-200 bg-white px-4 py-3 text-sm font-extrabold text-stone-700 shadow-sm shadow-stone-200/60 transition duration-150 peer-checked:border-forest peer-checked:bg-forest peer-checked:text-white peer-checked:shadow-lg peer-checked:shadow-forest/20 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-clay hover:border-moss/50 hover:bg-sage hover:shadow-md active:translate-y-0">
+                    <span className="group grid min-h-20 grid-cols-[2.25rem_minmax(0,1fr)_1.5rem] items-center gap-2.5 rounded-2xl border border-stone-200 bg-white px-3 py-3 text-[0.83rem] font-extrabold text-stone-700 shadow-sm shadow-stone-200/60 transition duration-150 peer-checked:border-forest peer-checked:bg-forest peer-checked:text-white peer-checked:shadow-lg peer-checked:shadow-forest/20 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-clay hover:border-moss/50 hover:bg-sage hover:shadow-md active:translate-y-0 sm:grid-cols-[2.5rem_minmax(0,1fr)_1.5rem] sm:gap-3 sm:px-4 sm:text-sm">
                       <span
                         className={`grid size-10 shrink-0 place-items-center rounded-xl ring-1 ring-stone-100 transition group-hover:bg-white group-hover:text-forest ${
                           isSelected
@@ -213,7 +213,7 @@ export function HomeSearchCard() {
                       >
                         <ServiceIcon name={service.icon} />
                       </span>
-                      <span className="line-clamp-2 min-w-0 leading-5">{t(service.label)}</span>
+                      <span className="min-w-0 whitespace-normal break-words leading-5">{t(service.label)}</span>
                       <span
                         aria-hidden="true"
                         className={`ml-auto grid size-6 shrink-0 place-items-center rounded-full border border-current transition ${
