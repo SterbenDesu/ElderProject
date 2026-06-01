@@ -6,13 +6,29 @@ export const bg = {
     account: "Профил",
     switchTo: "Превключи на английски",
   },
+  shell: {
+    mainNavigationLabel: "Основна навигация",
+    homeLabel: "Начална страница на Vnuk Pod Naem",
+    menu: "Меню",
+    navigationHeading: "Навигация",
+    legalHeading: "Правна информация",
+    footerDescription:
+      "Платформа за доверена ежедневна подкрепа: посещения, задачи, пазаруване, компания, помощ у дома и придружаване. Всеки започва със стандартен профил, а помощниците се показват публично само след администраторски преглед.",
+    links: {
+      services: "Услуги",
+      caregivers: "Помощници",
+      safety: "Безопасност",
+      becomeCaregiver: "Стани помощник",
+      terms: "Условия",
+      privacy: "Поверителност",
+    },
+  },
 
 };
 
 export const phraseTranslations: Record<string, string> = {
   // Already translated UI fragments
 
-  "Помощници": "Помощници",
   "Град": "Град",
   "Услуга": "Услуга",
   "Начална дата": "Начална дата",

@@ -1,51 +1,59 @@
+"use client";
+
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { AuthNav } from "@/components/AuthNav";
 import { LanguageSelector } from "@/components/LanguageSelector";
-import { I18nProvider } from "@/lib/i18n";
+import { I18nProvider, translations, useI18n } from "@/lib/i18n";
 
 const navigationLinks = [
-  { href: "/services", label: "Services" },
-  { href: "/helpers", label: "Caregivers" },
-  { href: "/safety", label: "Safety" },
-];
+  { href: "/services", labelKey: "services" },
+  { href: "/helpers", labelKey: "caregivers" },
+  { href: "/safety", labelKey: "safety" },
+] as const;
 
 const loggedOutOnlyLinks = [
   { href: "/helper/apply", label: "Become a caregiver" },
 ];
 
 const footerLinks = [
-  { href: "/services", label: "Services" },
-  { href: "/helpers", label: "Caregivers" },
-  { href: "/safety", label: "Safety" },
-  { href: "/terms", label: "Terms" },
-  { href: "/privacy", label: "Privacy" },
-];
+  { href: "/services", labelKey: "services" },
+  { href: "/helpers", labelKey: "caregivers" },
+  { href: "/safety", labelKey: "safety" },
+  { href: "/terms", labelKey: "terms" },
+  { href: "/privacy", labelKey: "privacy" },
+] as const;
 
-function NavLink({ href, label }: { href: string; label: string }) {
+type ShellLinkKey = keyof typeof translations.en.shell.links;
+
+function NavLink({ href, labelKey }: { href: string; labelKey: ShellLinkKey }) {
+  const { language } = useI18n();
+
   return (
     <Link
       href={href}
       className="rounded-full px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-white hover:text-forest hover:shadow-sm focus-visible:bg-white md:px-3 md:py-2"
     >
-      {label}
+      {translations[language].shell.links[labelKey]}
     </Link>
   );
 }
 
-export function SiteShell({ children }: { children: ReactNode }) {
+function SiteShellContent({ children }: { children: ReactNode }) {
+  const { language } = useI18n();
+  const shellText = translations[language].shell;
+
   return (
-    <I18nProvider>
     <div className="min-h-screen overflow-hidden bg-cream text-stone-900">
       <header className="sticky top-0 z-40 border-b border-stone-200/80 bg-cream/90 shadow-sm shadow-stone-200/40 backdrop-blur">
         <nav
           className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-5 lg:px-8"
-          aria-label="Main navigation"
+          aria-label={shellText.mainNavigationLabel}
         >
           <Link
             href="/"
             className="group flex min-h-12 items-center gap-3 rounded-full pr-3 text-forest transition hover:text-stone-800"
-            aria-label="Vnuk Pod Naem home"
+            aria-label={shellText.homeLabel}
           >
             <span className="grid size-11 place-items-center rounded-2xl bg-gradient-to-br from-forest via-moss to-clay text-white shadow-md shadow-stone-300/50 ring-1 ring-white/80 transition group-hover:scale-[1.02]">
               <svg
@@ -90,7 +98,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
 
           <details className="group relative md:hidden">
             <summary className="flex min-h-12 cursor-pointer list-none items-center gap-2 rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-semibold text-forest shadow-sm transition hover:border-moss/40 hover:bg-sage [&::-webkit-details-marker]:hidden">
-              Menu
+              {shellText.menu}
               <span
                 aria-hidden="true"
                 className="text-lg leading-none transition group-open:rotate-45"
@@ -119,28 +127,37 @@ export function SiteShell({ children }: { children: ReactNode }) {
           <div>
             <p className="text-lg font-bold text-forest">Vnuk Pod Naem</p>
             <p className="mt-3 max-w-xl leading-7">
-              A marketplace for trusted everyday support: visits, errands,
-              shopping, companionship, home tasks, and accompaniment. Everyone
-              starts with a normal account, and caregivers appear publicly only
-              after admin review.
+              {shellText.footerDescription}
             </p>
           </div>
           <div>
-            <h2 className="text-sm font-bold uppercase tracking-[0.16em] text-forest">Navigation</h2>
+            <h2 className="text-sm font-bold uppercase tracking-[0.16em] text-forest">
+              {shellText.navigationHeading}
+            </h2>
             <div className="mt-3 grid gap-2">
               {footerLinks.slice(0, 3).map((link) => (
-                <Link key={link.href} href={link.href} className="font-semibold text-stone-700 transition hover:text-forest">
-                  {link.label}
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="font-semibold text-stone-700 transition hover:text-forest"
+                >
+                  {shellText.links[link.labelKey]}
                 </Link>
               ))}
             </div>
           </div>
           <div>
-            <h2 className="text-sm font-bold uppercase tracking-[0.16em] text-forest">Legal</h2>
+            <h2 className="text-sm font-bold uppercase tracking-[0.16em] text-forest">
+              {shellText.legalHeading}
+            </h2>
             <div className="mt-3 grid gap-2">
               {footerLinks.slice(3).map((link) => (
-                <Link key={link.href} href={link.href} className="font-semibold text-stone-700 transition hover:text-forest">
-                  {link.label}
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="font-semibold text-stone-700 transition hover:text-forest"
+                >
+                  {shellText.links[link.labelKey]}
                 </Link>
               ))}
             </div>
@@ -148,6 +165,13 @@ export function SiteShell({ children }: { children: ReactNode }) {
         </div>
       </footer>
     </div>
+  );
+}
+
+export function SiteShell({ children }: { children: ReactNode }) {
+  return (
+    <I18nProvider>
+      <SiteShellContent>{children}</SiteShellContent>
     </I18nProvider>
   );
 }
