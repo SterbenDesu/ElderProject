@@ -4,13 +4,6 @@ import { PageIntro } from "@/components/PageIntro";
 import { useState } from "react";
 import { useI18n } from "@/lib/i18n";
 
-const safetyPoints = [
-  { title: "Clear service limits", text: "The product scope stays focused on companionship and practical everyday help, not medical or licensed care." },
-  { title: "Early helper review", text: "The shell includes basic helper applications, admin helper review, helper profile editing, and admin-controlled public helper visibility when Supabase is configured; this still does not guarantee safety." },
-  { title: "Future complaint pathways", text: "Disputes and complaint UI are not implemented yet; future booking phases should define concern reporting and admin review before any payment release logic is added." },
-  { title: "No absolute guarantees", text: "Good process can reduce risk, but the platform must not promise guaranteed safety." },
-];
-
 const allowedServices = [
   { title: "Companionship", text: "Conversation, shared hobbies, reading together, or friendly presence." },
   { title: "Light errands", text: "Simple local tasks that do not involve valuables, cash handling, or private credentials." },
@@ -47,31 +40,13 @@ export default function SafetyPage() {
   return (
     <section className="mx-auto max-w-6xl px-5 py-12 lg:px-8 lg:py-16">
       <PageIntro
-        eyebrow={t("Safety")}
-        title={t("Trust-focused boundaries for an early marketplace shell")}
-        description={t("Vnuk Pod Naem is planned as a technology marketplace for non-medical everyday assistance. The current testable shell has basic database-backed auth, client elderly profiles, booking requests, helper applications, helper profile editing, public helper visibility, and admin helper review when Supabase is configured. It is not launched, and payments, helper acceptance, disputes, chat, notifications, ratings, subscriptions, and advanced admin workflows are not implemented.")}
+        className="max-w-5xl"
+        title={t("Trust-focused boundaries")}
+        description={t("Review what can and cannot be requested before sending a support request.")}
       />
 
-      <div className="mt-10 grid gap-4 sm:grid-cols-2">
-        {safetyPoints.map((point) => (
-          <article key={point.title} className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-stone-200">
-            <h2 className="text-xl font-bold text-forest">{t(point.title)}</h2>
-            <p className="mt-3 leading-7 text-stone-700">{t(point.text)}</p>
-          </article>
-        ))}
-      </div>
-
-      <div className="mt-10 rounded-[2rem] bg-forest p-7 text-white">
-        <h2 className="text-2xl font-bold">{t("Important positioning")}</h2>
-        <div className="mt-4 grid gap-4 text-stone-100 md:grid-cols-3">
-          <p className="leading-7">{t("Helpers are independent marketplace participants, not employees of Vnuk Pod Naem.")}</p>
-          <p className="leading-7">{t("The platform is not a medical provider, licensed care provider, or emergency service.")}</p>
-          <p className="leading-7">{t("Users should never request card PINs, passwords, cash handling, or access to valuables.")}</p>
-        </div>
-      </div>
-
-      <div className="mt-10 rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-stone-200 sm:p-6">
-        <div className="max-w-3xl">
+      <div className="mx-auto mt-10 max-w-5xl rounded-[2rem] bg-white p-5 text-center shadow-sm ring-1 ring-stone-200 sm:p-6 lg:p-8">
+        <div className="mx-auto max-w-3xl">
           <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">{t("Service scope")}</p>
           <h2 className="mt-2 text-3xl font-bold tracking-tight text-forest">{t("How requests stay practical")}</h2>
           <p className="mt-3 leading-7 text-stone-700">
@@ -81,7 +56,7 @@ export default function SafetyPage() {
 
         <div
           aria-label={t("Service scope views")}
-          className="mt-6 grid gap-2 rounded-full bg-sage/70 p-1.5 sm:inline-grid sm:min-w-[28rem] sm:grid-cols-2"
+          className="mx-auto mt-6 grid gap-2 rounded-full bg-sage/70 p-1.5 sm:inline-grid sm:min-w-[28rem] sm:grid-cols-2"
           role="tablist"
         >
           {serviceTabs.map((tab) => {
@@ -110,11 +85,11 @@ export default function SafetyPage() {
 
         <div
           aria-labelledby={`${selectedView}-services-tab`}
-          className="mt-8"
+          className="mt-8 text-left"
           id={isAllowedView ? "allowed-services-panel" : "prohibited-services-panel"}
           role="tabpanel"
         >
-          <div className="max-w-3xl">
+          <div className="mx-auto max-w-3xl text-center">
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">
               {isAllowedView ? t("What can be requested") : t("What should not be requested")}
             </p>
