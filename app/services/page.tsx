@@ -20,20 +20,19 @@ export default function ServicesPage() {
   return (
     <section className="mx-auto max-w-6xl px-5 py-12 lg:px-8 lg:py-16">
       <PageIntro
-        eyebrow={t("Services")}
         title={t("Everyday support categories")}
         description={t("Vnuk Pod Naem presents practical support types that families can understand quickly before creating a basic request. Each category is meant to describe ordinary, everyday help in a clear and limited way.")}
       />
 
-      <aside className="mt-8 rounded-[2rem] border border-forest/10 bg-sage/80 px-6 py-5 text-stone-700 shadow-sm sm:px-7 lg:flex lg:items-start lg:justify-between lg:gap-8">
-        <div className="max-w-4xl">
+      <aside className="mt-8 rounded-[2rem] border border-forest/10 bg-sage/80 px-6 py-5 text-center text-stone-700 shadow-sm sm:px-7">
+        <div className="mx-auto max-w-4xl">
           <h2 className="text-xl font-bold text-forest">{t("Current service scope")}</h2>
           <p className="mt-3 leading-7">
             {t("These service categories support the current test version. Families can browse support types and create basic requests, while live availability, helper acceptance, payments, disputes, ratings, and advanced marketplace workflows are not active yet.")}
           </p>
         </div>
         <Link
-          className="mt-4 inline-flex text-sm font-semibold text-forest underline decoration-forest/30 underline-offset-4 transition hover:text-stone-800 lg:mt-1 lg:shrink-0"
+          className="mx-auto mt-4 inline-flex justify-center text-center text-sm font-semibold text-forest underline decoration-forest/30 underline-offset-4 transition hover:text-stone-800"
           href="/safety"
         >
           {t("For detailed limits, review the Safety page.")}
