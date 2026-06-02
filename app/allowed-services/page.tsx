@@ -1,3 +1,5 @@
+import { PageIntro } from "@/components/PageIntro";
+
 const allowedServices = [
   { title: "Companionship", text: "Conversation, shared hobbies, reading together, or friendly presence." },
   { title: "Light errands", text: "Simple local tasks that do not involve valuables, cash handling, or private credentials." },
@@ -11,13 +13,11 @@ const allowedServices = [
 export default function AllowedServicesPage() {
   return (
     <section className="mx-auto max-w-6xl px-5 py-12 lg:px-8 lg:py-16">
-      <div className="max-w-3xl">
-        <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">Allowed services</p>
-        <h1 className="mt-3 text-4xl font-bold tracking-tight text-forest sm:text-5xl">What helpers may support</h1>
-        <p className="mt-5 text-lg leading-8 text-stone-700">
-          The first marketplace scope is limited to non-medical support and everyday assistance. Requests should be safe, practical, and manageable without clinical training.
-        </p>
-      </div>
+      <PageIntro
+        eyebrow="Allowed services"
+        title="What helpers may support"
+        description="The first marketplace scope is limited to non-medical support and everyday assistance. Requests should be safe, practical, and manageable without clinical training."
+      />
       <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {allowedServices.map((service) => (
           <li key={service.title} className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-stone-200">

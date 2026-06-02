@@ -1,3 +1,5 @@
+import { PageIntro } from "@/components/PageIntro";
+
 const prohibitedServices = [
   { title: "Medication management", text: "No administering, organizing, reminding as a medical responsibility, or changing medication routines." },
   { title: "Injections or wound care", text: "No clinical procedures, dressing changes, injections, or treatment tasks." },
@@ -11,13 +13,11 @@ const prohibitedServices = [
 export default function ProhibitedServicesPage() {
   return (
     <section className="mx-auto max-w-6xl px-5 py-12 lg:px-8 lg:py-16">
-      <div className="max-w-3xl">
-        <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">Prohibited services</p>
-        <h1 className="mt-3 text-4xl font-bold tracking-tight text-forest sm:text-5xl">Requests the platform must not accept</h1>
-        <p className="mt-5 text-lg leading-8 text-stone-700">
-          Vnuk Pod Naem is not a medical care service and does not support unsafe financial, credential, valuables-related, or off-platform transaction requests.
-        </p>
-      </div>
+      <PageIntro
+        eyebrow="Prohibited services"
+        title="Requests the platform must not accept"
+        description="Vnuk Pod Naem is not a medical care service and does not support unsafe financial, credential, valuables-related, or off-platform transaction requests."
+      />
       <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {prohibitedServices.map((service) => (
           <li key={service.title} className="rounded-3xl border border-clay/20 bg-white p-6 shadow-sm">

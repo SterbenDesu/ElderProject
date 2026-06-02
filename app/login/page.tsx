@@ -1,5 +1,6 @@
 "use client";
 
+import { PageIntro } from "@/components/PageIntro";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { FormEvent } from "react";
@@ -55,12 +56,11 @@ export default function LoginPage() {
 
   return (
     <section className="mx-auto max-w-5xl px-5 py-12 lg:px-8 lg:py-16">
-      <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">
-        Account access
-      </p>
-      <h1 className="mt-3 text-4xl font-bold tracking-tight text-forest sm:text-5xl">
-        Enter your profile
-      </h1>
+      <PageIntro
+        eyebrow="Account access"
+        title="Enter your profile"
+        description="Use your email and password to open your profile, browse caregivers, and manage your account actions."
+      />
       <div className="mt-8 grid gap-5 lg:grid-cols-[1fr_0.72fr]">
         <div className="rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200">
           <h2 className="text-2xl font-bold text-forest">Sign in</h2>

@@ -1,5 +1,6 @@
 "use client";
 
+import { PageIntro } from "@/components/PageIntro";
 import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -286,12 +287,11 @@ export default function DashboardPage() {
 
   return (
     <section className="mx-auto max-w-5xl px-5 py-12 lg:px-8 lg:py-16">
-      <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">
-        Account hub
-      </p>
-      <h1 className="mt-3 text-4xl font-bold tracking-tight text-forest sm:text-5xl">
-        My profile
-      </h1>
+      <PageIntro
+        eyebrow="Account hub"
+        title="My profile"
+        description="Manage your account, family support details, caregiver application, and profile shortcuts from one place."
+      />
 
       {status === "loading" ? (
         <div

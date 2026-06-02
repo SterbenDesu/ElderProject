@@ -1,5 +1,6 @@
 "use client";
 
+import { PageIntro } from "@/components/PageIntro";
 import { useState } from "react";
 import { useI18n } from "@/lib/i18n";
 
@@ -45,13 +46,11 @@ export default function SafetyPage() {
 
   return (
     <section className="mx-auto max-w-6xl px-5 py-12 lg:px-8 lg:py-16">
-      <div className="max-w-3xl">
-        <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">{t("Safety")}</p>
-        <h1 className="mt-3 text-4xl font-bold tracking-tight text-forest sm:text-5xl">{t("Trust-focused boundaries for an early marketplace shell")}</h1>
-        <p className="mt-5 text-lg leading-8 text-stone-700">
-          {t("Vnuk Pod Naem is planned as a technology marketplace for non-medical everyday assistance. The current testable shell has basic database-backed auth, client elderly profiles, booking requests, helper applications, helper profile editing, public helper visibility, and admin helper review when Supabase is configured. It is not launched, and payments, helper acceptance, disputes, chat, notifications, ratings, subscriptions, and advanced admin workflows are not implemented.")}
-        </p>
-      </div>
+      <PageIntro
+        eyebrow={t("Safety")}
+        title={t("Trust-focused boundaries for an early marketplace shell")}
+        description={t("Vnuk Pod Naem is planned as a technology marketplace for non-medical everyday assistance. The current testable shell has basic database-backed auth, client elderly profiles, booking requests, helper applications, helper profile editing, public helper visibility, and admin helper review when Supabase is configured. It is not launched, and payments, helper acceptance, disputes, chat, notifications, ratings, subscriptions, and advanced admin workflows are not implemented.")}
+      />
 
       <div className="mt-10 grid gap-4 sm:grid-cols-2">
         {safetyPoints.map((point) => (
