@@ -256,3 +256,9 @@ This pass keeps the current visual direction and focuses on language completenes
 - Terms, Privacy, and Safety card copy is expected to switch consistently between English and Bulgarian with no mixed-language static UI text.
 - Homepage hero/search card desktop width was adjusted so service labels have enough space to display fully or wrap cleanly.
 - EN/BG translation coverage is expected to include all current static UI text; user-generated profile, booking, application, and database content remains displayed as entered.
+
+## Safety service-scope tabs implemented (2026-06-02)
+
+- `/safety` now contains in-page allowed/prohibited service tabs below the existing safety introduction and positioning content.
+- Separate navigation to `/allowed-services` and `/prohibited-services` is no longer required for the main Safety page user flow, though existing routes may remain for compatibility.
+- EN/BG translation applies to both service-scope views so the Safety page should not mix languages when users switch between allowed and prohibited services.
