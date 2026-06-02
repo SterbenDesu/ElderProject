@@ -270,3 +270,10 @@ This pass keeps the current visual direction and focuses on language completenes
 - Service boundary switching lives on `/safety`, where the allowed/prohibited in-page views already explain request limits.
 - The redundant allowed/prohibited service buttons were removed from `/services` so the page does not duplicate the Safety flow.
 - The service status note is now a calm full-width top banner below the Services introduction instead of a disconnected right-side panel.
+
+## Non-homepage page intro alignment implemented (2026-06-02)
+
+- All implemented non-homepage routes should use a consistent centered page-intro treatment for the eyebrow, page title, and short description.
+- English and Bulgarian page headers should preserve the same structure, max width, centered alignment, and vertical spacing so language switching does not make pages feel like different layouts.
+- Long Bulgarian page titles should wrap cleanly within the centered intro block without overflowing or becoming left-heavy.
+- The homepage remains a separate landing/search layout with its current hero and search module, not the standardized non-homepage intro pattern.

@@ -1,5 +1,6 @@
 "use client";
 
+import { PageIntro } from "@/components/PageIntro";
 import Link from "next/link";
 import type { FormEvent } from "react";
 import { useState } from "react";
@@ -116,12 +117,11 @@ export default function SignupPage() {
 
   return (
     <section className="mx-auto max-w-5xl px-5 py-12 lg:px-8 lg:py-16">
-      <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">
-        Create your account
-      </p>
-      <h1 className="mt-3 text-4xl font-bold tracking-tight text-forest sm:text-5xl">
-        Join Vnuk Pod Naem
-      </h1>
+      <PageIntro
+        eyebrow="Create your account"
+        title="Join Vnuk Pod Naem"
+        description="Create a normal account first. If you want to offer support as a caregiver, you can apply later from your profile after signing in."
+      />
       <div className="mt-8 grid gap-5 lg:grid-cols-[1fr_0.72fr]">
         <div className="rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200">
           <h2 className="text-2xl font-bold text-forest">

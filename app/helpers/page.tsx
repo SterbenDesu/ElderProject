@@ -1,5 +1,6 @@
 "use client";
 
+import { PageIntro } from "@/components/PageIntro";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
@@ -96,11 +97,11 @@ function HelpersPageContent() {
 
   return (
     <section className="mx-auto max-w-7xl px-5 py-12 lg:px-8 lg:py-16">
-      <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">{t("Caregivers")}</p>
-      <h1 className="mt-3 text-4xl font-bold tracking-tight text-forest sm:text-5xl">{t("Certified caregivers")}</h1>
-      <p className="mt-5 max-w-3xl text-lg leading-8 text-stone-700">
-        {t("Browse approved caregiver profiles for everyday support. Longer profile information is available on each caregiver page.")}
-      </p>
+      <PageIntro
+        eyebrow={t("Caregivers")}
+        title={t("Certified caregivers")}
+        description={t("Browse approved caregiver profiles for everyday support. Longer profile information is available on each caregiver page.")}
+      />
 
       <div className="mt-8 rounded-[2rem] border border-moss/20 bg-sage/70 p-5 text-stone-700 shadow-sm">
         <h2 className="text-lg font-bold text-forest">{t("Before you choose a caregiver")}</h2>

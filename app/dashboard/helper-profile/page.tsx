@@ -1,5 +1,6 @@
 "use client";
 
+import { PageIntro } from "@/components/PageIntro";
 import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useState } from "react";
@@ -289,17 +290,11 @@ export default function HelperProfilePage() {
 
   return (
     <section className="mx-auto max-w-5xl px-5 py-12 lg:px-8 lg:py-16">
-      <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">
-        Dashboard
-      </p>
-      <h1 className="mt-3 text-4xl font-bold tracking-tight text-forest sm:text-5xl">
-        Helper profile management
-      </h1>
-      <p className="mt-5 max-w-3xl text-lg leading-8 text-stone-700">
-        Approved helpers can edit safe public profile fields here. Helpers
-        cannot change verification status, public visibility, account role, or
-        admin-only fields.
-      </p>
+      <PageIntro
+        eyebrow="Dashboard"
+        title="Helper profile management"
+        description="Approved helpers can edit safe public profile fields here. Helpers cannot change verification status, public visibility, account role, or admin-only fields."
+      />
 
       {status === "loading" || profileStatus === "loading" ? (
         <div

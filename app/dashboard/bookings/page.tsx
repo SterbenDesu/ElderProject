@@ -1,5 +1,6 @@
 "use client";
 
+import { PageIntro } from "@/components/PageIntro";
 import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -425,11 +426,11 @@ export default function BookingsPage() {
 
   return (
     <section className="mx-auto max-w-6xl px-5 py-12 lg:px-8 lg:py-16">
-      <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">Client dashboard</p>
-      <h1 className="mt-3 text-4xl font-bold tracking-tight text-forest sm:text-5xl">Booking requests</h1>
-      <p className="mt-5 max-w-3xl text-lg leading-8 text-stone-700">
-        Create and manage basic non-medical service requests, including requests for a specific visible helper. Payment processing, helper acceptance, final confirmation, and matching are not active yet.
-      </p>
+      <PageIntro
+        eyebrow="Client dashboard"
+        title="Booking requests"
+        description="Create and manage basic non-medical service requests, including requests for a specific visible helper. Payment processing, helper acceptance, final confirmation, and matching are not active yet."
+      />
 
       {status === "loading" ? (
         <div className="mt-8 rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200" role="status">

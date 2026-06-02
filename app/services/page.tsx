@@ -1,5 +1,6 @@
 "use client";
 
+import { PageIntro } from "@/components/PageIntro";
 import Link from "next/link";
 import { useI18n } from "@/lib/i18n";
 
@@ -18,15 +19,11 @@ export default function ServicesPage() {
 
   return (
     <section className="mx-auto max-w-6xl px-5 py-12 lg:px-8 lg:py-16">
-      <div className="max-w-4xl">
-        <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">{t("Services")}</p>
-        <h1 className="mt-3 max-w-3xl text-4xl font-bold tracking-tight text-forest sm:text-5xl">
-          {t("Everyday support categories")}
-        </h1>
-        <p className="mt-5 max-w-3xl text-lg leading-8 text-stone-700">
-          {t("Vnuk Pod Naem presents practical support types that families can understand quickly before creating a basic request. Each category is meant to describe ordinary, everyday help in a clear and limited way.")}
-        </p>
-      </div>
+      <PageIntro
+        eyebrow={t("Services")}
+        title={t("Everyday support categories")}
+        description={t("Vnuk Pod Naem presents practical support types that families can understand quickly before creating a basic request. Each category is meant to describe ordinary, everyday help in a clear and limited way.")}
+      />
 
       <aside className="mt-8 rounded-[2rem] border border-forest/10 bg-sage/80 px-6 py-5 text-stone-700 shadow-sm sm:px-7 lg:flex lg:items-start lg:justify-between lg:gap-8">
         <div className="max-w-4xl">

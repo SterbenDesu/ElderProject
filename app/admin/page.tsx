@@ -1,5 +1,6 @@
 "use client";
 
+import { PageIntro } from "@/components/PageIntro";
 import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
@@ -402,17 +403,11 @@ export default function AdminPage() {
 
   return (
     <section className="mx-auto max-w-6xl px-5 py-12 lg:px-8 lg:py-16">
-      <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">
-        Admin dashboard
-      </p>
-      <h1 className="mt-3 text-4xl font-bold tracking-tight text-forest sm:text-5xl">
-        Helper application review
-      </h1>
-      <p className="mt-5 max-w-3xl text-lg leading-8 text-stone-700">
-        Admin users can review helper applications, update review status, and
-        control whether approved helper profiles are publicly visible on
-        `/helpers`.
-      </p>
+      <PageIntro
+        eyebrow="Admin dashboard"
+        title="Helper application review"
+        description="Admin users can review helper applications, update review status, and control whether approved helper profiles are publicly visible on /helpers."
+      />
 
       {status === "loading" || status === "checking-profile" ? (
         <div

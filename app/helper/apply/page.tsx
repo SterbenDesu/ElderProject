@@ -1,5 +1,6 @@
 "use client";
 
+import { PageIntro } from "@/components/PageIntro";
 import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
@@ -200,11 +201,11 @@ export default function ApplyPage() {
 
   return (
     <section className="mx-auto max-w-5xl px-5 py-12 lg:px-8 lg:py-16">
-      <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">Caregiver application</p>
-      <h1 className="mt-3 text-4xl font-bold tracking-tight text-forest sm:text-5xl">Apply to become a caregiver</h1>
-      <p className="mt-5 max-w-3xl text-lg leading-8 text-stone-700">
-        Submit a caregiver application for admin review. If approved, your caregiver profile can appear on the certified caregivers list.
-      </p>
+      <PageIntro
+        eyebrow="Caregiver application"
+        title="Apply to become a caregiver"
+        description="Submit a caregiver application for admin review. If approved, your caregiver profile can appear on the certified caregivers list."
+      />
       <div className="mt-8 rounded-[2rem] border border-moss/20 bg-sage/70 p-5 text-stone-700 shadow-sm">
         <h2 className="text-xl font-bold text-forest">Before you submit</h2>
         <div className="mt-4 grid gap-5 md:grid-cols-2">
