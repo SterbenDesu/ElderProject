@@ -173,7 +173,7 @@ export const phraseTranslations: Record<string, string> = {
   "Under review": "В процес на преглед",
 
   // Public pages
-  "Allowed services": "Разрешени услуги",
+  "Allowed services": "Позволени услуги",
   "Prohibited services": "Забранени услуги",
   "Privacy policy": "Политика за поверителност",
   "Terms of service": "Условия за ползване",
@@ -184,6 +184,17 @@ export const phraseTranslations: Record<string, string> = {
   "Search, helper acceptance, payments, disputes, chat, notifications, ratings, subscriptions, and advanced marketplace workflows are still later phases.": "Търсене с реална наличност, приемане от помощник, плащания, спорове, чат, известия, оценки, абонаменти и по-сложни пазарни процеси остават за следващи етапи.",
   "No payment processing, refunds, payout handling, payment-provider integration, helper acceptance, full booking lifecycle, disputes, chat, notifications, ratings, or subscriptions are implemented yet.": "Обработка на плащания, възстановявания, изплащания, интеграция с платежен доставчик, приемане от помощник, пълен жизнен цикъл на заявка, спорове, чат, известия, оценки или абонаменти още не са реализирани.",
   "These categories support the current testable shell. Basic database-backed client booking requests are available for signed-in client accounts, while search, helper acceptance, payments, disputes, chat, notifications, ratings, subscriptions, and advanced marketplace workflows are not implemented.": "Тези категории поддържат текущата тестова версия. Основни заявки за подкрепа с база данни са налични за влезли клиентски профили, докато търсене с реална наличност, приемане от помощник, плащания, спорове, чат, известия, оценки, абонаменти и разширени пазарни процеси не са внедрени.",
+
+  "Service scope": "Обхват на услугите",
+  "How requests stay practical": "Как заявките остават практични",
+  "Some services are limited for safety and legal reasons. Use these in-page views to check what can be requested and what should not be requested.": "Някои услуги са ограничени от съображения за безопасност и законови изисквания. Използвайте тези изгледи на страницата, за да проверите какво може да се заяви и какво не трябва да се заявява.",
+  "Service scope views": "Изгледи за обхвата на услугите",
+  "What can be requested": "Какво може да се заяви",
+  "What should not be requested": "Какво не трябва да се заявява",
+  "The first marketplace scope is limited to everyday support. Requests should be safe, practical, and manageable without clinical training.": "Първоначалният обхват на платформата е ограничен до ежедневна подкрепа. Заявките трябва да са безопасни, практични и изпълними без клинично обучение.",
+  "Vnuk Pod Naem does not support unsafe medical, financial, credential, valuables-related, or off-platform transaction requests.": "Внук Под Наем не поддържа рискови заявки, свързани с медицински задачи, финанси, данни за достъп, ценности или плащания извън платформата.",
+  "If a request starts to involve health decisions, medication, emergency response, money access, passwords, valuables, or legal authority, it belongs outside this planned marketplace scope.": "Ако заявката започне да включва здравни решения, лекарства, спешна реакция, достъп до пари, пароли, ценности или правни правомощия, тя е извън планирания обхват на платформата.",
+  "Future product flows should direct users toward appropriate professional, emergency, legal, or financial support when a request falls outside everyday assistance.": "Бъдещите продуктови процеси трябва да насочват потребителите към подходяща професионална, спешна, правна или финансова подкрепа, когато заявката е извън ежедневната помощ.",
   "Vnuk Pod Naem is planned as a technology marketplace for non-medical everyday assistance. The current testable shell has basic database-backed auth, client elderly profiles, booking requests, helper applications, helper profile editing, public helper visibility, and admin helper review when Supabase is configured. It is not launched, and payments, helper acceptance, disputes, chat, notifications, ratings, subscriptions, and advanced admin workflows are not implemented.": "Внук Под Наем е планиран като технологична платформа за ежедневна подкрепа. Текущата тестова версия има основна автентикация с база данни, клиентски профили на възрастни хора, заявки за подкрепа, кандидатури за помощници, редактиране на профил на помощник, публична видимост на помощници и администраторски преглед при конфигуриран Supabase. Услугата още не е стартирана, а плащания, приемане от помощник, спорове, чат, известия, оценки, абонаменти и разширени администраторски процеси не са внедрени.",
 
   "Vnuk Pod Naem": "Внук Под Наем",
@@ -504,7 +515,7 @@ export const phraseTranslations: Record<string, string> = {
   "Important positioning": "Важна рамка",
   "The platform is not a medical provider, licensed care provider, or emergency service.": "Платформата не е медицински доставчик, лицензиран доставчик на грижи или спешна услуга.",
   "Users should never request card PINs, passwords, cash handling, or access to valuables.": "Потребителите никога не трябва да искат ПИН кодове, пароли, работа с пари в брой или достъп до ценности.",
-  "Review allowed services": "Вижте разрешените услуги",
+  "Review allowed services": "Вижте позволените услуги",
   "Review prohibited services": "Вижте забранените услуги",
   "Non-binary": "Небинарен пол",
   "Caregiver applications": "Кандидатури за помощник",
