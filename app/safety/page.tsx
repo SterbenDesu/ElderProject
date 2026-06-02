@@ -47,8 +47,7 @@ export default function SafetyPage() {
 
       <div className="mx-auto mt-10 max-w-5xl rounded-[2rem] bg-white p-5 text-center shadow-sm ring-1 ring-stone-200 sm:p-6 lg:p-8">
         <div className="mx-auto max-w-3xl">
-          <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">{t("Service scope")}</p>
-          <h2 className="mt-2 text-3xl font-bold tracking-tight text-forest">{t("How requests stay practical")}</h2>
+          <h2 className="text-3xl font-bold tracking-tight text-forest">{t("How requests stay practical")}</h2>
           <p className="mt-3 leading-7 text-stone-700">
             {t("Some services are limited for safety and legal reasons. Use these in-page views to check what can be requested and what should not be requested.")}
           </p>
@@ -90,10 +89,7 @@ export default function SafetyPage() {
           role="tabpanel"
         >
           <div className="mx-auto max-w-3xl text-center">
-            <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">
-              {isAllowedView ? t("What can be requested") : t("What should not be requested")}
-            </p>
-            <h3 className="mt-2 text-2xl font-bold text-forest">
+            <h3 className="text-2xl font-bold text-forest">
               {isAllowedView ? t("What helpers may support") : t("Requests the platform must not accept")}
             </h3>
             <p className="mt-3 leading-7 text-stone-700">

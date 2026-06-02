@@ -187,12 +187,9 @@ export const phraseTranslations: Record<string, string> = {
 
   "Trust-focused boundaries": "Граници, които подкрепят доверието",
   "Review what can and cannot be requested before sending a support request.": "Прегледайте какво може и какво не трябва да се заявява, преди да изпратите заявка за подкрепа.",
-  "Service scope": "Обхват на услугите",
   "How requests stay practical": "Как заявките остават практични",
   "Some services are limited for safety and legal reasons. Use these in-page views to check what can be requested and what should not be requested.": "Някои услуги са ограничени от съображения за безопасност и законови изисквания. Използвайте тези изгледи на страницата, за да проверите какво може да се заяви и какво не трябва да се заявява.",
   "Service scope views": "Изгледи за обхвата на услугите",
-  "What can be requested": "Какво може да се заяви",
-  "What should not be requested": "Какво не трябва да се заявява",
   "The first marketplace scope is limited to everyday support. Requests should be safe, practical, and manageable without clinical training.": "Първоначалният обхват на платформата е ограничен до ежедневна подкрепа. Заявките трябва да са безопасни, практични и изпълними без клинично обучение.",
   "Vnuk Pod Naem does not support unsafe medical, financial, credential, valuables-related, or off-platform transaction requests.": "Внук Под Наем не поддържа рискови заявки, свързани с медицински задачи, финанси, данни за достъп, ценности или плащания извън платформата.",
   "If a request starts to involve health decisions, medication, emergency response, money access, passwords, valuables, or legal authority, it belongs outside this planned marketplace scope.": "Ако заявката започне да включва здравни решения, лекарства, спешна реакция, достъп до пари, пароли, ценности или правни правомощия, тя е извън планирания обхват на платформата.",
