@@ -262,3 +262,11 @@ This pass keeps the current visual direction and focuses on language completenes
 - `/safety` now contains in-page allowed/prohibited service tabs below the existing safety introduction and positioning content.
 - Separate navigation to `/allowed-services` and `/prohibited-services` is no longer required for the main Safety page user flow, though existing routes may remain for compatibility.
 - EN/BG translation applies to both service-scope views so the Safety page should not mix languages when users switch between allowed and prohibited services.
+
+
+## Services page scope cleanup (2026-06-02)
+
+- `/services` now focuses only on explaining everyday support categories in a clear, balanced layout.
+- Service boundary switching lives on `/safety`, where the allowed/prohibited in-page views already explain request limits.
+- The redundant allowed/prohibited service buttons were removed from `/services` so the page does not duplicate the Safety flow.
+- The service status note is now a calm full-width top banner below the Services introduction instead of a disconnected right-side panel.
