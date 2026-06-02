@@ -259,7 +259,9 @@ This pass keeps the current visual direction and focuses on language completenes
 
 ## Safety service-scope tabs implemented (2026-06-02)
 
-- `/safety` now contains in-page allowed/prohibited service tabs below the existing safety introduction and positioning content.
+- `/safety` now contains in-page allowed/prohibited service tabs as the main page flow.
+- The Safety page was simplified by removing the large positioning section and the four introductory information cards.
+- Safety now focuses on a centered allowed/prohibited service-scope switcher with short intro copy and balanced content.
 - Separate navigation to `/allowed-services` and `/prohibited-services` is no longer required for the main Safety page user flow, though existing routes may remain for compatibility.
 - EN/BG translation applies to both service-scope views so the Safety page should not mix languages when users switch between allowed and prohibited services.
 

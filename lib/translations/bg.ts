@@ -185,6 +185,8 @@ export const phraseTranslations: Record<string, string> = {
   "No payment processing, refunds, payout handling, payment-provider integration, helper acceptance, full booking lifecycle, disputes, chat, notifications, ratings, or subscriptions are implemented yet.": "Обработка на плащания, възстановявания, изплащания, интеграция с платежен доставчик, приемане от помощник, пълен жизнен цикъл на заявка, спорове, чат, известия, оценки или абонаменти още не са реализирани.",
   "These categories support the current testable shell. Basic database-backed client booking requests are available for signed-in client accounts, while search, helper acceptance, payments, disputes, chat, notifications, ratings, subscriptions, and advanced marketplace workflows are not implemented.": "Тези категории поддържат текущата тестова версия. Основни заявки за подкрепа с база данни са налични за влезли клиентски профили, докато търсене с реална наличност, приемане от помощник, плащания, спорове, чат, известия, оценки, абонаменти и разширени пазарни процеси не са внедрени.",
 
+  "Trust-focused boundaries": "Граници, които подкрепят доверието",
+  "Review what can and cannot be requested before sending a support request.": "Прегледайте какво може и какво не трябва да се заявява, преди да изпратите заявка за подкрепа.",
   "Service scope": "Обхват на услугите",
   "How requests stay practical": "Как заявките остават практични",
   "Some services are limited for safety and legal reasons. Use these in-page views to check what can be requested and what should not be requested.": "Някои услуги са ограничени от съображения за безопасност и законови изисквания. Използвайте тези изгледи на страницата, за да проверите какво може да се заяви и какво не трябва да се заявява.",
