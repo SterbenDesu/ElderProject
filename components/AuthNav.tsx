@@ -74,6 +74,19 @@ export function AuthNav({
 
     let isMounted = true;
 
+    // Safety net: the auth state must resolve quickly so the loading
+    // indicator never gets stuck visible. If getSession() is slow or never
+    // resolves (e.g. a network/CORS failure that rejects or hangs), fall back
+    // to the signed-out view within 1 second instead of showing a spinner
+    // forever.
+    const loadingFallback = setTimeout(() => {
+      if (!isMounted) {
+        return;
+      }
+
+      setStatus((current) => (current === "loading" ? "signed-out" : current));
+    }, 1000);
+
     async function loadAccount(userId: string, email: string | null) {
       if (!supabase) {
         return;
@@ -92,21 +105,33 @@ export function AuthNav({
       });
     }
 
-    supabase.auth.getSession().then(({ data }) => {
-      if (!isMounted) {
-        return;
-      }
+    supabase.auth
+      .getSession()
+      .then(({ data }) => {
+        if (!isMounted) {
+          return;
+        }
 
-      if (data.session?.user) {
-        setStatus("signed-in");
-        setMessage(null);
-        void loadAccount(data.session.user.id, data.session.user.email ?? null);
-      } else {
+        if (data.session?.user) {
+          setStatus("signed-in");
+          setMessage(null);
+          void loadAccount(data.session.user.id, data.session.user.email ?? null);
+        } else {
+          setStatus("signed-out");
+          setAccount({ email: null, displayName: null, role: null });
+          setMessage(null);
+        }
+      })
+      .catch(() => {
+        if (!isMounted) {
+          return;
+        }
+
+        // Never leave the user stuck on the loading indicator if the session
+        // lookup rejects. Treat an unreadable session as signed-out.
         setStatus("signed-out");
         setAccount({ email: null, displayName: null, role: null });
-        setMessage(null);
-      }
-    });
+      });
 
     const {
       data: { subscription },
@@ -125,6 +150,7 @@ export function AuthNav({
 
     return () => {
       isMounted = false;
+      clearTimeout(loadingFallback);
       subscription.unsubscribe();
     };
   }, [router]);
@@ -177,7 +203,21 @@ export function AuthNav({
   }
 
   if (status === "loading") {
-    return <span className="px-4 py-2.5 text-sm font-semibold text-stone-500">{t("Checking account…")}</span>;
+    // A subtle, accessible spinner instead of raw status text. This resolves
+    // within ~1s (see the loading fallback in the effect above), so users
+    // never see a permanent "Checking account…" label.
+    return (
+      <span
+        className="flex min-h-12 items-center px-3 py-2.5"
+        role="status"
+        aria-label={t("Checking account…")}
+      >
+        <span
+          aria-hidden="true"
+          className="size-5 animate-spin rounded-full border-2 border-stone-300 border-t-forest"
+        />
+      </span>
+    );
   }
 
   if (status === "signed-in") {

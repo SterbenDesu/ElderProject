@@ -129,6 +129,29 @@ function SiteShellContent({ children }: { children: ReactNode }) {
             <p className="mt-3 max-w-xl leading-7">
               {shellText.footerDescription}
             </p>
+            {/* Placeholder social links — update hrefs once official accounts exist. */}
+            <div className="mt-5 flex items-center gap-3">
+              <a
+                href="#"
+                aria-label="Facebook"
+                className="grid size-10 place-items-center rounded-full border border-stone-200 bg-white text-forest shadow-sm transition hover:border-moss/40 hover:bg-sage"
+              >
+                <svg viewBox="0 0 24 24" className="size-5" fill="currentColor" aria-hidden="true">
+                  <path d="M14 9h2.5l.5-3H14V4.5c0-.9.3-1.5 1.6-1.5H17V.3C16.7.2 15.8.1 14.7.1 12.3.1 10.7 1.6 10.7 4.2V6H8v3h2.7v9H14V9Z" />
+                </svg>
+              </a>
+              <a
+                href="#"
+                aria-label="Instagram"
+                className="grid size-10 place-items-center rounded-full border border-stone-200 bg-white text-forest shadow-sm transition hover:border-moss/40 hover:bg-sage"
+              >
+                <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                  <rect x="3" y="3" width="18" height="18" rx="5" />
+                  <circle cx="12" cy="12" r="4" />
+                  <circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none" />
+                </svg>
+              </a>
+            </div>
           </div>
           <div>
             <h2 className="text-sm font-bold uppercase tracking-[0.16em] text-forest">

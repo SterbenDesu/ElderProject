@@ -3,18 +3,64 @@ import { HomeSearchCard, ServiceIcon } from "@/components/HomeSearchCard";
 
 const howItWorks = [
   {
+    icon: "calendar",
     title: "Share the day you have in mind",
     text: "Choose a city, date or date range, and the everyday support that would make life easier.",
   },
   {
+    icon: "users",
     title: "Browse reviewed caregivers",
     text: "Use the caregiver listings to compare visible profiles and find a calm, practical match for your family.",
   },
   {
+    icon: "check",
     title: "Continue from your account",
     text: "Booking requests are handled after sign in. Final reservation and payment steps will come later.",
   },
-];
+] as const;
+
+type StepIconName = (typeof howItWorks)[number]["icon"];
+
+function StepIcon({ name }: { name: StepIconName }) {
+  const commonProps = {
+    className: "size-6",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 2,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+    "aria-hidden": true,
+  };
+
+  if (name === "calendar") {
+    return (
+      <svg {...commonProps}>
+        <rect x="3" y="5" width="18" height="16" rx="2" />
+        <path d="M3 9h18" />
+        <path d="M8 3v4M16 3v4" />
+      </svg>
+    );
+  }
+
+  if (name === "users") {
+    return (
+      <svg {...commonProps}>
+        <circle cx="9" cy="8" r="3.5" />
+        <path d="M3.5 20c0-3.6 2.5-6 5.5-6s5.5 2.4 5.5 6" />
+        <path d="M16 5.2a3.5 3.5 0 0 1 0 6.6" />
+        <path d="M17.5 14.2c2.3.6 3.9 2.7 3.9 5.8" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg {...commonProps}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="m8.5 12.5 2.5 2.5 4.5-5" />
+    </svg>
+  );
+}
 
 const popularServices = [
   {
@@ -77,7 +123,7 @@ export default function Home() {
           className="absolute right-0 top-10 size-72 rounded-full bg-clay/10 blur-3xl"
         />
         <div className="mx-auto grid max-w-7xl gap-8 px-5 py-14 lg:grid-cols-[minmax(0,0.92fr)_minmax(31rem,1.08fr)] lg:px-8 lg:py-20 xl:grid-cols-[minmax(0,0.9fr)_minmax(36rem,1.1fr)]">
-          <div className="relative z-10 flex flex-col justify-center">
+          <div className="animate-fade-up relative z-10 flex flex-col justify-center">
             <h1 className="max-w-4xl text-4xl font-extrabold tracking-[-0.04em] text-forest sm:text-5xl lg:text-6xl">
               Find trusted everyday support for the people you love.
             </h1>
@@ -108,7 +154,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="relative z-10 grid w-full content-center gap-5 justify-self-center lg:max-w-[38rem] lg:justify-self-end">
+          <div className="animate-fade-up relative z-10 grid w-full content-center gap-5 justify-self-center lg:max-w-[38rem] lg:justify-self-end" style={{ animationDelay: "120ms" }}>
             <HomeSearchCard />
           </div>
         </div>
@@ -140,11 +186,17 @@ export default function Home() {
           {howItWorks.map((step, index) => (
             <article
               key={step.title}
-              className="rounded-[2rem] bg-white p-6 shadow-sm shadow-stone-200/60 ring-1 ring-stone-200 transition hover:-translate-y-1 hover:shadow-lg hover:shadow-stone-200/80"
+              className="animate-fade-up rounded-[2rem] bg-white p-6 shadow-sm shadow-stone-200/60 ring-1 ring-stone-200 transition hover:-translate-y-1 hover:shadow-lg hover:shadow-stone-200/80"
+              style={{ animationDelay: `${index * 90}ms` }}
             >
-              <span className="grid size-12 place-items-center rounded-2xl bg-sage text-base font-bold text-forest">
-                {index + 1}
-              </span>
+              <div className="flex items-center gap-3">
+                <span className="grid size-12 place-items-center rounded-2xl bg-forest text-white">
+                  <StepIcon name={step.icon} />
+                </span>
+                <span className="grid size-8 place-items-center rounded-full bg-sage text-sm font-bold text-forest">
+                  {index + 1}
+                </span>
+              </div>
               <h3 className="mt-5 text-xl font-extrabold text-forest">
                 {step.title}
               </h3>
@@ -178,7 +230,7 @@ export default function Home() {
             {popularServices.map((service) => (
               <article
                 key={service.title}
-                className="group rounded-[2rem] bg-cream p-7 shadow-sm shadow-stone-200/60 ring-1 ring-stone-200 transition hover:-translate-y-1 hover:bg-white hover:shadow-lg hover:shadow-stone-200/80"
+                className="group animate-fade-up rounded-[2rem] bg-cream p-7 shadow-sm shadow-stone-200/60 ring-1 ring-stone-200 transition hover:-translate-y-1 hover:bg-white hover:shadow-lg hover:shadow-stone-200/80"
               >
                 <span className="grid size-12 place-items-center rounded-2xl bg-white text-forest shadow-sm ring-1 ring-stone-100">
                   <ServiceIcon name={service.icon} className="size-6" />
@@ -230,36 +282,54 @@ export default function Home() {
       </section>
 
       <section
-        className="mx-auto grid max-w-6xl gap-5 px-5 pb-16 lg:grid-cols-[1.05fr_0.95fr] lg:px-8"
-        aria-label="Caregiver and safety information"
+        className="relative isolate overflow-hidden bg-[linear-gradient(120deg,#f6e2c8_0%,#f3d3ad_45%,#e9b486_100%)]"
+        aria-labelledby="become-a-caregiver"
       >
-        <article className="relative overflow-hidden rounded-[2rem] bg-white p-7 shadow-sm ring-1 ring-stone-200 sm:p-8">
-          <div
-            aria-hidden="true"
-            className="absolute -right-10 -top-10 size-32 rounded-full bg-sage"
-          />
-          <div className="relative">
-            <p className="text-sm font-bold uppercase tracking-[0.18em] text-clay">
-              Become a caregiver
-            </p>
-            <h2 className="mt-3 text-3xl font-bold text-forest">
-              Apply when you are ready to offer support
-            </h2>
-            <p className="mt-4 leading-8 text-stone-700">
-              Everyone starts with a normal account. People who want to offer
-              support can apply later, and caregiver status depends on admin
-              review before becoming visible.
-            </p>
+        <div
+          aria-hidden="true"
+          className="absolute -left-16 -top-16 size-72 rounded-full bg-white/30 blur-3xl"
+        />
+        <div
+          aria-hidden="true"
+          className="absolute -bottom-24 right-0 size-80 rounded-full bg-clay/20 blur-3xl"
+        />
+        <div className="relative mx-auto flex max-w-5xl flex-col items-center gap-6 px-5 py-16 text-center lg:px-8 lg:py-20">
+          <p className="text-sm font-bold uppercase tracking-[0.18em] text-clay">
+            Become a caregiver
+          </p>
+          <h2
+            id="become-a-caregiver"
+            className="max-w-3xl text-3xl font-extrabold tracking-[-0.03em] text-forest sm:text-4xl lg:text-5xl"
+          >
+            Turn the time you give into trusted everyday support.
+          </h2>
+          <p className="max-w-2xl text-lg leading-8 text-stone-800">
+            Everyone starts with a normal account. When you are ready to offer
+            companionship, errands, or practical help, apply in minutes —
+            caregivers become visible only after a calm admin review.
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/signup"
-              className="mt-6 inline-flex min-h-12 items-center rounded-full bg-forest px-5 py-3 font-semibold text-white transition hover:bg-stone-800"
+              className="inline-flex min-h-12 items-center rounded-full bg-forest px-7 py-3 text-base font-extrabold text-white shadow-lg shadow-clay/30 transition hover:-translate-y-0.5 hover:bg-stone-800 hover:shadow-xl active:translate-y-0"
             >
-              Create account
+              Create your account
+            </Link>
+            <Link
+              href="/helper/apply"
+              className="inline-flex min-h-12 items-center rounded-full border border-forest/20 bg-white/80 px-7 py-3 text-base font-extrabold text-forest shadow-sm transition hover:-translate-y-0.5 hover:bg-white active:translate-y-0"
+            >
+              See how applying works
             </Link>
           </div>
-        </article>
+        </div>
+      </section>
 
-        <article className="rounded-[2rem] bg-sage p-7 shadow-sm ring-1 ring-stone-200 sm:p-8">
+      <section
+        className="mx-auto max-w-6xl px-5 py-16 lg:px-8"
+        aria-label="Safety information"
+      >
+        <article className="rounded-[2.5rem] bg-sage p-7 shadow-sm ring-1 ring-stone-200 sm:p-9 lg:p-11">
           <p className="text-sm font-bold uppercase tracking-[0.18em] text-clay">
             Calm safety note
           </p>

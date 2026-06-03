@@ -75,16 +75,48 @@ function HelpersPageContent() {
       return;
     }
 
-    loadVisibleVerifiedHelperProfiles(supabase).then((result) => {
-      if (result.errorMessage) {
-        setStatus("error");
-        setMessage(`Could not load certified caregiver profiles: ${result.errorMessage}. Confirm the helper_profiles RLS policy is applied and only visible approved caregivers are public.`);
+    let isMounted = true;
+
+    // Safety net: never let the page sit on the loading spinner forever. If the
+    // query is slow or its promise rejects (network/CORS failure), resolve to a
+    // friendly empty state instead of an infinite loader.
+    const loadingFallback = setTimeout(() => {
+      if (!isMounted) {
         return;
       }
-      setHelperProfiles(result.helperProfiles);
-      setStatus("loaded");
-      setMessage(null);
-    });
+
+      setStatus((current) => (current === "loading" ? "loaded" : current));
+    }, 8000);
+
+    loadVisibleVerifiedHelperProfiles(supabase)
+      .then((result) => {
+        if (!isMounted) {
+          return;
+        }
+
+        if (result.errorMessage) {
+          setStatus("error");
+          setMessage(`Could not load certified caregiver profiles: ${result.errorMessage}. Confirm the helper_profiles RLS policy is applied and only visible approved caregivers are public.`);
+          return;
+        }
+        setHelperProfiles(result.helperProfiles);
+        setStatus("loaded");
+        setMessage(null);
+      })
+      .catch((error: unknown) => {
+        if (!isMounted) {
+          return;
+        }
+
+        const reason = error instanceof Error ? error.message : "Unknown error";
+        setStatus("error");
+        setMessage(`Could not load certified caregiver profiles: ${reason}. Confirm the helper_profiles RLS policy is applied and only visible approved caregivers are public.`);
+      });
+
+    return () => {
+      isMounted = false;
+      clearTimeout(loadingFallback);
+    };
   }, []);
 
   const visibleHelperProfiles = useMemo(() => {
@@ -139,7 +171,13 @@ function HelpersPageContent() {
         {status === "loaded" && visibleHelperProfiles.length === 0 ? (
           <div className="rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200">
             <h2 className="text-2xl font-bold text-forest">{t("No certified caregivers to show yet")}</h2>
-            <p className="mt-3 leading-7">{criteria.city ? `${t("No certified caregivers are listed in")} ${criteria.city} ${t("yet.")}` : t("Approved caregivers will appear here after admin review and public visibility are complete.")}</p>
+            <p className="mt-3 leading-7">{criteria.city ? `${t("No caregivers are available in")} ${criteria.city} ${t("yet. Check back soon.")}` : t("No caregivers are available in your area yet. Check back soon.")}</p>
+            <Link
+              href="/"
+              className="mt-6 inline-flex min-h-12 items-center rounded-full bg-forest px-5 py-3 font-semibold text-white transition hover:bg-stone-800"
+            >
+              {t("Back to homepage")}
+            </Link>
           </div>
         ) : null}
         {status === "loaded" && visibleHelperProfiles.length > 0 ? (
