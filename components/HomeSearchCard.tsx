@@ -3,6 +3,18 @@
 import type { FormEvent } from "react";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import {
+  Check,
+  Clock,
+  Heart,
+  Home,
+  MapPin,
+  Plus,
+  Search,
+  ShoppingCart,
+  Sparkles,
+  type LucideIcon,
+} from "lucide-react";
 import { bulgariaCities } from "@/lib/bulgariaCities";
 import { useI18n } from "@/lib/i18n";
 
@@ -17,95 +29,24 @@ export const serviceOptions = [
 
 type ServiceIconName = (typeof serviceOptions)[number]["icon"];
 
-export function ServiceIcon({ name, className = "size-5" }: { name: ServiceIconName; className?: string }) {
-  const commonProps = {
-    className,
-    viewBox: "0 0 24 24",
-    fill: "none",
-    stroke: "currentColor",
-    strokeWidth: 2,
-    strokeLinecap: "round" as const,
-    strokeLinejoin: "round" as const,
-    "aria-hidden": true,
-  };
+const serviceIconMap: Record<ServiceIconName, LucideIcon> = {
+  home: Home,
+  clock: Clock,
+  cart: ShoppingCart,
+  spark: Sparkles,
+  heart: Heart,
+  pin: MapPin,
+};
 
-  if (name === "home") {
-    return (
-      <svg {...commonProps}>
-        <path d="m3 11 9-7 9 7" />
-        <path d="M5 10v10h14V10" />
-        <path d="M10 20v-6h4v6" />
-      </svg>
-    );
-  }
-
-  if (name === "clock") {
-    return (
-      <svg {...commonProps}>
-        <circle cx="12" cy="12" r="8" />
-        <path d="M12 8v5l3 2" />
-        <path d="M4 4.5 2.5 6" />
-        <path d="M20 4.5 21.5 6" />
-      </svg>
-    );
-  }
-
-  if (name === "cart") {
-    return (
-      <svg {...commonProps}>
-        <path d="M5 6h16l-2 8H7L5 3H3" />
-        <circle cx="9" cy="20" r="1.5" />
-        <circle cx="18" cy="20" r="1.5" />
-      </svg>
-    );
-  }
-
-  if (name === "spark") {
-    return (
-      <svg {...commonProps}>
-        <path d="M4 18h16" />
-        <path d="M7 18v-7a5 5 0 0 1 10 0v7" />
-        <path d="M9 14h6" />
-        <path d="M12 3v2" />
-        <path d="M19 5.5 17.5 7" />
-        <path d="M5 5.5 6.5 7" />
-      </svg>
-    );
-  }
-
-  if (name === "heart") {
-    return (
-      <svg {...commonProps}>
-        <path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z" />
-        <path d="M9 13h6" />
-      </svg>
-    );
-  }
-
-  return (
-    <svg {...commonProps}>
-      <path d="M12 21s6-5.2 6-11a6 6 0 1 0-12 0c0 5.8 6 11 6 11Z" />
-      <circle cx="12" cy="10" r="2" />
-      <path d="M5 21h14" />
-    </svg>
-  );
-}
-
-function SelectionIcon({ selected }: { selected: boolean }) {
-  return (
-    <svg
-      viewBox="0 0 20 20"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-      className="size-3.5"
-    >
-      {selected ? <path d="m5 10 3 3 7-7" /> : <path d="M10 5v10M5 10h10" />}
-    </svg>
-  );
+export function ServiceIcon({
+  name,
+  className = "size-5",
+}: {
+  name: ServiceIconName;
+  className?: string;
+}) {
+  const Icon = serviceIconMap[name];
+  return <Icon className={className} strokeWidth={1.75} aria-hidden="true" />;
 }
 
 export function formatServiceLabel(serviceValue: string, translator?: (text: string) => string) {
@@ -170,15 +111,15 @@ export function HomeSearchCard() {
   }
 
   return (
-    <div className="w-full rounded-[2rem] border border-white/90 bg-white/95 p-5 shadow-2xl shadow-stone-300/45 backdrop-blur transition hover:shadow-stone-300/60 sm:p-6">
-      <div className="rounded-[1.5rem] bg-gradient-to-br from-sage via-cream to-white p-5 ring-1 ring-white/80 sm:p-7">
-        <p className="text-sm font-extrabold uppercase tracking-[0.18em] text-clay">
+    <div className="w-full rounded-[2rem] border border-white bg-white/95 p-5 shadow-2xl shadow-espresso/15 backdrop-blur transition hover:shadow-espresso/20 sm:p-6">
+      <div className="rounded-[1.5rem] bg-gradient-to-br from-ivory via-linen to-white p-5 ring-1 ring-sand/70 sm:p-7">
+        <p className="text-sm font-bold uppercase tracking-[0.18em] text-terracotta">
           {t("Find support")}
         </p>
-        <h2 className="mt-3 text-2xl font-extrabold tracking-[-0.02em] text-forest sm:text-3xl">
+        <h2 className="mt-3 font-display text-2xl font-extrabold tracking-[-0.02em] text-espresso sm:text-3xl">
           {t("What kind of help do you need?")}
         </h2>
-        <p className="mt-4 max-w-2xl text-base leading-7 text-stone-700">
+        <p className="mt-4 max-w-2xl text-base leading-7 text-espresso-light">
           {t(
             "Choose one or more services, a city, and a date range. We’ll show caregivers using the information that is currently available.",
           )}
@@ -186,7 +127,7 @@ export function HomeSearchCard() {
 
         <form onSubmit={handleSubmit} className="mt-6 grid gap-5">
           <fieldset>
-            <legend className="text-sm font-extrabold text-stone-700">
+            <legend className="text-sm font-bold text-espresso">
               {t("Service types")}
             </legend>
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
@@ -203,12 +144,12 @@ export function HomeSearchCard() {
                       onChange={() => toggleService(service.value)}
                       className="peer sr-only"
                     />
-                    <span className="group grid min-h-20 grid-cols-[2.25rem_minmax(0,1fr)_1.5rem] items-center gap-2.5 rounded-2xl border border-stone-200 bg-white px-3 py-3 text-[0.83rem] font-extrabold text-stone-700 shadow-sm shadow-stone-200/60 transition duration-150 peer-checked:border-forest peer-checked:bg-forest peer-checked:text-white peer-checked:shadow-lg peer-checked:shadow-forest/20 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-clay hover:border-moss/50 hover:bg-sage hover:shadow-md active:translate-y-0 sm:grid-cols-[2.5rem_minmax(0,1fr)_1.5rem] sm:gap-3 sm:px-4 sm:text-sm">
+                    <span className="group grid min-h-20 grid-cols-[2.25rem_minmax(0,1fr)_1.5rem] items-center gap-2.5 rounded-2xl border border-sand bg-white px-3 py-3 text-[0.83rem] font-bold text-espresso shadow-sm shadow-espresso/5 transition duration-200 peer-checked:border-terracotta peer-checked:bg-terracotta peer-checked:text-white peer-checked:shadow-lg peer-checked:shadow-terracotta/30 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-terracotta hover:-translate-y-0.5 hover:border-terracotta/50 hover:bg-ivory hover:shadow-md active:translate-y-0 sm:grid-cols-[2.5rem_minmax(0,1fr)_1.5rem] sm:gap-3 sm:px-4 sm:text-sm">
                       <span
-                        className={`grid size-10 shrink-0 place-items-center rounded-xl ring-1 ring-stone-100 transition group-hover:bg-white group-hover:text-forest ${
+                        className={`grid size-10 shrink-0 place-items-center rounded-xl ring-1 ring-sand/70 transition group-hover:bg-white group-hover:text-terracotta ${
                           isSelected
-                            ? "bg-white text-forest"
-                            : "bg-cream text-forest"
+                            ? "bg-white text-terracotta"
+                            : "bg-linen text-terracotta"
                         }`}
                       >
                         <ServiceIcon name={service.icon} />
@@ -218,11 +159,15 @@ export function HomeSearchCard() {
                         aria-hidden="true"
                         className={`ml-auto grid size-6 shrink-0 place-items-center rounded-full border border-current transition ${
                           isSelected
-                            ? "bg-white text-forest opacity-100"
-                            : "bg-white/10 text-current opacity-80"
+                            ? "bg-white text-terracotta opacity-100"
+                            : "bg-white/10 text-current opacity-70"
                         }`}
                       >
-                        <SelectionIcon selected={isSelected} />
+                        {isSelected ? (
+                          <Check className="size-3.5" strokeWidth={2.5} aria-hidden="true" />
+                        ) : (
+                          <Plus className="size-3.5" strokeWidth={2.5} aria-hidden="true" />
+                        )}
                       </span>
                     </span>
                   </label>
@@ -232,18 +177,18 @@ export function HomeSearchCard() {
           </fieldset>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <label className="grid gap-2 text-sm font-extrabold text-stone-700">
+            <label className="grid gap-2 text-sm font-bold text-espresso">
               {t("Start date")}
               <input
                 name="startDate"
                 type="date"
                 value={startDate}
                 onChange={(event) => setStartDate(event.target.value)}
-                className="min-h-[3.25rem] rounded-2xl border border-stone-200 bg-white px-4 py-3 text-base font-normal text-stone-900 shadow-inner shadow-stone-100 transition focus:border-clay focus:outline-none focus:ring-2 focus:ring-clay/20"
+                className="min-h-[3.25rem] rounded-2xl border border-sand bg-white px-4 py-3 text-base font-normal text-espresso shadow-inner shadow-linen transition focus:border-terracotta focus:outline-none focus:ring-2 focus:ring-terracotta/25"
               />
             </label>
 
-            <label className="grid gap-2 text-sm font-extrabold text-stone-700">
+            <label className="grid gap-2 text-sm font-bold text-espresso">
               {t("End date")}
               <input
                 name="endDate"
@@ -251,19 +196,19 @@ export function HomeSearchCard() {
                 value={normalizedEndDate}
                 min={startDate || undefined}
                 onChange={(event) => setEndDate(event.target.value)}
-                className="min-h-[3.25rem] rounded-2xl border border-stone-200 bg-white px-4 py-3 text-base font-normal text-stone-900 shadow-inner shadow-stone-100 transition focus:border-clay focus:outline-none focus:ring-2 focus:ring-clay/20"
+                className="min-h-[3.25rem] rounded-2xl border border-sand bg-white px-4 py-3 text-base font-normal text-espresso shadow-inner shadow-linen transition focus:border-terracotta focus:outline-none focus:ring-2 focus:ring-terracotta/25"
               />
             </label>
           </div>
 
-          <label className="grid gap-2 text-sm font-extrabold text-stone-700">
+          <label className="grid gap-2 text-sm font-bold text-espresso">
             {t("City")}
             <select
               name="city"
               value={city}
               onChange={(event) => setCity(event.target.value)}
               autoComplete="address-level2"
-              className="min-h-[3.25rem] rounded-2xl border border-stone-200 bg-white px-4 py-3 text-base font-normal text-stone-900 shadow-inner shadow-stone-100 transition focus:border-clay focus:outline-none focus:ring-2 focus:ring-clay/20"
+              className="min-h-[3.25rem] rounded-2xl border border-sand bg-white px-4 py-3 text-base font-normal text-espresso shadow-inner shadow-linen transition focus:border-terracotta focus:outline-none focus:ring-2 focus:ring-terracotta/25"
             >
               <option value="">{t("Any listed city")}</option>
               {bulgariaCities.map((cityOption) => (
@@ -276,8 +221,9 @@ export function HomeSearchCard() {
 
           <button
             type="submit"
-            className="inline-flex min-h-14 items-center justify-center rounded-full bg-forest px-6 py-3 text-base font-extrabold text-white shadow-lg shadow-forest/20 transition hover:-translate-y-0.5 hover:bg-stone-800 hover:shadow-xl hover:shadow-forest/25 active:translate-y-0"
+            className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-terracotta px-6 py-3 text-base font-bold text-white shadow-lg shadow-terracotta/30 transition hover:-translate-y-0.5 hover:bg-terracotta-dark hover:shadow-xl hover:shadow-terracotta/40 active:translate-y-0"
           >
+            <Search className="size-5" strokeWidth={2} aria-hidden="true" />
             {t("Search caregivers")}
           </button>
         </form>

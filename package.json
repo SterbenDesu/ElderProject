@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.50.1",
+    "lucide-react": "^1.17.0",
     "next": "latest",
     "react": "latest",
     "react-dom": "latest"
