@@ -5,6 +5,15 @@ This folder contains SQL files for the VnukPodNaem Supabase database.
 ## Current contents
 
 - `migrations/20260529120000_initial_schema.sql` — initial schema for the non-medical marketplace MVP.
+- `migrations/2026053*` / `2026060110*` — helper review/visibility RPCs and booking RLS tightening.
+- `migrations/20260605*` — **Phase 1 target model** (DATABASE_SCHEMA.md): renames
+  the helper-era tables to the elder/caregiver vocabulary and adds regions,
+  per-caregiver services/extras, availability slots, reservations + line items,
+  escrow-ready payments, notifications, chat, reviews, disputes, and the
+  `create_reservation` / `transition_reservation` state-machine RPCs.
+- `seed.sql` — dev seed: 24 Sofia districts, the service catalogue, sample extras,
+  and 3 clearly-fake caregiver accounts. Dev only — never run against production.
+- `tests/` — a local RLS verification harness (see `../VERIFICATION.md`).
 
 ## Important safety notes
 
