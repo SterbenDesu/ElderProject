@@ -124,3 +124,15 @@ Use `PROJECT_BRIEF.md` as the source of truth for the app idea, user roles, core
 Use `docs/known-bugs.md` as the source of truth for user-tested bugs and UX issues.
 
 Use `docs/deployment-notes.md` as the source of truth for deployment state and deployment instructions.
+
+---
+
+## Frontend & Design Agent Rules
+
+- Before any UI or component work, read the Design & Aesthetic Rules in CLAUDE.md
+- The frontend-design plugin is installed. Invoke /frontend-design:frontend-design for any significant visual work
+- The Superpowers plugin is installed. Invoke /superpowers:brainstorming before building any new feature or page from scratch
+- Never hardcode user-facing strings — all copy must go through lib/translations/ for both EN and BG
+- Mobile-first always. Test every component at 375px width before considering it done
+- All animations must use Tailwind classes or pure CSS — no JavaScript animation libraries
+- Lucide-react is the only icon library. Do not install others.
