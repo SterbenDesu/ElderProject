@@ -2,6 +2,8 @@ Read AGENTS.md before any task. All rules there are mandatory.
 
 Read PROJECT_BRIEF.md to understand the product vision before making any structural decisions.
 
+Read PRODUCT_SPEC.md and DATABASE_SCHEMA.md before any backend or feature work.
+
 # CLAUDE.md
 
 ## Tech Stack

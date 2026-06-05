@@ -1,5 +1,7 @@
 # AGENTS.md
 
+Read PRODUCT_SPEC.md and DATABASE_SCHEMA.md before any backend or feature work.
+
 ## Purpose
 
 This file gives Codex persistent instructions for working in this repository.
@@ -116,6 +118,33 @@ Never commit `.env` files.
 Environment variables should be documented by name only.
 
 Authentication, authorization, database rules, and user permissions must be treated as high-risk areas.
+
+## Backend Rules
+
+These rules are mandatory for all backend, database, and API work. See
+`PRODUCT_SPEC.md` and `DATABASE_SCHEMA.md` for the full design they enforce.
+
+- **Enforce the one-way platform via RLS on every table.** Only elders can search,
+  browse, and view caregivers. Caregivers can never search for, browse, or
+  enumerate elders — a caregiver may reach elder-linked data only through a
+  reservation they own. This boundary must be enforced with Supabase Row-Level
+  Security on every relevant table, not just hidden in the UI. There must be no
+  policy anywhere that lets a caregiver list or read the elder population.
+- **Never expose elder phone numbers in any API response.** `profiles.phone` (and
+  any private contact field) is owner-and-admin readable only. No public, anon, or
+  cross-user policy may select it. Public and marketplace reads must use
+  column-restricted views or explicit column lists that exclude `phone`, `email`,
+  and other private fields — never `select *`.
+- **All money state changes must go through the reservation state machine.**
+  Payment status, held amounts, captures, releases, refunds, and payouts may only
+  change as a result of a valid reservation transition, executed by a trusted
+  `SECURITY DEFINER` RPC that re-checks the caller and validates the transition.
+  Clients must never directly `UPDATE` the payments table.
+- **Never bypass Supabase RLS with the service role key in client-facing code.**
+  The browser uses only the publishable/anon key. Privileged actions run through
+  `SECURITY DEFINER` RPCs that re-verify the caller's identity and role. Service
+  role keys must never appear in client code, public env vars, or be used to skip
+  RLS for convenience.
 
 ## Product memory
 
