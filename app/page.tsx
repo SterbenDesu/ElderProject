@@ -98,10 +98,6 @@ export default function Home() {
 
           {/* Left — headline copy */}
           <div className="animate-fade-up relative z-10 flex flex-col justify-center">
-            <p className="text-sm font-bold uppercase tracking-[0.2em] text-terracotta">
-              Everyday family support
-            </p>
-
             <h1 className="mt-4 font-display text-5xl font-black leading-[1.05] tracking-[-0.03em] text-espresso sm:text-6xl lg:text-7xl">
               Find trusted support for the&nbsp;people you&nbsp;love.
             </h1>
@@ -150,9 +146,6 @@ export default function Home() {
       >
         <Reveal className="grid gap-6 lg:grid-cols-[1fr_1.2fr] lg:items-end">
           <div>
-            <p className="text-sm font-bold uppercase tracking-[0.2em] text-terracotta">
-              How it works
-            </p>
             <h2
               id="how-it-works"
               className="mt-3 font-display text-4xl font-black tracking-[-0.03em] text-espresso sm:text-5xl"
@@ -199,9 +192,6 @@ export default function Home() {
       >
         <div className="mx-auto max-w-6xl px-5 py-20 lg:px-8">
           <Reveal className="max-w-2xl">
-            <p className="text-sm font-bold uppercase tracking-[0.2em] text-terracotta">
-              Popular support types
-            </p>
             <h2
               id="popular-services"
               className="mt-3 font-display text-4xl font-black tracking-[-0.03em] text-espresso sm:text-5xl"
@@ -245,9 +235,6 @@ export default function Home() {
       >
         <Reveal className="grid gap-8 rounded-3xl border border-sand bg-ivory p-8 shadow-md shadow-terracotta/5 sm:p-10 lg:grid-cols-[1fr_1.1fr] lg:p-12">
           <div>
-            <p className="text-sm font-bold uppercase tracking-[0.2em] text-terracotta">
-              Why families choose us
-            </p>
             <h2
               id="why-families"
               className="mt-3 font-display text-4xl font-black tracking-[-0.03em] text-espresso sm:text-5xl"
@@ -307,9 +294,6 @@ export default function Home() {
 
         <div className="relative mx-auto flex max-w-4xl flex-col items-center gap-7 px-5 py-20 text-center lg:px-8 lg:py-28">
           <Reveal>
-            <p className="text-sm font-bold uppercase tracking-[0.2em] text-ivory/80">
-              Become a caregiver
-            </p>
             <h2
               id="become-a-caregiver"
               className="mt-4 font-display text-4xl font-black leading-tight tracking-[-0.03em] text-white sm:text-5xl lg:text-6xl"
@@ -356,9 +340,6 @@ export default function Home() {
             <ShieldCheck className="size-7" strokeWidth={1.75} />
           </span>
           <div className="flex-1">
-            <p className="text-sm font-bold uppercase tracking-[0.2em] text-terracotta">
-              Calm safety note
-            </p>
             <h2 className="mt-1 font-display text-2xl font-bold text-espresso">
               Clear boundaries, dedicated pages
             </h2>

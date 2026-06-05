@@ -45,7 +45,7 @@ export default function SafetyPage() {
         description={t("Review what can and cannot be requested before sending a support request.")}
       />
 
-      <div className="mx-auto mt-10 max-w-5xl rounded-[2rem] bg-white p-5 text-center shadow-sm ring-1 ring-stone-200 sm:p-6 lg:p-8">
+      <div className="mx-auto mt-10 max-w-5xl rounded-xl bg-white p-8 text-center shadow-sm">
         <div className="mx-auto max-w-3xl">
           <h2 className="text-3xl font-bold tracking-tight text-forest">{t("How requests stay practical")}</h2>
           <p className="mt-3 leading-7 text-stone-700">
@@ -55,7 +55,7 @@ export default function SafetyPage() {
 
         <div
           aria-label={t("Service scope views")}
-          className="mx-auto mt-6 grid gap-2 rounded-full bg-sage/70 p-1.5 sm:inline-grid sm:min-w-[28rem] sm:grid-cols-2"
+          className="mt-6 flex flex-wrap justify-center gap-3"
           role="tablist"
         >
           {serviceTabs.map((tab) => {
@@ -66,10 +66,10 @@ export default function SafetyPage() {
                 key={tab.id}
                 aria-controls={tab.panelId}
                 aria-selected={isActive}
-                className={`rounded-full px-5 py-3 text-center text-sm font-bold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest sm:text-base ${
+                className={`rounded-full px-6 py-3 text-sm font-bold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest sm:text-base ${
                   isActive
                     ? "bg-forest text-white shadow-sm"
-                    : "bg-white/70 text-forest ring-1 ring-forest/10 hover:bg-white"
+                    : "bg-stone-100 text-forest hover:bg-stone-200"
                 }`}
                 id={`${tab.id}-services-tab`}
                 onClick={() => setSelectedView(tab.id)}
@@ -113,7 +113,7 @@ export default function SafetyPage() {
             ))}
           </ul>
 
-          <div className={`mt-6 rounded-[2rem] p-6 ${isAllowedView ? "bg-sage text-stone-700" : "bg-forest text-white"}`}>
+          <div className={`mt-6 rounded-xl p-6 ${isAllowedView ? "bg-sage text-stone-700" : "bg-forest text-white"}`}>
             <h3 className={`text-2xl font-bold ${isAllowedView ? "text-forest" : "text-white"}`}>
               {isAllowedView ? t("Keep requests simple") : t("If in doubt, do not accept the request")}
             </h3>

@@ -113,10 +113,7 @@ export function HomeSearchCard() {
   return (
     <div className="w-full rounded-[2rem] border border-white bg-white/95 p-5 shadow-2xl shadow-espresso/15 backdrop-blur transition hover:shadow-espresso/20 sm:p-6">
       <div className="rounded-[1.5rem] bg-gradient-to-br from-ivory via-linen to-white p-5 ring-1 ring-sand/70 sm:p-7">
-        <p className="text-sm font-bold uppercase tracking-[0.18em] text-terracotta">
-          {t("Find support")}
-        </p>
-        <h2 className="mt-3 font-display text-2xl font-extrabold tracking-[-0.02em] text-espresso sm:text-3xl">
+        <h2 className="font-display text-2xl font-extrabold tracking-[-0.02em] text-espresso sm:text-3xl">
           {t("What kind of help do you need?")}
         </h2>
         <p className="mt-4 max-w-2xl text-base leading-7 text-espresso-light">

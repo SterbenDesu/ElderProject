@@ -17,11 +17,6 @@ export function PageIntro({
 }: PageIntroProps) {
   return (
     <div className={`mx-auto max-w-3xl text-center ${className}`.trim()}>
-      {eyebrow ? (
-        <p className="text-sm font-bold uppercase tracking-[0.2em] text-clay">
-          {eyebrow}
-        </p>
-      ) : null}
       <h1 className="mt-3 text-balance break-words text-4xl font-bold tracking-tight text-forest sm:text-5xl">
         {title}
       </h1>
