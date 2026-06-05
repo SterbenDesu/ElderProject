@@ -30,7 +30,11 @@ export const bg = {
     legalHeading: "Правна информация",
     footerDescription:
       "Платформа за доверена ежедневна помощ: посещения, дребни задачи, пазаруване, компания, домакински дела и придружаване. Всеки започва с обикновен профил, а помощниците стават видими публично едва след проверка от наш екип.",
+    followUs: "Последвайте ни",
+    marketplaceDisclaimer: "Технологична платформа — помощниците са независими.",
+    closeMenu: "Затворете менюто",
     links: {
+      home: "Начало",
       services: "Услуги",
       caregivers: "Помощници",
       safety: "Безопасност",
@@ -47,6 +51,7 @@ export const phraseTranslations: Record<string, string> = {
   // ---------------------------------------------------------------------------
   "Vnuk Pod Naem": "Внук под наем",
   "Vnuk Pod Naem home": "Внук под наем — начало",
+  "Home": "Начало",
   "Services": "Услуги",
   "Caregivers": "Помощници",
   "Safety": "Безопасност",
@@ -57,6 +62,10 @@ export const phraseTranslations: Record<string, string> = {
   "Sign up": "Регистрация",
   "Account": "Профил",
   "Menu": "Меню",
+  "Close menu": "Затворете менюто",
+  "Follow us": "Последвайте ни",
+  "A technology marketplace — caregivers are independent.":
+    "Технологична платформа — помощниците са независими.",
   "My profile": "Моят профил",
   "Browse caregivers": "Разгледайте помощниците",
   "Admin": "Администратор",
@@ -74,8 +83,13 @@ export const phraseTranslations: Record<string, string> = {
   // ---------------------------------------------------------------------------
   // Homepage — hero
   // ---------------------------------------------------------------------------
+  "Everyday family support": "Ежедневна грижа за семейството",
+  "Find trusted support for the people you love.":
+    "Намерете грижовна подкрепа за хората, до които Ви е сърце.",
   "Find trusted everyday support for the people you love.":
     "Доверена грижа за вашите близки, когато имат нужда от помощ.",
+  "Calm, practical help with visits, companionship, shopping, errands, and home tasks — arranged through reviewed caregivers.":
+    "Спокойна и практична помощ с посещения, компания, пазаруване, дребни задачи и домакинство — организирана чрез проверени помощници.",
   "Vnuk Pod Naem helps families find calm, practical help with visits, companionship, shopping, errands, home tasks, and accompaniment.":
     "Внук под наем помага на семействата да намерят спокоен и грижовен помощник за посещения, компания, пазаруване, дребни задачи у дома и придружаване на възрастните си близки.",
   "Explore services": "Вижте услугите",
@@ -86,6 +100,8 @@ export const phraseTranslations: Record<string, string> = {
   "How it works": "Как работи",
   "A simple path from need to next step":
     "Спокоен път от нуждата до следващата стъпка",
+  "Describe the support you are looking for, then continue to caregiver listings without making a reservation too early.":
+    "Посочете каква помощ търсите и разгледайте профилите на помощниците — без да бързате с резервация.",
   "The homepage keeps the first action easy: describe the support you are looking for, then continue to caregiver listings without making a reservation too early.":
     "Първата стъпка е лесна: посочете каква помощ търсите и разгледайте профилите на помощниците, без да бързате с резервация.",
   "Share the day you have in mind": "Посочете кога ви е удобно",
@@ -117,10 +133,13 @@ export const phraseTranslations: Record<string, string> = {
     "Един човек до вас при посещение при лекар, в институция, в магазина или при роднини, когато е добре да има придружител.",
 
   // Homepage — why families / trust band
+  "Why families choose us": "Защо семействата избират нас",
   "Support that feels clear and easy to arrange":
     "Помощ, която е лесна за уговаряне",
   "Choose what you need, then continue step by step":
     "Изберете каква помощ ви трябва и продължете спокойно, стъпка по стъпка",
+  "Review caregiver profiles, and move forward at a steady pace with clear next steps.":
+    "Разгледайте профилите на помощниците и продължете напред спокойно, стъпка по стъпка.",
   "Choose services, review caregiver profiles, and move forward at a steady pace with clear next steps.":
     "Изберете услугите, разгледайте профилите на помощниците и продължете напред със спокойно темпо и ясни стъпки.",
   "Choose what you need, review caregiver profiles, and continue step by step.":
@@ -135,6 +154,8 @@ export const phraseTranslations: Record<string, string> = {
   // Homepage — become a caregiver band
   "Turn the time you give into trusted everyday support.":
     "Превърнете времето, което подарявате, в грижа, на която хората се доверяват.",
+  "Everyone starts with a normal account. When you are ready to offer companionship, errands, or practical help, apply in minutes — caregivers become visible only after admin review.":
+    "Всеки започва с обикновен профил. Когато сте готови да предложите компания, помощ с дребни задачи или практична подкрепа, кандидатствайте само за няколко минути — профилът Ви става видим едва след проверка от нашия екип.",
   "Everyone starts with a normal account. When you are ready to offer companionship, errands, or practical help, apply in minutes — caregivers become visible only after a calm admin review.":
     "Всеки започва с обикновен профил. Когато сте готови да предложите компания, помощ с дребни задачи или практична подкрепа, кандидатствайте само за няколко минути — профилът ви става видим едва след спокойна проверка от наш екип.",
   "Create your account": "Създайте профила си",
@@ -142,8 +163,13 @@ export const phraseTranslations: Record<string, string> = {
 
   // Homepage — calm safety note
   "Calm safety note": "Спокойна бележка за безопасност",
+  "Clear boundaries, dedicated pages": "Ясни граници в отделни страници",
   "Clear boundaries without making the page feel heavy":
     "Ясни граници, поднесени спокойно",
+  "Service limits are in dedicated safety and service scope pages so families can review them before sending a request.":
+    "Ограниченията на услугите са описани в отделните страници за безопасност и обхват — прегледайте ги преди да изпратите заявка.",
+  "Safety notes": "Бележки за безопасност",
+  "Service scope": "Обхват на услугите",
   "Vnuk Pod Naem keeps service limits in dedicated safety and service scope pages so families can review them before sending a request.":
     "Внук под наем събира ограниченията в отделни страници за безопасност и обхват на услугите, за да можете да ги прегледате спокойно, преди да изпратите заявка.",
   "Read safety notes": "Прочетете за безопасността",

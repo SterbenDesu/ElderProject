@@ -12,21 +12,21 @@ const config: Config = {
         moss: "#647a58",
         clay: "#b87453",
 
-        // Warm redesign palette (buddyguard.bg level of warmth).
-        // Reference: #F5EFE6, #C4752A, #2C1A0E, #F9F4EE
-        linen: "#F5EFE6", // warm cream — primary background
-        ivory: "#F9F4EE", // lightest cream — card surfaces
-        sand: "#EAD9C2", // soft warm border / divider
+        // Green palette — trustworthy, calm, warm.
+        // Reference: #2D6A4F, #F0F7F4, #1B4332, #40916C, #F9F4EE, #1B2A23
+        linen: "#F0F7F4", // light green background — primary background
+        ivory: "#F9F4EE", // cream — card surfaces (unchanged)
+        sand: "#C8DDD8", // light green border / divider
         terracotta: {
-          DEFAULT: "#C4752A", // warm amber/terracotta — primary
-          dark: "#A8631F", // hover/pressed
-          light: "#E0A05A", // soft accent
+          DEFAULT: "#2D6A4F", // primary green — buttons, accents
+          dark: "#1B4332", // dark green — hover/pressed
+          light: "#40916C", // medium green — soft accent
         },
         espresso: {
-          DEFAULT: "#2C1A0E", // deep warm brown — text & footer
-          light: "#4A3525", // muted warm brown
+          DEFAULT: "#1B2A23", // dark green-black — text & footer
+          light: "#2D4A3E", // medium dark green
         },
-        warmgrey: "#8C7B6B", // warm muted grey for secondary text
+        warmgrey: "#6B8277", // warm green-grey for secondary text
       },
       fontFamily: {
         // Body — humanist, highly legible (Cyrillic-capable for Bulgarian).
