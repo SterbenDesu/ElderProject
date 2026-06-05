@@ -42,3 +42,28 @@ Always use: a distinctive Google Font pairing. For headings: Fraunces, Bricolage
 Always use: scroll-triggered fade or slide-in animations on sections. Hover effects on all interactive elements.
 The visual reference is buddyguard.bg. Every UI decision should be measured against that standard of warmth and polish.
 State your font choice explicitly before writing any component code.
+
+---
+
+## Design & Aesthetic Rules
+
+Claude Code must follow these rules on every frontend task without exception.
+
+### Anti-patterns — never use these
+- Fonts: Inter, Roboto, Open Sans, Lato, Arial, or any system default font
+- Colors: generic purple-on-white gradients, flat grey cards, white backgrounds with blue buttons
+- Layout: three equal-width feature cards in a row, generic hero with centered text and two buttons
+- Animations: none, or CSS transitions under 200ms
+- Icons: emoji as UI elements, or no icons at all
+
+### Required approach
+- Typography: choose one distinctive font from Google Fonts. For this project the aesthetic is warm, trustworthy, human — good choices are Fraunces, Bricolage Grotesque, Newsreader, or Lora for headings, paired with Source Sans 3 or Space Grotesk for body.
+- Color: warm amber, cream, and soft terracotta tones. Reference: #F5EFE6, #C4752A, #2C1A0E, #F9F4EE. Never use cold blues or corporate greys as primary colors.
+- Motion: every section should fade or slide in on scroll. Buttons should have a subtle scale or color shift on hover. Cards should lift with a soft shadow on hover.
+- Imagery: warm photography tones. If using placeholders, use warm gradient backgrounds not grey boxes.
+- The reference site for aesthetic quality is buddyguard.bg — match that level of visual polish and human warmth.
+
+### Typography scale
+- Headlines: 3x size jumps minimum. Never 400 vs 600 weight — use 200 vs 800.
+- Display text should feel editorial, not corporate.
+- State your font choice before writing any component code.
