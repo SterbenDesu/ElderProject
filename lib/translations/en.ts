@@ -14,7 +14,11 @@ export const en = {
     legalHeading: "Legal",
     footerDescription:
       "A marketplace for trusted everyday support: visits, errands, shopping, companionship, home tasks, and accompaniment. Everyone starts with a normal account, and caregivers appear publicly only after admin review.",
+    followUs: "Follow us",
+    marketplaceDisclaimer: "A technology marketplace — caregivers are independent.",
+    closeMenu: "Close menu",
     links: {
+      home: "Home",
       services: "Services",
       caregivers: "Caregivers",
       safety: "Safety",

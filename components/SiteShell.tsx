@@ -8,6 +8,7 @@ import { LanguageSelector } from "@/components/LanguageSelector";
 import { I18nProvider, translations, useI18n } from "@/lib/i18n";
 
 const navigationLinks = [
+  { href: "/", labelKey: "home" },
   { href: "/services", labelKey: "services" },
   { href: "/helpers", labelKey: "caregivers" },
   { href: "/safety", labelKey: "safety" },
@@ -134,7 +135,7 @@ function SiteShellContent({ children }: { children: ReactNode }) {
             type="button"
             className="flex min-h-11 min-w-11 items-center justify-center rounded-full border border-sand bg-white text-espresso shadow-sm transition hover:border-terracotta/30 hover:bg-linen md:hidden"
             aria-expanded={mobileOpen}
-            aria-label={mobileOpen ? "Close menu" : shellText.menu}
+            aria-label={mobileOpen ? shellText.closeMenu : shellText.menu}
             onClick={() => setMobileOpen((prev) => !prev)}
           >
             {mobileOpen ? (
@@ -233,7 +234,7 @@ function SiteShellContent({ children }: { children: ReactNode }) {
               that match Lucide's stroke style. */}
           <div>
             <h2 className="text-xs font-bold uppercase tracking-[0.18em] text-ivory/50">
-              Follow us
+              {shellText.followUs}
             </h2>
             <div className="mt-4 flex gap-3">
               <a
@@ -286,7 +287,7 @@ function SiteShellContent({ children }: { children: ReactNode }) {
               © {new Date().getFullYear()} Vnuk Pod Naem. All rights reserved.
             </p>
             <p className="text-xs text-warmgrey/60">
-              A technology marketplace — caregivers are independent.
+              {shellText.marketplaceDisclaimer}
             </p>
           </div>
         </div>
