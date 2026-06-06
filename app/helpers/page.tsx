@@ -95,8 +95,11 @@ function HelpersPageContent() {
         }
 
         if (result.errorMessage) {
+          // Never surface raw database errors to families — log the technical
+          // detail for developers and show a calm, translated message instead.
+          console.error("Could not load caregiver profiles:", result.errorMessage);
           setStatus("error");
-          setMessage(`Could not load certified caregiver profiles: ${result.errorMessage}. Confirm the helper_profiles RLS policy is applied and only visible approved caregivers are public.`);
+          setMessage(t("We couldn't load caregivers right now. Please try again in a little while."));
           return;
         }
         setHelperProfiles(result.helperProfiles);
@@ -109,8 +112,9 @@ function HelpersPageContent() {
         }
 
         const reason = error instanceof Error ? error.message : "Unknown error";
+        console.error("Could not load caregiver profiles:", reason);
         setStatus("error");
-        setMessage(`Could not load certified caregiver profiles: ${reason}. Confirm the helper_profiles RLS policy is applied and only visible approved caregivers are public.`);
+        setMessage(t("We couldn't load caregivers right now. Please try again in a little while."));
       });
 
     return () => {
@@ -119,11 +123,10 @@ function HelpersPageContent() {
     };
   }, []);
 
-  const visibleHelperProfiles = useMemo(() => {
-    if (!criteria.city) return helperProfiles;
-    const selectedCity = criteria.city.toLocaleLowerCase();
-    return helperProfiles.filter((helperProfile) => helperProfile.city.trim().toLocaleLowerCase() === selectedCity);
-  }, [criteria.city, helperProfiles]);
+  // Location now lives in the regions model rather than a free-text `city`
+  // column on the profile, so the listing shows every visible, verified
+  // caregiver. District-based filtering will return with the regions UI.
+  const visibleHelperProfiles = helperProfiles;
 
   const hasSearchCriteria = Boolean(criteria.city || criteria.services.length > 0 || criteria.startDate || criteria.endDate);
 
@@ -193,11 +196,12 @@ function HelpersPageContent() {
                 <CaregiverPlaceholder />
                 <div className="-mt-4 flex justify-center"><span className="rounded-full border border-moss/30 bg-white px-3 py-1 text-xs font-extrabold uppercase tracking-[0.12em] text-forest shadow-sm">{t("Certified caregiver")}</span></div>
                 <div className="flex flex-1 flex-col px-2 pb-2 pt-4">
-                  <h2 className="text-lg font-bold text-forest">{t("Caregiver in")} {helperProfile.city}</h2>
-                  <dl className="mt-3 grid gap-2 text-sm text-stone-600">
-                    <div><dt className="font-bold text-stone-500">{t("Location")}</dt><dd className="font-semibold text-stone-800">{helperProfile.city}</dd></div>
-                    <div><dt className="font-bold text-stone-500">{t("Age")}</dt><dd className="font-semibold text-stone-800">{t("Age not added")}</dd></div>
-                  </dl>
+                  <h2 className="text-lg font-bold text-forest">{helperProfile.display_name}</h2>
+                  {helperProfile.experience ? (
+                    <dl className="mt-3 grid gap-2 text-sm text-stone-600">
+                      <div><dt className="font-bold text-stone-500">{t("Experience")}</dt><dd className="font-semibold text-stone-800">{shortSummary(helperProfile.experience)}</dd></div>
+                    </dl>
+                  ) : null}
                   <p className="mt-3 flex-1 text-sm leading-6 text-stone-600">{shortSummary(helperProfile.bio)}</p>
                   <Link href={detailHref(helperProfile.id)} className="mt-4 inline-flex min-h-11 items-center justify-center rounded-full bg-forest px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-stone-800">
                     {t("View profile")}

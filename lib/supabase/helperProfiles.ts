@@ -7,12 +7,17 @@ export type HelperVerificationStatus =
   | "suspended"
   | "banned";
 
+// Public marketplace shape. Mirrors the safe, publicly-readable columns of the
+// canonical `caregiver_profiles` table (see DATABASE_SCHEMA.md §4.2). The old
+// `helper_profiles` table and its `city`/`service_radius_km` columns no longer
+// exist — geography now lives in the regions model, and the public display uses
+// `display_name`, `bio`, and `experience`. Never selects private payout fields.
 export type PublicHelperProfile = {
   id: string;
   verification_status: "verified_basic" | "trusted";
+  display_name: string;
   bio: string;
-  city: string;
-  service_radius_km: number | null;
+  experience: string | null;
 };
 
 export type OwnHelperProfile = {
@@ -44,6 +49,11 @@ type ProfileSummaryRow = {
   display_name: string | null;
 };
 
+// Safe public columns of `caregiver_profiles` only — never `stripe_account_id`
+// or any owner-private field. Matches the column-level GRANT in SUPABASE_FIX.sql.
+const publicHelperProfileSelect =
+  "id,verification_status,display_name,bio,experience";
+
 const ownHelperProfileSelect =
   "id,profile_id,verification_status,bio,city,service_radius_km,is_visible,created_at,updated_at";
 
@@ -68,11 +78,11 @@ export async function loadVisibleVerifiedHelperProfiles(
   errorMessage: string | null;
 }> {
   const { data, error } = await supabase
-    .from("helper_profiles")
-    .select("id,verification_status,bio,city,service_radius_km")
+    .from("caregiver_profiles")
+    .select(publicHelperProfileSelect)
     .eq("is_visible", true)
     .in("verification_status", ["verified_basic", "trusted"])
-    .order("city", { ascending: true });
+    .order("display_name", { ascending: true });
 
   if (error) {
     return { helperProfiles: [], errorMessage: error.message };
@@ -92,8 +102,8 @@ export async function loadVisibleVerifiedHelperProfileById(
   errorMessage: string | null;
 }> {
   const { data, error } = await supabase
-    .from("helper_profiles")
-    .select("id,verification_status,bio,city,service_radius_km")
+    .from("caregiver_profiles")
+    .select(publicHelperProfileSelect)
     .eq("id", helperProfileId)
     .eq("is_visible", true)
     .in("verification_status", ["verified_basic", "trusted"])
@@ -123,8 +133,8 @@ export async function loadVisibleVerifiedHelperProfilesByIds(
   }
 
   const { data, error } = await supabase
-    .from("helper_profiles")
-    .select("id,verification_status,bio,city,service_radius_km")
+    .from("caregiver_profiles")
+    .select(publicHelperProfileSelect)
     .in("id", uniqueIds)
     .eq("is_visible", true)
     .in("verification_status", ["verified_basic", "trusted"]);
