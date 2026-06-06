@@ -3,8 +3,9 @@
 import { PageIntro } from "@/components/PageIntro";
 import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { withReturnTo } from "@/lib/auth/returnTo";
 import {
   createOwnBookingRequest,
   loadAllowedServiceCategories,
@@ -56,6 +57,15 @@ function buildDatabaseErrorMessage(action: string, errorMessage: string) {
 export default function HelperDetailPage() {
   const params = useParams<{ id: string }>();
   const helperProfileId = params.id;
+  // Preserve any marketplace filter query (carried into this URL from the
+  // listing) through the auth flow, so signup/login returns the elder here
+  // with their filters intact.
+  const searchParams = useSearchParams();
+  const filterQuery = searchParams.toString();
+  const marketplaceHref = filterQuery ? `/helpers?${filterQuery}` : "/helpers";
+  const returnTo = filterQuery
+    ? `/helpers/${helperProfileId}?${filterQuery}`
+    : `/helpers/${helperProfileId}`;
   const [pageStatus, setPageStatus] = useState<PageStatus>("loading");
   const [authStatus, setAuthStatus] = useState<AuthStatus>("checking");
   const [helperProfile, setHelperProfile] = useState<PublicHelperProfile | null>(null);
@@ -332,7 +342,7 @@ export default function HelperDetailPage() {
         <div className="mt-8 rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200" role={pageStatus === "error" ? "alert" : undefined}>
           <h2 className="text-2xl font-bold text-forest">Caregiver unavailable</h2>
           <p className="mt-4 leading-7">{message}</p>
-          <Link href="/helpers" className="mt-6 inline-flex min-h-12 items-center rounded-full bg-forest px-5 py-3 font-semibold text-white transition hover:bg-stone-800">
+          <Link href={marketplaceHref} className="mt-6 inline-flex min-h-12 items-center rounded-full bg-forest px-5 py-3 font-semibold text-white transition hover:bg-stone-800">
             Back to certified caregivers
           </Link>
         </div>
@@ -390,8 +400,8 @@ export default function HelperDetailPage() {
                   <h3 className="font-bold">Login required</h3>
                   <p className="mt-2 text-sm leading-6">Sign in with a normal account before requesting a caregiver.</p>
                   <div className="mt-4 flex flex-wrap gap-3">
-                    <Link href="/login" className="inline-flex min-h-11 items-center rounded-full bg-forest px-5 py-2 text-sm font-semibold text-white transition hover:bg-stone-800">Login</Link>
-                    <Link href="/signup" className="inline-flex min-h-11 items-center rounded-full border border-stone-200 bg-white px-5 py-2 text-sm font-semibold text-forest transition hover:bg-sage">Create account</Link>
+                    <Link href={withReturnTo("/login", returnTo)} className="inline-flex min-h-11 items-center rounded-full bg-forest px-5 py-2 text-sm font-semibold text-white transition hover:bg-stone-800">Login</Link>
+                    <Link href={withReturnTo("/signup", returnTo)} className="inline-flex min-h-11 items-center rounded-full border border-stone-200 bg-white px-5 py-2 text-sm font-semibold text-forest transition hover:bg-sage">Create account</Link>
                   </div>
                 </div>
               ) : null}

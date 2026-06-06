@@ -127,6 +127,12 @@ function HelpersPageContent() {
 
   const hasSearchCriteria = Boolean(criteria.city || criteria.services.length > 0 || criteria.startDate || criteria.endDate);
 
+  // Carry the active filter query onto each caregiver link so the filters
+  // survive the click into a caregiver profile (and any auth gate there).
+  const filterQuery = searchParams.toString();
+  const detailHref = (id: string) =>
+    filterQuery ? `/helpers/${id}?${filterQuery}` : `/helpers/${id}`;
+
   return (
     <section className="mx-auto max-w-7xl px-5 py-12 lg:px-8 lg:py-16">
       <PageIntro
@@ -193,7 +199,7 @@ function HelpersPageContent() {
                     <div><dt className="font-bold text-stone-500">{t("Age")}</dt><dd className="font-semibold text-stone-800">{t("Age not added")}</dd></div>
                   </dl>
                   <p className="mt-3 flex-1 text-sm leading-6 text-stone-600">{shortSummary(helperProfile.bio)}</p>
-                  <Link href={`/helpers/${helperProfile.id}`} className="mt-4 inline-flex min-h-11 items-center justify-center rounded-full bg-forest px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-stone-800">
+                  <Link href={detailHref(helperProfile.id)} className="mt-4 inline-flex min-h-11 items-center justify-center rounded-full bg-forest px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-stone-800">
                     {t("View profile")}
                   </Link>
                 </div>

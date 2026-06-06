@@ -1,19 +1,41 @@
 "use client";
 
+// Login — visually and texturally consistent with signup. Errors are surfaced
+// kindly and the user is returned to wherever they came from (returnTo),
+// preserving any marketplace filter query carried in that URL.
+
 import { PageIntro } from "@/components/PageIntro";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 import type { FormEvent } from "react";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { readReturnTo, withReturnTo } from "@/lib/auth/returnTo";
 
-export default function LoginPage() {
+const inputClass =
+  "min-h-14 w-full rounded-2xl border border-sand bg-white px-4 py-3 text-lg font-normal text-espresso shadow-inner shadow-linen transition focus:border-terracotta focus:outline-none focus:ring-2 focus:ring-terracotta/25";
+const labelClass = "grid gap-2 text-base font-bold text-espresso";
+
+function friendlyAuthError(message: string) {
+  const normalized = message.toLowerCase();
+  if (normalized.includes("invalid login credentials")) {
+    return "That email or password did not match. Please check them and try again.";
+  }
+  if (normalized.includes("email not confirmed")) {
+    return "Please confirm your email first — check your inbox for the confirmation link.";
+  }
+  return message;
+}
+
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnTo = readReturnTo(searchParams);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [resetContact, setResetContact] = useState("");
-  const [showResetForm, setShowResetForm] = useState(false);
-  const [resetMessage, setResetMessage] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -21,7 +43,6 @@ export default function LoginPage() {
     event.preventDefault();
 
     const { supabase, envError } = getSupabaseBrowserClient();
-
     if (envError || !supabase) {
       setErrorMessage(envError);
       return;
@@ -31,46 +52,34 @@ export default function LoginPage() {
     setErrorMessage(null);
 
     const { error } = await supabase.auth.signInWithPassword({
-      email,
+      email: email.trim(),
       password,
     });
 
     if (error) {
-      setErrorMessage(error.message);
+      setErrorMessage(friendlyAuthError(error.message));
       setIsSubmitting(false);
       return;
     }
 
     setPassword("");
     setIsSubmitting(false);
-    router.push("/");
+    router.push(returnTo ?? "/account");
     router.refresh();
-  }
-
-  function handleResetSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setResetMessage(
-      "Password reset is not active yet. For testing, use your email/password account.",
-    );
   }
 
   return (
     <section className="mx-auto max-w-5xl px-5 py-12 lg:px-8 lg:py-16">
       <PageIntro
-        eyebrow="Account access"
-        title="Enter your profile"
-        description="Use your email and password to open your profile, browse caregivers, and manage your account actions."
+        eyebrow="Welcome back"
+        title="Sign in"
+        description="Sign in with your email and password to continue where you left off."
       />
-      <div className="mt-8 grid gap-5 lg:grid-cols-[1fr_0.72fr]">
-        <div className="rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200">
-          <h2 className="text-2xl font-bold text-forest">Sign in</h2>
-          <p className="mt-4 text-lg leading-8">
-            Use your email and password to open your profile, browse caregivers,
-            and manage your account actions.
-          </p>
 
-          <form onSubmit={handleSubmit} className="mt-6 grid gap-5">
-            <label className="grid gap-2 text-sm font-semibold text-stone-700">
+      <div className="mt-8 grid gap-5 lg:grid-cols-[1fr_0.7fr]">
+        <div className="rounded-[2rem] border border-sand bg-white p-6 shadow-sm sm:p-8">
+          <form onSubmit={handleSubmit} className="grid gap-6">
+            <label className={labelClass}>
               Email
               <input
                 type="email"
@@ -78,25 +87,39 @@ export default function LoginPage() {
                 onChange={(event) => setEmail(event.target.value)}
                 required
                 autoComplete="email"
-                className="min-h-12 rounded-2xl border border-stone-200 bg-white px-4 py-3 text-base font-normal text-stone-900 shadow-sm focus:border-clay focus:outline-none"
+                className={inputClass}
               />
             </label>
 
-            <label className="grid gap-2 text-sm font-semibold text-stone-700">
+            <label className={labelClass}>
               Password
-              <input
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                required
-                autoComplete="current-password"
-                className="min-h-12 rounded-2xl border border-stone-200 bg-white px-4 py-3 text-base font-normal text-stone-900 shadow-sm focus:border-clay focus:outline-none"
-              />
+              <span className="relative block">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  required
+                  autoComplete="current-password"
+                  className={`${inputClass} pr-14`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((current) => !current)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  className="absolute right-2 top-1/2 grid size-11 -translate-y-1/2 place-items-center rounded-xl text-warmgrey transition hover:bg-linen hover:text-terracotta"
+                >
+                  {showPassword ? (
+                    <EyeOff className="size-5" strokeWidth={2} aria-hidden="true" />
+                  ) : (
+                    <Eye className="size-5" strokeWidth={2} aria-hidden="true" />
+                  )}
+                </button>
+              </span>
             </label>
 
             {errorMessage ? (
               <div
-                className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700"
+                className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-base font-semibold text-red-700"
                 role="alert"
               >
                 {errorMessage}
@@ -106,68 +129,49 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="inline-flex min-h-12 items-center justify-center rounded-full bg-forest px-5 py-3 font-semibold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-70"
+              className="inline-flex min-h-14 items-center justify-center rounded-full bg-terracotta px-6 py-3 text-lg font-bold text-white shadow-lg shadow-terracotta/30 transition hover:-translate-y-0.5 hover:bg-terracotta-dark hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-70"
             >
               {isSubmitting ? "Signing in…" : "Sign in"}
             </button>
           </form>
 
-          <div className="mt-5 grid gap-3 text-sm text-stone-600">
-            <button
-              type="button"
-              onClick={() => {
-                setShowResetForm((current) => !current);
-                setResetMessage(null);
-              }}
-              className="w-fit font-semibold text-forest underline"
+          <p className="mt-6 text-base text-espresso-light">
+            Need an account?{" "}
+            <Link
+              href={withReturnTo("/signup", returnTo)}
+              className="font-bold text-terracotta underline"
             >
-              Forgot password?
-            </button>
-
-            {showResetForm ? (
-              <form onSubmit={handleResetSubmit} className="grid gap-3 rounded-3xl bg-cream p-4">
-                <label className="grid gap-2 font-semibold text-stone-700">
-                  Email or phone
-                  <input
-                    type="text"
-                    value={resetContact}
-                    onChange={(event) => setResetContact(event.target.value)}
-                    required
-                    className="min-h-11 rounded-2xl border border-stone-200 bg-white px-4 py-2 text-base font-normal text-stone-900 shadow-sm focus:border-clay focus:outline-none"
-                  />
-                </label>
-                <button
-                  type="submit"
-                  className="inline-flex min-h-11 w-fit items-center rounded-full border border-stone-200 bg-white px-5 py-2 font-semibold text-forest transition hover:bg-sage"
-                >
-                  Check reset options
-                </button>
-                {resetMessage ? (
-                  <p className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 font-semibold text-amber-900" role="status">
-                    {resetMessage}
-                  </p>
-                ) : null}
-              </form>
-            ) : null}
-
-            <p>
-              Need an account?{" "}
-              <Link href="/signup" className="font-semibold text-forest underline">
-                Sign up
-              </Link>
-              .
-            </p>
-          </div>
+              Create one
+            </Link>
+            .
+          </p>
         </div>
-        <aside className="rounded-[2rem] bg-sage p-6 text-stone-700">
-          <h2 className="text-xl font-bold text-forest">After signing in</h2>
-          <ul className="mt-4 space-y-3 leading-7">
-            <li>• The header shows your avatar initials menu.</li>
-            <li>• My profile is your account hub for family and caregiver actions.</li>
-            <li>• Password reset is a placeholder and does not send emails yet.</li>
+
+        <aside className="h-fit rounded-[2rem] bg-ivory p-6 ring-1 ring-sand sm:p-8">
+          <h2 className="font-display text-2xl font-extrabold text-espresso">
+            After signing in
+          </h2>
+          <ul className="mt-5 grid gap-4 text-base leading-7 text-espresso-light">
+            <li>• You return exactly where you were, with your search kept.</li>
+            <li>• Your profile is your simple account hub.</li>
+            <li>• Your phone number always stays private.</li>
           </ul>
         </aside>
       </div>
     </section>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <section className="mx-auto max-w-5xl px-5 py-12 lg:px-8 lg:py-16">
+          <p className="text-lg font-semibold text-espresso">Loading…</p>
+        </section>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }
