@@ -912,4 +912,74 @@ export const phraseTranslations: Record<string, string> = {
     "Влезли сте в профила си, но липсва запис в таблицата с профили. Моля, завършете или поправете настройката, преди да управлявате профил на помощник.",
   "Your account is marked as a verified helper, but no helper_profiles row was found. Ask an admin to repair your approved helper profile.":
     "Профилът ви е отбелязан като проверен помощник, но не е намерен запис в helper_profiles. Помолете администратор да поправи одобрения ви профил.",
+
+  // ---------------------------------------------------------------------------
+  // Auth — elder signup / login / account (role system)
+  // ---------------------------------------------------------------------------
+  "Creating an account takes a minute. It lets you save the caregivers you like and continue your request when you are ready.":
+    "Създаването на профил отнема минута. Така можете да запазите харесаните помощници и да продължите заявката си, когато сте готови.",
+  "You will use your email to sign in.": "С този имейл ще влизате в профила си.",
+  "Your phone number stays private. It is never shown to caregivers or other people — we use it only for your account.":
+    "Вашият телефонен номер остава поверителен. Той никога не се показва на помощници или други хора — използваме го само за Вашия профил.",
+  "Use at least 8 characters.": "Използвайте поне 8 знака.",
+  "Profile photo": "Профилна снимка",
+  "You can skip this and add a photo later.":
+    "Можете да пропуснете това и да добавите снимка по-късно.",
+  "Remove photo": "Премахнете снимката",
+  "Please enter an age between 16 and 120.":
+    "Моля, въведете възраст между 16 и 120.",
+  "Please accept the Terms and Privacy Policy to create your account.":
+    "Моля, приемете Условията и Политиката за поверителност, за да създадете профил.",
+  "Your account was created. Please check your email to confirm it, then sign in. You can add a profile photo later from your profile.":
+    "Профилът Ви е създаден. Моля, проверете имейла си, за да го потвърдите, след което влезте. Можете да добавите профилна снимка по-късно от профила си.",
+  "Warm, private, simple": "Топло, поверително, лесно",
+  "Your phone number is private and never shown to others.":
+    "Телефонният Ви номер е поверителен и никога не се показва на други хора.",
+  "No role to choose — everyone starts with one simple account.":
+    "Няма роля за избиране — всеки започва с един прост профил.",
+  "You can offer help as a caregiver later, from your profile.":
+    "По-късно можете да предложите помощ като помощник — направо от профила си.",
+  "Hide password": "Скрийте паролата",
+  "Show password": "Покажете паролата",
+  "Loading…": "Зареждане…",
+
+  "Sign in with your email and password to continue where you left off.":
+    "Влезте с имейл и парола, за да продължите оттам, докъдето сте стигнали.",
+  "Create one": "Създайте профил",
+  "You return exactly where you were, with your search kept.":
+    "Връщате се точно там, където бяхте, със запазено търсене.",
+  "Your profile is your simple account hub.":
+    "Профилът Ви е лесното място за всичко около акаунта.",
+  "Your phone number always stays private.":
+    "Телефонният Ви номер винаги остава поверителен.",
+  "That email or password did not match. Please check them and try again.":
+    "Имейлът или паролата не съвпадат. Моля, проверете ги и опитайте отново.",
+  "Please confirm your email first — check your inbox for the confirmation link.":
+    "Първо потвърдете имейла си — проверете пощата си за връзката за потвърждение.",
+
+  "View and update your details. Your phone number is private and only you can see it here.":
+    "Вижте и обновете данните си. Телефонният Ви номер е поверителен и само Вие можете да го видите тук.",
+  "Setup needed": "Необходима е настройка",
+  "Sign in to view and edit your profile.":
+    "Влезте, за да видите и редактирате профила си.",
+  "Try again": "Опитайте отново",
+  "Elder account": "Потребителски профил",
+  "Caregiver": "Помощник",
+  "Edit profile": "Редактирайте профила",
+  "Your profile was saved.": "Профилът Ви е запазен.",
+  "Phone — private to you": "Телефон — видим само за Вас",
+  "Member since": "Регистриран от",
+  "Not available": "Не е налично",
+  "Your phone number stays private and is never shown to others.":
+    "Телефонният Ви номер остава поверителен и никога не се показва на други хора.",
+  "Optional — choose a new photo to replace the current one.":
+    "По избор — изберете нова снимка, която да замени текущата.",
+  "To change your sign-in email, please contact support for now.":
+    "За да смените имейла за вход, засега се свържете с поддръжката.",
+  "Please enter an age between 16 and 120, or leave it blank.":
+    "Моля, въведете възраст между 16 и 120 или оставете полето празно.",
+  "Save changes": "Запазете промените",
+  "Cancel": "Отказ",
+  "Things you can do": "Какво можете да правите",
+  "Caregiver dashboard": "Табло за помощник",
 };

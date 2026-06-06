@@ -1,5 +1,14 @@
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 
+// NOTE: The applied target-model migrations simplified profiles.role to
+// 'elder' | 'admin' and renamed display_name -> first_name. The NEW identity
+// layer for elders lives in `lib/auth/account.ts` + `lib/auth/useCurrentUser.ts`
+// (the single source of truth used by signup, login, the account page and the
+// header). This module is the LEGACY surface kept so older marketplace/booking
+// pages keep compiling; its runtime is patched here to read/write the real
+// columns. The legacy `display_name` field below mirrors `first_name`, and the
+// legacy `ProfileRole` union is retained only for those older pages.
+
 export type SignupAccountType = "client_caregiver" | "helper_applicant";
 
 export type ProfileRole = "client" | "helper_applicant" | "verified_helper" | "admin";
@@ -8,6 +17,7 @@ export type Profile = {
   id: string;
   email: string;
   role: ProfileRole;
+  /** Mirrors profiles.first_name (the column display_name was renamed to). */
   display_name: string | null;
   phone: string | null;
   created_at: string | null;
@@ -25,14 +35,6 @@ function isDuplicateRowError(error: { code?: string; message?: string } | null) 
 
 function isNoRowsError(error: { code?: string } | null) {
   return error?.code === noRowsCode;
-}
-
-export function mapSignupAccountTypeToProfileRole(accountType: SignupAccountType): "client" | "helper_applicant" {
-  if (accountType === "helper_applicant") {
-    return "helper_applicant";
-  }
-
-  return "client";
 }
 
 export function deriveDisplayNameFromEmail(email: string) {
@@ -56,7 +58,7 @@ export function getSignupAccountTypeFromUser(user: User): SignupAccountType {
 export async function loadProfile(supabase: SupabaseClient, userId: string): Promise<{ profile: Profile | null; errorMessage: string | null }> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("id,email,role,display_name,phone,created_at")
+    .select("id,email,role,first_name,phone,created_at")
     .eq("id", userId)
     .single();
 
@@ -68,7 +70,26 @@ export async function loadProfile(supabase: SupabaseClient, userId: string): Pro
     return { profile: null, errorMessage: error.message };
   }
 
-  return { profile: data as Profile, errorMessage: null };
+  const row = data as {
+    id: string;
+    email: string;
+    role: string;
+    first_name: string | null;
+    phone: string | null;
+    created_at: string | null;
+  };
+
+  return {
+    profile: {
+      id: row.id,
+      email: row.email,
+      role: row.role as ProfileRole,
+      display_name: row.first_name,
+      phone: row.phone,
+      created_at: row.created_at,
+    },
+    errorMessage: null,
+  };
 }
 
 export async function createProfileIfMissing(
@@ -81,11 +102,13 @@ export async function createProfileIfMissing(
     phone?: string;
   },
 ): Promise<{ errorMessage: string | null }> {
+  // Universal account model: every self-created profile is an 'elder' (RLS only
+  // permits id = auth.uid() with role = 'elder'). Admin is assigned manually.
   const { error } = await supabase.from("profiles").insert({
     id: input.userId,
     email: input.email,
-    role: mapSignupAccountTypeToProfileRole(input.accountType),
-    display_name: input.displayName?.trim() || deriveDisplayNameFromEmail(input.email),
+    role: "elder",
+    first_name: input.displayName?.trim() || deriveDisplayNameFromEmail(input.email),
     phone: input.phone?.trim() || null,
   });
 

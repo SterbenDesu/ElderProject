@@ -368,3 +368,55 @@ Verification steps:
 6. Use the admin visibility control to hide/unpublish the caregiver if the profile should be removed from public listing.
 
 Environment variables remain documented by name only in the existing deployment notes; no new secrets are required for this UI pass.
+
+## 2026-06-06 Role system + elder signup/login/account
+
+Scope: identity/auth layer built on the already-applied target schema
+(`profiles.role = elder|admin`; caregiver capability = an approved
+`caregiver_profiles` row). No existing table RLS was changed.
+
+Required migration:
+
+- Apply `supabase/migrations/20260606120000_avatars_storage.sql` (creates a
+  public `avatars` Storage bucket for OPTIONAL profile photos).
+  - Public READ is limited to the `avatars` bucket only (avatar URLs are
+    public-safe; phone/email are never stored here).
+  - WRITE/UPDATE/DELETE are restricted to a user's own `{auth.uid}/...` folder.
+  - This is additive and does NOT weaken the one-way rule or phone privacy.
+
+Required services / env vars: unchanged
+(`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`).
+
+Build command: `npm run build`. Start command: `npm run start`.
+
+Auth method: email + password (existing pattern kept). Magic-link/OTP is a
+recommended future upgrade once a transactional email provider is chosen.
+
+Profile creation: on signup the elder profile row is written to `public.profiles`
+with `role = 'elder'` and the private `phone` (RLS already restricts phone to
+owner/admin). When email confirmation defers the first session, the row is
+created on first authenticated load by the single source of truth
+(`lib/auth/useCurrentUser.ts` -> `ensureElderProfile`) from auth user_metadata.
+
+Verification steps:
+
+1. `/signup`: create an elder (first/last name, email, phone, age, optional
+   photo, password). Confirm a `profiles` row is created with `role = 'elder'`.
+2. Confirm the phone reassurance note is shown under the phone field (EN + BG).
+3. `/login`: sign in; confirm redirect to `/account` (or to `returnTo`).
+4. Filter preservation: open `/helpers?city=...&services=...`, open a caregiver,
+   while signed out click Login/Create account, finish auth, and confirm you are
+   returned to the same caregiver page with the filter query intact.
+5. `/account`: confirm the phone is visible ONLY to the signed-in owner, and that
+   name/phone/age/photo can be edited and saved.
+6. Header avatar menu: confirm "My profile" -> `/account`, caregivers see
+   "Caregiver dashboard", admins see "Admin", others see "Become a caregiver".
+
+Known follow-ups (out of scope here):
+
+- The legacy `/dashboard`, marketplace and booking pages still reference the
+  pre-rename table/column names and remain part of the separate app-code
+  migration follow-up noted in `VERIFICATION.md`.
+- Editing the sign-in email from `/account` is intentionally deferred (shown
+  read-only with a note) because changing the Supabase Auth email requires a
+  re-confirmation flow; revisit as a dedicated task.

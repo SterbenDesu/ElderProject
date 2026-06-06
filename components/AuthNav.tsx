@@ -3,31 +3,13 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
-import { useEffect, useMemo, useState } from "react";
-import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { useMemo, useState } from "react";
 import { useI18n } from "@/lib/i18n";
-import { loadProfile, type ProfileRole } from "@/lib/supabase/profiles";
+import { getAccountInitials } from "@/lib/auth/account";
+import { useCurrentUser } from "@/lib/auth/useCurrentUser";
 
-type AuthStatus = "loading" | "signed-in" | "signed-out" | "unconfigured";
 type AuthNavVariant = "desktop" | "mobile" | "links";
 type HeaderLink = { href: string; label: string };
-
-type AccountSummary = {
-  email: string | null;
-  displayName: string | null;
-  role: ProfileRole | null;
-};
-
-function getInitials(displayName: string | null, email: string | null) {
-  const source = displayName?.trim() || email?.split("@")[0]?.trim() || "VP";
-  const words = source.split(/\s+/).filter(Boolean);
-
-  if (words.length >= 2) {
-    return `${words[0][0]}${words[1][0]}`.toUpperCase();
-  }
-
-  return source.slice(0, 2).toUpperCase();
-}
 
 function DropdownLink({ href, children }: { href: string; children: ReactNode }) {
   return (
@@ -49,134 +31,37 @@ export function AuthNav({
 }) {
   const router = useRouter();
   const { t } = useI18n();
-  const [status, setStatus] = useState<AuthStatus>("loading");
-  const [account, setAccount] = useState<AccountSummary>({
-    email: null,
-    displayName: null,
-    role: null,
-  });
+  // Single source of truth for identity + role.
+  const { status, user, profile, isAdmin, isCaregiver, envError, signOut } =
+    useCurrentUser();
   const [message, setMessage] = useState<string | null>(null);
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   const initials = useMemo(
-    () => getInitials(account.displayName, account.email),
-    [account.displayName, account.email],
+    () =>
+      getAccountInitials(
+        profile?.first_name ?? null,
+        profile?.last_name ?? null,
+        user?.email ?? null,
+      ),
+    [profile?.first_name, profile?.last_name, user?.email],
   );
 
-  useEffect(() => {
-    const { supabase, envError } = getSupabaseBrowserClient();
-
-    if (envError || !supabase) {
-      setStatus("unconfigured");
-      setMessage(envError);
-      return;
-    }
-
-    let isMounted = true;
-
-    // Safety net: the auth state must resolve quickly so the loading
-    // indicator never gets stuck visible. If getSession() is slow or never
-    // resolves (e.g. a network/CORS failure that rejects or hangs), fall back
-    // to the signed-out view within 1 second instead of showing a spinner
-    // forever.
-    const loadingFallback = setTimeout(() => {
-      if (!isMounted) {
-        return;
-      }
-
-      setStatus((current) => (current === "loading" ? "signed-out" : current));
-    }, 1000);
-
-    async function loadAccount(userId: string, email: string | null) {
-      if (!supabase) {
-        return;
-      }
-
-      const profileResult = await loadProfile(supabase, userId);
-
-      if (!isMounted) {
-        return;
-      }
-
-      setAccount({
-        email,
-        displayName: profileResult.profile?.display_name ?? null,
-        role: profileResult.profile?.role ?? null,
-      });
-    }
-
-    supabase.auth
-      .getSession()
-      .then(({ data }) => {
-        if (!isMounted) {
-          return;
-        }
-
-        if (data.session?.user) {
-          setStatus("signed-in");
-          setMessage(null);
-          void loadAccount(data.session.user.id, data.session.user.email ?? null);
-        } else {
-          setStatus("signed-out");
-          setAccount({ email: null, displayName: null, role: null });
-          setMessage(null);
-        }
-      })
-      .catch(() => {
-        if (!isMounted) {
-          return;
-        }
-
-        // Never leave the user stuck on the loading indicator if the session
-        // lookup rejects. Treat an unreadable session as signed-out.
-        setStatus("signed-out");
-        setAccount({ email: null, displayName: null, role: null });
-      });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        setStatus("signed-in");
-        setMessage(null);
-        void loadAccount(session.user.id, session.user.email ?? null);
-      } else {
-        setStatus("signed-out");
-        setAccount({ email: null, displayName: null, role: null });
-        setMessage(null);
-      }
-      router.refresh();
-    });
-
-    return () => {
-      isMounted = false;
-      clearTimeout(loadingFallback);
-      subscription.unsubscribe();
-    };
-  }, [router]);
+  const displayName =
+    [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || null;
 
   async function handleSignOut() {
-    const { supabase, envError } = getSupabaseBrowserClient();
-
-    if (envError || !supabase) {
-      setStatus("unconfigured");
-      setMessage(envError);
-      return;
-    }
-
     setIsSigningOut(true);
     setMessage(null);
 
-    const { error } = await supabase.auth.signOut();
+    const { errorMessage } = await signOut();
 
-    if (error) {
-      setMessage(error.message);
+    if (errorMessage) {
+      setMessage(errorMessage);
       setIsSigningOut(false);
       return;
     }
 
-    setStatus("signed-out");
-    setAccount({ email: null, displayName: null, role: null });
     setIsSigningOut(false);
     router.push("/");
     router.refresh();
@@ -203,9 +88,6 @@ export function AuthNav({
   }
 
   if (status === "loading") {
-    // A subtle, accessible spinner instead of raw status text. This resolves
-    // within ~1s (see the loading fallback in the effect above), so users
-    // never see a permanent "Checking account…" label.
     return (
       <span
         className="flex min-h-12 items-center px-3 py-2.5"
@@ -235,17 +117,23 @@ export function AuthNav({
           <div className={`absolute right-0 mt-3 ${menuWidth} rounded-3xl border border-stone-200 bg-white p-3 shadow-xl shadow-stone-300/40`}>
             <div className="border-b border-stone-100 px-3 pb-3">
               <p className="text-sm font-bold text-forest">
-                {account.displayName || t("My profile")}
+                {displayName || t("My profile")}
               </p>
-              {account.email ? (
-                <p className="mt-1 break-words text-xs text-stone-500">{account.email}</p>
+              {user?.email ? (
+                <p className="mt-1 break-words text-xs text-stone-500">{user.email}</p>
               ) : null}
             </div>
             <div className="mt-2 grid gap-1">
-              <DropdownLink href="/dashboard">{t("My profile")}</DropdownLink>
+              <DropdownLink href="/account">{t("My profile")}</DropdownLink>
               <DropdownLink href="/helpers">{t("Browse caregivers")}</DropdownLink>
-              <DropdownLink href="/helper/apply">{t("Become a caregiver")}</DropdownLink>
-              {account.role === "admin" ? <DropdownLink href="/admin">{t("Admin")}</DropdownLink> : null}
+              {isCaregiver ? (
+                <DropdownLink href="/dashboard/helper-profile">
+                  {t("Caregiver dashboard")}
+                </DropdownLink>
+              ) : (
+                <DropdownLink href="/helper/apply">{t("Become a caregiver")}</DropdownLink>
+              )}
+              {isAdmin ? <DropdownLink href="/admin">{t("Admin")}</DropdownLink> : null}
               <button
                 type="button"
                 onClick={handleSignOut}
@@ -273,7 +161,9 @@ export function AuthNav({
       <Link href="/login" className={loginClass}>
         {t("Sign in")}
       </Link>
-      {status === "unconfigured" && message ? <p className="text-xs font-semibold text-clay">{message}</p> : null}
+      {status === "unconfigured" && envError ? (
+        <p className="text-xs font-semibold text-clay">{envError}</p>
+      ) : null}
     </div>
   );
 }
