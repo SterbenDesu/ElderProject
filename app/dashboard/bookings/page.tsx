@@ -657,7 +657,7 @@ export default function BookingsPage() {
                           {booking.helper_profile_id ? (
                             helperProfile ? (
                               <>
-                                Requested for a specific visible helper in {helperProfile.city} ({formatHelperVerificationStatus(helperProfile.verification_status)}). Service radius: {helperProfile.service_radius_km === null ? "Not listed" : `${helperProfile.service_radius_km} km`}.
+                                Requested for {helperProfile.display_name} ({formatHelperVerificationStatus(helperProfile.verification_status)}), a specific visible caregiver.
                               </>
                             ) : (
                               "Requested for a specific helper, but the helper is no longer publicly visible or the safe public helper details could not be read."

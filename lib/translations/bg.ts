@@ -224,7 +224,12 @@ export const phraseTranslations: Record<string, string> = {
   "Location": "Населено място",
   "Age": "Възраст",
   "Age not added": "Възрастта не е посочена",
+  "Experience": "Опит",
   "View profile": "Вижте профила",
+  "We couldn't load caregivers right now. Please try again in a little while.":
+    "В момента не можем да заредим помощниците. Моля, опитайте отново малко по-късно.",
+  "We couldn't load this caregiver right now. Please try again in a little while.":
+    "В момента не можем да заредим този помощник. Моля, опитайте отново малко по-късно.",
 
   // ---------------------------------------------------------------------------
   // Caregiver profile (/helpers/[id])
@@ -284,8 +289,8 @@ export const phraseTranslations: Record<string, string> = {
   "• No card details or payment information are collected here.":
     "• Тук не се събират данни за карта или плащане.",
   "Public data only": "Само публични данни",
-  "This page uses safe helper profile fields only: bio, city, service radius, and verification label. It does not show email addresses, private user details, profile ownership IDs, application answers, or hidden/admin-only fields.":
-    "Тази страница показва само безопасните полета от профила: описание, град, радиус на работа и етикет за проверка. Тук не се показват имейл адреси, лични данни, идентификатори на собственика, отговори от кандидатурата или скрити служебни полета.",
+  "This page uses safe caregiver profile fields only: display name, bio, experience, and verification label. It does not show email addresses, private user details, profile ownership IDs, application answers, or hidden/admin-only fields.":
+    "Тази страница показва само безопасните полета от профила: показвано име, описание, опит и етикет за проверка. Тук не се показват имейл адреси, лични данни, идентификатори на собственика, отговори от кандидатурата или скрити служебни полета.",
   // setMessage / status (caregiver profile)
   "This helper profile is not available publicly. It may be hidden, unverified, or missing.":
     "Този профил на помощник не е публично достъпен. Възможно е да е скрит, непроверен или да не съществува.",

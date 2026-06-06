@@ -143,8 +143,10 @@ export default function HelperDetailPage() {
       }
 
       if (helperResult.errorMessage) {
+        // Log the technical reason for developers; show families a calm message.
+        console.error("Could not load caregiver profile:", helperResult.errorMessage);
         setPageStatus("error");
-        setMessage(`Could not load this public helper profile: ${helperResult.errorMessage}. Confirm the helper_profiles public visibility RLS policy is applied.`);
+        setMessage("We couldn't load this caregiver right now. Please try again in a little while.");
         return;
       }
 
@@ -157,7 +159,6 @@ export default function HelperDetailPage() {
 
       setHelperProfile(helperResult.helperProfile);
       setPageStatus("loaded");
-      setForm((current) => ({ ...current, city: current.city || helperResult.helperProfile?.city || "" }));
 
       const { data: userData, error: userError } = await activeSupabase.auth.getUser();
 
@@ -199,7 +200,7 @@ export default function HelperDetailPage() {
       setProfile(profileResult.profile);
 
       if (profileResult.profile.role === "client") {
-        await loadClientFormData(profileResult.profile, helperResult.helperProfile.city);
+        await loadClientFormData(profileResult.profile, "");
       }
     }
 
@@ -362,15 +363,11 @@ export default function HelperDetailPage() {
               <p className="inline-flex rounded-full bg-sage px-3 py-1 text-xs font-extrabold uppercase tracking-[0.14em] text-forest">
                 Certified caregiver
               </p>
-              <h2 className="mt-3 text-3xl font-bold text-forest">Caregiver in {helperProfile.city}</h2>
+              <h2 className="mt-3 text-3xl font-bold text-forest">{helperProfile.display_name}</h2>
               <dl className="mt-6 grid gap-4 text-sm sm:grid-cols-2">
-                <div>
-                  <dt className="font-bold text-forest">City</dt>
-                  <dd className="mt-1">{helperProfile.city}</dd>
-                </div>
-                <div>
-                  <dt className="font-bold text-forest">Service radius</dt>
-                  <dd className="mt-1">{helperProfile.service_radius_km === null ? "Not listed" : `${helperProfile.service_radius_km} km`}</dd>
+                <div className="sm:col-span-2">
+                  <dt className="font-bold text-forest">Experience</dt>
+                  <dd className="mt-1 whitespace-pre-wrap leading-7">{helperProfile.experience ?? "Not listed"}</dd>
                 </div>
                 <div className="sm:col-span-2">
                   <dt className="font-bold text-forest">Full profile</dt>
@@ -516,7 +513,7 @@ export default function HelperDetailPage() {
             <div className="rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200">
               <h2 className="text-xl font-bold text-forest">Public data only</h2>
               <p className="mt-4 leading-7">
-                This page uses safe helper profile fields only: bio, city, service radius, and verification label. It does not show email addresses, private user details, profile ownership IDs, application answers, or hidden/admin-only fields.
+                This page uses safe caregiver profile fields only: display name, bio, experience, and verification label. It does not show email addresses, private user details, profile ownership IDs, application answers, or hidden/admin-only fields.
               </p>
             </div>
           </aside>
