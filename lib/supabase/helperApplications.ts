@@ -1,5 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+// NOTE: the Phase 1 target model renamed the `helper_applications` table to
+// `caregiver_applications` (same column shape). This module reads/writes that
+// table. The TypeScript surface keeps the "Helper…" names to avoid a wider
+// rename of the caregiver-application page that consumes it.
+
 export type HelperApplicationStatus = "draft" | "submitted" | "under_review" | "approved" | "rejected";
 
 export type HelperApplication = {
@@ -52,7 +57,7 @@ export async function loadOwnHelperApplication(
   profileId: string,
 ): Promise<{ application: HelperApplication | null; errorMessage: string | null }> {
   const { data, error } = await supabase
-    .from("helper_applications")
+    .from("caregiver_applications")
     .select("id,profile_id,status,full_name,city,motivation,experience_summary,availability_summary,created_at,updated_at")
     .eq("profile_id", profileId)
     .order("updated_at", { ascending: false })
@@ -86,14 +91,14 @@ export async function saveOwnHelperApplication(
 
   const query = input.applicationId
     ? supabase
-        .from("helper_applications")
+        .from("caregiver_applications")
         .update(payload)
         .eq("id", input.applicationId)
         .eq("profile_id", input.profileId)
         .select("id,profile_id,status,full_name,city,motivation,experience_summary,availability_summary,created_at,updated_at")
         .single()
     : supabase
-        .from("helper_applications")
+        .from("caregiver_applications")
         .insert(payload)
         .select("id,profile_id,status,full_name,city,motivation,experience_summary,availability_summary,created_at,updated_at")
         .single();

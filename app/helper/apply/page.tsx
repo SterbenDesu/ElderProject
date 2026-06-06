@@ -14,6 +14,7 @@ import {
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { useI18n } from "@/lib/i18n";
 import { loadProfile, type Profile } from "@/lib/supabase/profiles";
+import { ensureElderProfile } from "@/lib/auth/account";
 
 type PageStatus = "loading" | "signed-out" | "ready" | "unconfigured" | "error";
 type SaveAction = "draft" | "submitted";
@@ -95,7 +96,7 @@ export default function ApplyPage() {
 
     setUser(userData.user);
 
-    const profileResult = await loadProfile(supabase, userData.user.id);
+    let profileResult = await loadProfile(supabase, userData.user.id);
 
     if (profileResult.errorMessage) {
       setPageStatus("error");
@@ -103,9 +104,22 @@ export default function ApplyPage() {
       return;
     }
 
+    // Self-heal: if the profile row is missing (e.g. email-confirmation deferred
+    // it past signup), create it from the signed-in user's metadata and reload,
+    // so the page never dead-ends on a missing profile.
+    if (!profileResult.profile) {
+      const ensured = await ensureElderProfile(supabase, userData.user);
+      if (ensured.errorMessage) {
+        setPageStatus("error");
+        setMessage(getDebuggableDatabaseMessage("Could not set up your profile", ensured.errorMessage));
+        return;
+      }
+      profileResult = await loadProfile(supabase, userData.user.id);
+    }
+
     if (!profileResult.profile) {
       setPageStatus("error");
-      setMessage("Your login works, but your profile row is missing. Open Dashboard and use the profile setup retry after confirming the Supabase schema and RLS policies are applied.");
+      setMessage("Your login works, but your profile is still being set up. Open My profile to finish setup, then return here.");
       return;
     }
 

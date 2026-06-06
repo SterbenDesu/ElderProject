@@ -71,7 +71,67 @@ npm run start
 6. Run `npm run dev`.
 7. Test `/signup`, `/login`, header auth state, sign out, `/dashboard`, profile creation, terms acceptance creation, missing-profile handling, `/helper/apply` draft/submission behavior, and `/helpers` public verified listing behavior.
 
-## Database setup
+## Database setup — Phase 1 target model (apply `SUPABASE_SETUP.sql`)
+
+> **If the live site shows `column profiles.first_name does not exist` or
+> `Could not find the 'age' column of 'profiles'`, the Phase 1 migrations were
+> never applied to the live database. Apply `SUPABASE_SETUP.sql` (repo root).**
+
+`SUPABASE_SETUP.sql` at the repository root is ONE consolidated, **idempotent**
+script that brings the database to the Phase 1 target model from
+`DATABASE_SCHEMA.md`. It is equivalent to applying every migration under
+`supabase/migrations/` in order, but is safe to paste and run as a single query.
+
+How to apply (no direct DB access needed from the agent):
+
+1. Open the Supabase Dashboard for the project → **SQL Editor** → **New query**.
+2. Paste the entire contents of `SUPABASE_SETUP.sql`.
+3. Confirm you are in the correct project, then **Run**. It is safe to re-run.
+
+What it does (data-preserving — `ALTER`/`ADD`/guarded `RENAME`, never `DROP TABLE`):
+
+- Extends `profiles` to the target identity columns the app requires
+  (`first_name` (was `display_name`), `last_name`, `age`, `avatar_url`,
+  `account_status`) and simplifies `role` to `elder` | `admin`.
+- Renames the helper-era tables to the caregiver/elder vocabulary
+  (`helper_profiles`→`caregiver_profiles`, `helper_applications`→
+  `caregiver_applications`, `bookings`→`reservations`,
+  `service_categories`→`services`, `payment_records`→`payments`,
+  `complaints`→`disputes`) and adds the new tables (`regions`,
+  `caregiver_services`, `service_extras`, `caregiver_regions`,
+  `availability_slots`, `reservation_slots`, `reservation_services`,
+  `notifications`, `chat_threads`, `chat_messages`, `reviews`).
+- Enables RLS on every table and (re)creates all policies: the **one-way rule**
+  (a caregiver can never enumerate elders), **phone privacy**
+  (`profiles.phone`/`email`/`age`/`last_name` are owner+admin only — no
+  public/anon/cross-user read), the column-level revoke of
+  `caregiver_profiles.stripe_account_id`, and the state-machine RPCs.
+- Creates the public `avatars` storage bucket + owner-scoped write policies.
+- Seeds (upserts) the 24 Sofia districts and the non-medical service catalogue.
+  The dev-only fake caregiver accounts from `supabase/seed.sql` are intentionally
+  **not** seeded by this script (never seed production with them).
+
+Verified on a local PostgreSQL 16 cluster against (a) a fresh database and (b) a
+simulated pre-Phase-1 database with sample rows: applies cleanly, is idempotent
+on re-run, preserves existing data (`display_name` value carried into
+`first_name`, phone kept), and the one-way-rule / phone-privacy / column-revoke
+RLS checks all pass.
+
+### Known follow-up after applying Phase 1
+
+Applying Phase 1 renames the helper-era tables. The signup, **My profile**
+(`/account`), and **Become a caregiver** (`/helper/apply`) pages use the target
+schema and work after the script runs. The older marketplace pages still
+reference pre-Phase-1 names/columns (`bookings`, `helper_profiles`, `client_id`,
+`service_category_id`, the `update_own_helper_profile` RPC, etc.) via
+`lib/supabase/bookings.ts` and `lib/supabase/helperProfiles.ts`, so
+`/dashboard/bookings`, `/helpers`, `/helpers/[id]`, `/dashboard/helper-profile`,
+and the marketplace parts of `/admin` need a **follow-up** rewrite onto the
+`reservations` + `caregiver_services` model (this is the required follow-up noted
+in `VERIFICATION.md`, and is a separate, larger task — not a simple rename). The
+production build is unaffected because those references are string literals.
+
+## Database setup — original ordered migrations
 
 The current database schema and RPC/policy updates are represented by the ordered migration files in `supabase/migrations/`:
 
