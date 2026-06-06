@@ -987,4 +987,149 @@ export const phraseTranslations: Record<string, string> = {
   "Cancel": "Отказ",
   "Things you can do": "Какво можете да правите",
   "Caregiver dashboard": "Табло за помощник",
+
+  // ---------------------------------------------------------------------------
+  // Caregiver dashboard — services & prices, schedule, regions
+  // ---------------------------------------------------------------------------
+  "Set up the services, prices, schedule, and regions that appear on your public profile and the marketplace. Each section saves on its own.":
+    "Настройте услугите, цените, графика и районите, които се показват в публичния Ви профил и на пазара. Всеки раздел се запазва отделно.",
+  "Checking your account…": "Проверяваме акаунта Ви…",
+  "You need to sign in to reach the caregiver dashboard.":
+    "Трябва да влезете, за да достигнете таблото за помощник.",
+  "Approved caregivers only": "Само за одобрени помощници",
+  "This dashboard is available once an admin approves your caregiver application. Standard accounts manage their details from My profile.":
+    "Това табло е достъпно, след като администратор одобри Вашата кандидатура за помощник. Стандартните акаунти управляват данните си от „Моят профил“.",
+  "Loading your caregiver profile…": "Зареждаме профила Ви на помощник…",
+  "Could not load your caregiver profile":
+    "Профилът Ви на помощник не можа да се зареди",
+  "Caregiver profile missing": "Липсва профил на помощник",
+  "Your account is approved as a caregiver, but no caregiver profile row was found. Please ask an admin to repair your approved caregiver profile.":
+    "Акаунтът Ви е одобрен като помощник, но не е намерен профил на помощник. Моля, помолете администратор да възстанови одобрения Ви профил на помощник.",
+  "Visible on the marketplace": "Видим на пазара",
+  "Hidden until an admin makes you visible":
+    "Скрит, докато администратор не Ви направи видим",
+  "Services & prices": "Услуги и цени",
+  "Schedule": "График",
+  "Regions": "Райони",
+
+  // Section 1 — services + prices + extras
+  "Loading your services…": "Зареждаме услугите Ви…",
+  "Could not load your services": "Услугите Ви не можаха да се заредят",
+  "My services & prices": "Моите услуги и цени",
+  "Turn on the services you perform and set your own price in лв. for each. These prices appear on your public profile and the marketplace.":
+    "Включете услугите, които извършвате, и задайте собствена цена в лв. за всяка. Тези цени се показват в публичния Ви профил и на пазара.",
+  "Offered": "Предлага се",
+  "Offer this": "Предлагайте това",
+  "Save services": "Запазете услугите",
+  "Your services and prices were saved.": "Услугите и цените Ви бяха запазени.",
+  "Optional extras": "Допълнителни услуги",
+  "Small add-ons an elder can choose at booking time, each with its own price in лв. — for example taking out the trash or a light tidy-up.":
+    "Малки добавки, които потребителят може да избере при заявка, всяка със собствена цена в лв. — например изхвърляне на боклука или лека подредба.",
+  "No extras yet. Add one below if you offer small add-ons.":
+    "Все още няма допълнителни услуги. Добавете отдолу, ако предлагате малки добавки.",
+  "Remove": "Премахнете",
+  "Add an extra": "Добавете услуга",
+  "Your optional extras were saved.": "Допълнителните Ви услуги бяха запазени.",
+  "Please give every extra a short name, or remove it.":
+    "Моля, дайте кратко име на всяка добавка или я премахнете.",
+  "Extra name (e.g. Take out the trash)":
+    "Име на добавка (напр. Изхвърляне на боклука)",
+
+  // Service catalogue names + descriptions
+  "Non-medical social visits and conversation.":
+    "Немедицински социални посещения и разговор.",
+  "Simple local errands that do not involve medical, financial, or high-risk tasks.":
+    "Прости местни задачи без медицински, финансови или високорискови дейности.",
+  "Help with routine shopping for everyday items.":
+    "Помощ с обичайно пазаруване на ежедневни стоки.",
+  "Non-medical accompaniment for short local walks.":
+    "Немедицинско придружаване за кратки разходки наблизо.",
+  "Scheduled non-medical wellbeing check-ins and updates.":
+    "Планирани немедицински проверки на благополучието и новини.",
+  "Basic help using phones, computers, video calls, or online forms without handling passwords or sensitive financial access.":
+    "Основна помощ с телефони, компютри, видеоразговори или онлайн формуляри, без работа с пароли или чувствителен финансов достъп.",
+  "Non-medical accompaniment to appointments, shops, or community activities.":
+    "Немедицинско придружаване до срещи, магазини или обществени дейности.",
+  "Short visits": "Кратки посещения",
+  "Brief non-medical wellbeing visits and company.":
+    "Кратки немедицински посещения за благополучие и компания.",
+
+  // Section 2 — schedule
+  "My schedule": "Моят график",
+  "Tap the 2-hour slots you are available, then save the week. Booked slots are locked and shown for reference.":
+    "Докоснете 2-часовите интервали, в които сте свободни, след което запазете седмицата. Заетите интервали са заключени и се показват за справка.",
+  "Previous week": "Предишна седмица",
+  "Next week": "Следваща седмица",
+  "This week": "Тази седмица",
+  "Loading your week…": "Зареждаме седмицата Ви…",
+  "Add": "Добавете",
+  "Open": "Свободно",
+  "Booked": "Заето",
+  "Held": "Задържано",
+  "Blocked": "Блокирано",
+  "No changes to save for this week.":
+    "Няма промени за запазване за тази седмица.",
+  "Save this week": "Запазете тази седмица",
+  "Recurring weekly pattern": "Повтарящ се седмичен модел",
+  "Pick the slots you are usually free, then publish them across the coming weeks. This adds open slots and never overwrites booked ones.":
+    "Изберете интервалите, в които обикновено сте свободни, и ги публикувайте за следващите седмици. Това добавя свободни интервали и никога не презаписва заетите.",
+  "On": "Вкл.",
+  "Off": "Изкл.",
+  "Publish for the next": "Публикувайте за следващите",
+  "weeks": "седмици",
+  "Select at least one weekday and time slot first.":
+    "Първо изберете поне един делничен ден и времеви интервал.",
+  "This pattern produced no upcoming slots to publish.":
+    "Този модел не създаде предстоящи интервали за публикуване.",
+  "Publish weekly pattern": "Публикувайте седмичния модел",
+  "Publishing…": "Публикуваме…",
+  "Mon": "Пон",
+  "Tue": "Вто",
+  "Wed": "Сря",
+  "Thu": "Чет",
+  "Fri": "Пет",
+  "Sat": "Съб",
+  "Sun": "Нед",
+
+  // Section 3 — regions
+  "My operating regions": "Моите работни райони",
+  "Choose the Sofia districts you serve, or turn on Whole city to cover all of them.":
+    "Изберете районите на София, които обслужвате, или включете „Цял град“, за да покриете всички.",
+  "Whole city": "Цял град",
+  "Serve every Sofia district.": "Обслужвайте всеки район на София.",
+  "Districts": "Райони",
+  "Loading districts…": "Зареждаме районите…",
+  "Your operating regions were saved.": "Работните Ви райони бяха запазени.",
+  "Save regions": "Запазете районите",
+
+  // Sofia district names (Cyrillic)
+  "Sredets": "Средец",
+  "Krasno selo": "Красно село",
+  "Vazrazhdane": "Възраждане",
+  "Oborishte": "Оборище",
+  "Serdika": "Сердика",
+  "Poduyane": "Подуяне",
+  "Slatina": "Слатина",
+  "Izgrev": "Изгрев",
+  "Lozenets": "Лозенец",
+  "Triaditsa": "Триадица",
+  "Krasna polyana": "Красна поляна",
+  "Ilinden": "Илинден",
+  "Nadezhda": "Надежда",
+  "Iskar": "Искър",
+  "Mladost": "Младост",
+  "Studentski": "Студентски",
+  "Vitosha": "Витоша",
+  "Ovcha kupel": "Овча купел",
+  "Lyulin": "Люлин",
+  "Vrabnitsa": "Връбница",
+  "Novi Iskar": "Нови Искър",
+  "Kremikovtsi": "Кремиковци",
+  "Pancharevo": "Панчарево",
+  "Bankya": "Банкя",
+
+  // Dashboard hub — caregiver entry card
+  "You are approved as a caregiver. Set up your services and prices, schedule, and operating regions. Admins still control public visibility.":
+    "Одобрени сте като помощник. Настройте услугите и цените си, графика и работните райони. Администраторите все още контролират публичната видимост.",
+  "Open caregiver dashboard": "Отворете таблото за помощник",
 };

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { countOwnBookings } from "@/lib/supabase/bookings";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { loadIsCaregiver } from "@/lib/auth/account";
 import { countOwnElderlyProfiles } from "@/lib/supabase/elderlyProfiles";
 import {
   formatHelperApplicationStatus,
@@ -83,6 +84,8 @@ export default function DashboardPage() {
   const [profileMessage, setProfileMessage] = useState<string | null>(null);
   const [isRetryingProfileSetup, setIsRetryingProfileSetup] = useState(false);
 
+  const [isCaregiver, setIsCaregiver] = useState(false);
+
   const initials = useMemo(
     () => getInitials(profile?.display_name ?? null, user?.email ?? null),
     [profile?.display_name, user?.email],
@@ -99,6 +102,7 @@ export default function DashboardPage() {
 
     setProfileStatus("loading");
     setProfileMessage(null);
+    setIsCaregiver(false);
 
     const result = await loadProfile(supabase, currentUser.id);
 
@@ -133,6 +137,9 @@ export default function DashboardPage() {
     setProfile(result.profile);
     setProfileStatus("loaded");
     setProfileMessage(null);
+
+    // Caregiver capability = an approved caregiver_profiles row (not a role).
+    setIsCaregiver(await loadIsCaregiver(supabase, result.profile.id));
 
     const helperApplicationResult = await loadOwnHelperApplication(
       supabase,
@@ -511,19 +518,19 @@ export default function DashboardPage() {
                   </div>
                 ) : null}
 
-                {profile.role === "verified_helper" ? (
+                {isCaregiver ? (
                   <section className="mt-6 rounded-3xl border border-stone-200 bg-white p-5">
-                    <h3 className="font-bold text-forest">Caregiver profile</h3>
+                    <h3 className="font-bold text-forest">Caregiver dashboard</h3>
                     <p className="mt-2 text-sm leading-6 text-stone-600">
-                      You are approved as a caregiver. You can manage safe public
-                      helper profile fields; admins still control public
-                      visibility.
+                      You are approved as a caregiver. Set up your services and
+                      prices, schedule, and operating regions. Admins still
+                      control public visibility.
                     </p>
                     <Link
-                      href="/dashboard/helper-profile"
+                      href="/dashboard/caregiver"
                       className="mt-4 inline-flex min-h-11 items-center rounded-full bg-forest px-5 py-2 text-sm font-semibold text-white transition hover:bg-stone-800"
                     >
-                      Manage caregiver profile
+                      Open caregiver dashboard
                     </Link>
                   </section>
                 ) : null}

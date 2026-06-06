@@ -427,7 +427,7 @@ export default function AccountPage() {
               </Link>
               {isCaregiver ? (
                 <Link
-                  href="/dashboard/helper-profile"
+                  href="/dashboard/caregiver"
                   className="inline-flex min-h-12 items-center rounded-full border border-sand bg-white px-6 py-3 font-bold text-terracotta transition hover:bg-linen"
                 >
                   Caregiver dashboard
