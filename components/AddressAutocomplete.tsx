@@ -21,6 +21,12 @@
 // per render. The autocomplete and map are initialised exactly once behind a
 // ref guard, so typing never re-initialises them. The key is the
 // domain-restricted publishable NEXT_PUBLIC_GOOGLE_MAPS_API_KEY.
+//
+// Way 1 uses the modern google.maps.places.PlaceAutocompleteElement custom
+// element (the "gmp-place-autocomplete" web component) — the replacement for
+// the deprecated google.maps.places.Autocomplete class, which Google stopped
+// offering to new API customers on 1 March 2025. See the migration guide:
+// https://developers.google.com/maps/documentation/javascript/places-migration-overview
 
 import { CheckCircle2, ChevronDown, Loader2, MapPin } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
@@ -78,7 +84,13 @@ export function AddressAutocomplete({
   const { t, language } = useI18n();
   const inputId = useId();
 
-  const inputRef = useRef<HTMLInputElement | null>(null);
+  // The PlaceAutocompleteElement is a Google custom element
+  // (google.maps.places.PlaceAutocompleteElement). We mount it into this
+  // container instead of binding a class to a plain <input>, which is how the
+  // old, now-deprecated google.maps.places.Autocomplete API worked.
+  const autocompleteContainerRef = useRef<HTMLDivElement | null>(null);
+  const placeAutocompleteRef =
+    useRef<google.maps.places.PlaceAutocompleteElement | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
 
   // Live Maps objects. Kept in refs so the once-attached event listeners never
@@ -87,6 +99,10 @@ export function AddressAutocomplete({
   const markerRef = useRef<google.maps.Marker | null>(null);
   const geocoderRef = useRef<google.maps.Geocoder | null>(null);
   const regionsRef = useRef<MatchableRegion[]>([]);
+  // True while we are programmatically committing a location (a map click, a
+  // pin drag, or a chosen suggestion) so the element's own "input" events do
+  // not wrongly clear the selection we are in the middle of setting.
+  const committingRef = useRef(false);
 
   // The latest onSelect / language, so listeners attached once always call the
   // current versions.
@@ -143,7 +159,11 @@ export function AddressAutocomplete({
         return;
       }
 
-      if (!isMounted || !inputRef.current || !mapContainerRef.current) {
+      if (
+        !isMounted ||
+        !autocompleteContainerRef.current ||
+        !mapContainerRef.current
+      ) {
         return;
       }
 
@@ -179,18 +199,54 @@ export function AddressAutocomplete({
       });
 
       // --- Places autocomplete (Way 1) -------------------------------------
-      const autocomplete = new google.maps.places.Autocomplete(inputRef.current, {
-        componentRestrictions: { country: "bg" },
-        types: ["geocode"],
-        fields: ["formatted_address", "geometry", "address_components", "name"],
+      // The new PlaceAutocompleteElement replaces the deprecated
+      // google.maps.places.Autocomplete class (unavailable to new API customers
+      // as of 1 March 2025). It is an HTML custom element we append to the DOM,
+      // restricted to Bulgaria via `includedRegionCodes` — the new equivalent of
+      // the old `componentRestrictions: { country: "bg" }`.
+      const placeAutocomplete = new google.maps.places.PlaceAutocompleteElement({
+        includedRegionCodes: ["bg"],
+        requestedLanguage: languageRef.current,
+        value: value?.address ?? "",
       });
+      placeAutocomplete.id = inputId;
+      placeAutocomplete.placeholder = t("Start typing your address in Sofia");
+      // Sets the element's internal aria-describedby (replaces the old sr-only
+      // help text that used to be wired to the <input>).
+      placeAutocomplete.description = t(
+        "Suggestions are limited to addresses in Bulgaria.",
+      );
+      // We render our own MapPin / spinner icon over the field, so hide the
+      // element's built-in search icon to avoid showing two icons.
+      placeAutocomplete.noInputIcon = true;
+      autocompleteContainerRef.current.appendChild(placeAutocomplete);
+      placeAutocompleteRef.current = placeAutocomplete;
 
-      autocomplete.addListener("place_changed", () => {
-        const place = autocomplete.getPlace();
-        const location = place.geometry?.location;
+      // Way 1 — the user picks a suggestion. The new event is "gmp-select" (the
+      // GA replacement for the old "place_changed"); the selection arrives as
+      // event.placePrediction, which we turn into a Place and hydrate with
+      // fetchFields (the GA replacement for the old autocomplete.getPlace()).
+      placeAutocomplete.addEventListener("gmp-select", async (event) => {
+        committingRef.current = true;
 
+        const place = event.placePrediction.toPlace();
+        try {
+          await place.fetchFields({
+            fields: [
+              "location",
+              "formattedAddress",
+              "addressComponents",
+              "displayName",
+            ],
+          });
+        } catch {
+          // Ignore — handled by the missing-location guard below.
+        }
+
+        const location = place.location;
         if (!location) {
-          // User pressed Enter without choosing a suggestion.
+          // No geometry (e.g. an incomplete selection).
+          committingRef.current = false;
           setMatchState("none");
           onSelectRef.current(null);
           return;
@@ -198,9 +254,23 @@ export function AddressAutocomplete({
 
         const coords = { lat: location.lat(), lng: location.lng() };
         const address =
-          place.formatted_address ?? place.name ?? inputRef.current?.value ?? "";
+          place.formattedAddress ??
+          place.displayName ??
+          event.placePrediction.text?.text ??
+          "";
 
         void commitLocation(coords, { animate: true, addressOverride: address });
+      });
+
+      // Editing the text by hand invalidates any previously matched district
+      // (mirrors the old <input> onChange). Guarded so our own programmatic
+      // value updates during a commit don't clear the fresh selection.
+      placeAutocomplete.addEventListener("input", () => {
+        if (committingRef.current) {
+          return;
+        }
+        setMatchState("none");
+        onSelectRef.current(null);
       });
 
       setStatus("ready");
@@ -260,47 +330,55 @@ export function AddressAutocomplete({
       coords: LatLng,
       options: { animate: boolean; addressOverride?: string },
     ) {
-      setMatchState("matching");
-      ensureMarker(coords);
+      committingRef.current = true;
+      try {
+        setMatchState("matching");
+        ensureMarker(coords);
 
-      if (mapRef.current) {
-        mapRef.current.panTo(coords);
-        if (options.animate) {
-          mapRef.current.setZoom(SELECTED_ZOOM);
+        if (mapRef.current) {
+          mapRef.current.panTo(coords);
+          if (options.animate) {
+            mapRef.current.setZoom(SELECTED_ZOOM);
+          }
         }
+
+        const address =
+          options.addressOverride ??
+          (await reverseGeocodeAddress(coords)) ??
+          `${coords.lat.toFixed(5)}, ${coords.lng.toFixed(5)}`;
+
+        // Reflect the resolved address in the autocomplete field. The new
+        // element exposes a `value` setter, so map clicks and pin drags can
+        // update the visible text exactly like the old <input> did.
+        if (placeAutocompleteRef.current) {
+          placeAutocompleteRef.current.value = address;
+        }
+
+        const match = await matchSofiaDistrict(
+          coords,
+          regionsRef.current,
+          geocoderRef.current ?? undefined,
+        );
+
+        if (!match) {
+          // Pin stays put so the user can drag it back into Sofia.
+          setMatchState("outside");
+          onSelectRef.current(null);
+          return;
+        }
+
+        setMatchState("matched");
+        onSelectRef.current({
+          address,
+          lat: coords.lat,
+          lng: coords.lng,
+          regionId: match.region.id,
+          regionName: match.region.name,
+          regionSlug: match.region.slug,
+        });
+      } finally {
+        committingRef.current = false;
       }
-
-      const address =
-        options.addressOverride ??
-        (await reverseGeocodeAddress(coords)) ??
-        `${coords.lat.toFixed(5)}, ${coords.lng.toFixed(5)}`;
-
-      if (inputRef.current) {
-        inputRef.current.value = address;
-      }
-
-      const match = await matchSofiaDistrict(
-        coords,
-        regionsRef.current,
-        geocoderRef.current ?? undefined,
-      );
-
-      if (!match) {
-        // Pin stays put so the user can drag it back into Sofia.
-        setMatchState("outside");
-        onSelectRef.current(null);
-        return;
-      }
-
-      setMatchState("matched");
-      onSelectRef.current({
-        address,
-        lat: coords.lat,
-        lng: coords.lng,
-        regionId: match.region.id,
-        regionName: match.region.name,
-        regionSlug: match.region.slug,
-      });
     }
 
     void setup();
@@ -324,6 +402,19 @@ export function AddressAutocomplete({
     );
   }, [mapOpenMobile]);
 
+  // Keep the autocomplete element localized when the language changes. Its
+  // placeholder/description live inside the element's shadow DOM, so the global
+  // i18n DOM sync can't reach them — we update them imperatively instead.
+  useEffect(() => {
+    const element = placeAutocompleteRef.current;
+    if (!element) {
+      return;
+    }
+    element.placeholder = t("Start typing your address in Sofia");
+    element.description = t("Suggestions are limited to addresses in Bulgaria.");
+    element.requestedLanguage = language;
+  }, [language, t]);
+
   return (
     <div className="grid gap-2">
       <label htmlFor={inputId} className="text-sm font-bold text-espresso">
@@ -331,37 +422,52 @@ export function AddressAutocomplete({
       </label>
 
       <div className="relative">
-        <span className="pointer-events-none absolute inset-y-0 left-4 grid place-items-center text-terracotta">
+        <span className="pointer-events-none absolute inset-y-0 left-4 z-10 grid place-items-center text-terracotta">
           {matchState === "matching" ? (
             <Loader2 className="size-5 animate-spin" aria-hidden="true" />
           ) : (
             <MapPin className="size-5" aria-hidden="true" />
           )}
         </span>
-        <input
-          id={inputId}
-          ref={inputRef}
-          type="text"
-          inputMode="text"
-          autoComplete="off"
-          defaultValue={value?.address ?? ""}
-          placeholder={t("Start typing your address in Sofia")}
-          onChange={() => {
-            // Editing the text invalidates any previously matched district.
-            if (matchState !== "none") {
-              setMatchState("none");
-            }
-            onSelect(null);
-          }}
-          disabled={status === "error"}
-          aria-describedby={`${inputId}-help`}
-          className="min-h-[3.25rem] w-full rounded-2xl border border-sand bg-white px-4 py-3 pl-12 text-base font-normal text-espresso shadow-inner shadow-linen transition focus:border-terracotta focus:outline-none focus:ring-2 focus:ring-terracotta/25 disabled:cursor-not-allowed disabled:opacity-60"
+        {/* The Google PlaceAutocompleteElement custom element is appended here
+            in the setup effect. We never render a plain <input>: the element
+            owns its own input, styled to match the widget via ::part(input)
+            below (warm green, rounded, matching the field design). */}
+        <div
+          ref={autocompleteContainerRef}
+          className="vnuk-place-autocomplete min-h-[3.25rem] w-full"
         />
+        <style>{`
+          .vnuk-place-autocomplete gmp-place-autocomplete {
+            display: block;
+            width: 100%;
+            border-radius: 1rem;
+            border: 1px solid #C8DDD8; /* sand */
+            background-color: #ffffff;
+            box-shadow: inset 0 2px 4px 0 rgba(27, 42, 35, 0.06);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+          }
+          .vnuk-place-autocomplete gmp-place-autocomplete:focus-within {
+            border-color: #2D6A4F; /* warm green */
+            box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.25);
+          }
+          .vnuk-place-autocomplete gmp-place-autocomplete::part(input) {
+            box-sizing: border-box;
+            width: 100%;
+            min-height: 3.25rem;
+            border: none;
+            border-radius: 1rem;
+            background: transparent;
+            padding: 0.75rem 1rem 0.75rem 3rem;
+            font-family: inherit;
+            font-size: 1rem;
+            color: #1B2A23; /* espresso */
+          }
+          .vnuk-place-autocomplete gmp-place-autocomplete::part(input):focus {
+            outline: none;
+          }
+        `}</style>
       </div>
-
-      <p id={`${inputId}-help`} className="sr-only">
-        {t("Suggestions are limited to addresses in Bulgaria.")}
-      </p>
 
       {status === "loading" ? (
         <p className="flex items-center gap-2 text-sm text-warmgrey" role="status">
