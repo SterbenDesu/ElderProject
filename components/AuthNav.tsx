@@ -127,7 +127,7 @@ export function AuthNav({
               <DropdownLink href="/account">{t("My profile")}</DropdownLink>
               <DropdownLink href="/helpers">{t("Browse caregivers")}</DropdownLink>
               {isCaregiver ? (
-                <DropdownLink href="/dashboard/helper-profile">
+                <DropdownLink href="/dashboard/caregiver">
                   {t("Caregiver dashboard")}
                 </DropdownLink>
               ) : (
