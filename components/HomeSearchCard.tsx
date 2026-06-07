@@ -15,7 +15,7 @@ import {
   Sparkles,
   type LucideIcon,
 } from "lucide-react";
-import { bulgariaCities } from "@/lib/bulgariaCities";
+import { AddressAutocomplete, type AddressSelection } from "@/components/AddressAutocomplete";
 import { useI18n } from "@/lib/i18n";
 
 export const serviceOptions = [
@@ -59,11 +59,11 @@ export function formatServiceLabel(serviceValue: string, translator?: (text: str
 
 export function HomeSearchCard() {
   const router = useRouter();
-  const { t, language } = useI18n();
+  const { t } = useI18n();
   const [selectedServices, setSelectedServices] = useState<string[]>([
     "shopping",
   ]);
-  const [city, setCity] = useState("");
+  const [address, setAddress] = useState<AddressSelection | null>(null);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
@@ -90,8 +90,17 @@ export function HomeSearchCard() {
 
     const query = new URLSearchParams();
 
-    if (city) {
-      query.set("city", city);
+    if (address) {
+      // The matched Sofia district id is the filter the marketplace (Phase 5)
+      // will use; address + coordinates travel alongside for display and any
+      // later precise-location needs. They also survive the auth round-trip
+      // because the marketplace carries the whole query into returnTo.
+      query.set("district", address.regionId);
+      query.set("districtName", address.regionName);
+      query.set("regionSlug", address.regionSlug);
+      query.set("address", address.address);
+      query.set("lat", String(address.lat));
+      query.set("lng", String(address.lng));
     }
 
     if (selectedServices.length > 0) {
@@ -118,7 +127,7 @@ export function HomeSearchCard() {
         </h2>
         <p className="mt-4 max-w-2xl text-base leading-7 text-espresso-light">
           {t(
-            "Choose one or more services, a city, and a date range. We’ll show caregivers using the information that is currently available.",
+            "Choose one or more services, your address, and a date range. We’ll show caregivers using the information that is currently available.",
           )}
         </p>
 
@@ -198,23 +207,7 @@ export function HomeSearchCard() {
             </label>
           </div>
 
-          <label className="grid gap-2 text-sm font-bold text-espresso">
-            {t("City")}
-            <select
-              name="city"
-              value={city}
-              onChange={(event) => setCity(event.target.value)}
-              autoComplete="address-level2"
-              className="min-h-[3.25rem] rounded-2xl border border-sand bg-white px-4 py-3 text-base font-normal text-espresso shadow-inner shadow-linen transition focus:border-terracotta focus:outline-none focus:ring-2 focus:ring-terracotta/25"
-            >
-              <option value="">{t("Any listed city")}</option>
-              {bulgariaCities.map((cityOption) => (
-                <option key={cityOption.value} value={cityOption.value}>
-                  {language === "bg" ? cityOption.labelBg : cityOption.labelEn}
-                </option>
-              ))}
-            </select>
-          </label>
+          <AddressAutocomplete value={address} onSelect={setAddress} />
 
           <button
             type="submit"

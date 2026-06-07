@@ -37,9 +37,23 @@ No real Supabase credentials are committed. Configure these names locally and in
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=
 ```
 
 These are public browser variables. Do not commit `.env.local`, service role keys, or secret values. Do not use service role keys in browser code.
+
+### Google Maps key (`NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`)
+
+- Where to get it: Google Cloud Console → APIs & Services → Credentials → create an
+  API key. Enable both the **Maps JavaScript API** and the **Geocoding API** for the
+  project.
+- It powers the home-page address autocomplete and the silent reverse-geocode that
+  maps a chosen address to a Sofia district (`regions`).
+- It is a **publishable** browser key (hence the `NEXT_PUBLIC_` prefix). Restrict it
+  on the Google side to the production/preview domains (HTTP referrer restriction)
+  and to the two APIs above, so the exposed key cannot be abused elsewhere.
+- No additional/server Maps key is required — the geocoding runs client-side through
+  the same JS API.
 
 ## Development command
 

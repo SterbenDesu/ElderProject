@@ -7,6 +7,8 @@
 
 import { Building2, CircleCheck, Loader2, MapPin } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { useI18n } from "@/lib/i18n";
+import { RegionMiniMap } from "@/components/caregiver/RegionMiniMap";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import {
   loadCaregiverRegionIds,
@@ -29,6 +31,7 @@ export function RegionsSection({
   profile: CaregiverDashboardProfile;
   onProfileChange: (coversWholeCity: boolean) => void;
 }) {
+  const { t } = useI18n();
   const [regions, setRegions] = useState<RegionRow[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [existingIds, setExistingIds] = useState<string[]>([]);
@@ -114,7 +117,7 @@ export function RegionsSection({
       );
       if (errorMessage) {
         setSaving(false);
-        setError(`Could not update the whole-city setting: ${errorMessage}`);
+        setError(`${t("Could not update the whole-city setting")}: ${errorMessage}`);
         return;
       }
       onProfileChange(wholeCity);
@@ -130,12 +133,12 @@ export function RegionsSection({
     );
     if (errorMessage) {
       setSaving(false);
-      setError(`Could not save your districts: ${errorMessage}`);
+      setError(`${t("Could not save your districts")}: ${errorMessage}`);
       return;
     }
 
     setSaving(false);
-    setSuccess("Your operating regions were saved.");
+    setSuccess(t("Your operating regions were saved."));
     await load();
   }
 
@@ -147,42 +150,47 @@ export function RegionsSection({
         </span>
         <div>
           <h2 className="font-display text-2xl font-extrabold text-espresso">
-            My operating regions
+            {t("My operating regions")}
           </h2>
           <p className="mt-1 text-base leading-7 text-espresso-light">
-            Choose the Sofia districts you serve, or turn on Whole city to cover
-            all of them.
+            {t(
+              "Choose the Sofia districts you serve, or turn on Whole city to cover all of them.",
+            )}
           </p>
         </div>
       </div>
 
+      {/* Whole-city is the headline choice — kept large, full-width, and
+          visually distinct from the district checklist below. */}
       <button
         type="button"
         onClick={toggleWholeCity}
         aria-pressed={wholeCity}
-        className={`mt-6 flex w-full items-center justify-between gap-4 rounded-2xl border p-5 text-left transition ${
+        className={`mt-6 flex w-full items-center justify-between gap-4 rounded-3xl border-2 p-5 text-left shadow-sm transition hover:-translate-y-0.5 ${
           wholeCity
-            ? "border-terracotta bg-terracotta text-white"
+            ? "border-terracotta bg-terracotta text-white shadow-terracotta/30"
             : "border-sand bg-ivory text-espresso hover:bg-linen"
         }`}
       >
         <span className="flex items-center gap-3">
-          <Building2 className="size-6 shrink-0" aria-hidden="true" />
+          <Building2 className="size-7 shrink-0" aria-hidden="true" />
           <span>
-            <span className="block text-lg font-extrabold">Whole city</span>
+            <span className="block text-xl font-extrabold">{t("Whole city")}</span>
             <span
               className={`block text-sm ${wholeCity ? "text-white/80" : "text-espresso-light"}`}
             >
-              Serve every Sofia district.
+              {wholeCity
+                ? t("Active — you cover every Sofia district.")
+                : t("Serve every Sofia district.")}
             </span>
           </span>
         </span>
         <span
-          className={`grid size-7 shrink-0 place-items-center rounded-full border-2 ${
+          className={`grid size-8 shrink-0 place-items-center rounded-full border-2 ${
             wholeCity ? "border-white bg-white/20" : "border-sand bg-white"
           }`}
         >
-          {wholeCity ? <CircleCheck className="size-5" aria-hidden="true" /> : null}
+          {wholeCity ? <CircleCheck className="size-6" aria-hidden="true" /> : null}
         </span>
       </button>
 
@@ -192,7 +200,7 @@ export function RegionsSection({
           role="status"
         >
           <Loader2 className="size-5 animate-spin" aria-hidden="true" />
-          Loading districts…
+          {t("Loading districts…")}
         </p>
       ) : loadError ? (
         <p
@@ -207,8 +215,11 @@ export function RegionsSection({
           disabled={wholeCity}
         >
           <legend className="text-sm font-bold uppercase tracking-wide text-espresso-light">
-            Districts
+            {t("Districts")}
           </legend>
+          <p className="mt-1 text-sm text-espresso-light">
+            {t("The dot shows roughly where each district sits in Sofia.")}
+          </p>
           <ul className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {regions.map((region) => {
               const checked = selected.has(region.id);
@@ -226,6 +237,10 @@ export function RegionsSection({
                       checked={checked}
                       onChange={() => toggleRegion(region.id)}
                       className="size-5 accent-terracotta"
+                    />
+                    <RegionMiniMap
+                      slug={region.slug}
+                      className="size-9 shrink-0"
                     />
                     <span className="text-base font-semibold text-espresso">
                       {region.name}
@@ -265,7 +280,7 @@ export function RegionsSection({
         {saving ? (
           <Loader2 className="size-4 animate-spin" aria-hidden="true" />
         ) : null}
-        {saving ? "Saving…" : "Save regions"}
+        {saving ? t("Saving…") : t("Save regions")}
       </button>
     </div>
   );
