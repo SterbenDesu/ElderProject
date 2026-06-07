@@ -1116,8 +1116,17 @@ export const phraseTranslations: Record<string, string> = {
   "Suggestions are limited to addresses in Bulgaria.":
     "Предложенията са ограничени до адреси в България.",
   "Loading address search…": "Зареждаме търсенето по адрес…",
+  "Loading map…": "Зареждаме картата…",
   "Address search is unavailable right now.":
     "Търсенето по адрес е недостъпно в момента.",
+  "Show map": "Покажете картата",
+  "Hide map": "Скрийте картата",
+  "Map of Sofia for choosing your address":
+    "Карта на София за избор на Вашия адрес",
+  "Drag to adjust the location":
+    "Плъзнете, за да коригирате местоположението",
+  "Or tap the map to drop a pin, then drag it to fine-tune your address.":
+    "Или докоснете картата, за да поставите карфица, и я плъзнете за по-точен адрес.",
   "We currently serve Sofia — please enter a Sofia address":
     "В момента обслужваме София — моля, въведете адрес в София",
   "Address search is not configured yet. Add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to .env.local for local development and to the Vercel environment variables for deployment.":
