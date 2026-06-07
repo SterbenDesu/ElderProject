@@ -8,7 +8,10 @@
 //
 // Libraries:
 //   - "places"    → Places Autocomplete on the home search widget.
-//   - "geocoding" → reverse geocoding for district matching (lib/maps/districtMatch).
+//   - "geocoding" → reverse geocoding for district matching (lib/maps/districtMatch)
+//                   and for turning a clicked/dragged pin into a formatted address.
+//   - "maps"      → the interactive map (google.maps.Map / Marker) rendered inside
+//                   the home search widget.
 
 export const googleMapsMissingKeyMessage =
   "Address search is not configured yet. Add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to .env.local for local development and to the Vercel environment variables for deployment.";
@@ -22,9 +25,10 @@ let configured = false;
 let loadPromise: Promise<void> | null = null;
 
 /**
- * Ensure the Google Maps JS API (places + geocoding) is loaded.
- * Resolves once `google.maps.places` and `google.maps.Geocoder` are usable.
- * Rejects with a friendly message when the key is missing.
+ * Ensure the Google Maps JS API (maps + places + geocoding) is loaded.
+ * Resolves once `google.maps.Map`, `google.maps.places` and
+ * `google.maps.Geocoder` are usable. Rejects with a friendly message when the
+ * key is missing.
  */
 export async function loadGoogleMaps(): Promise<void> {
   const apiKey = getGoogleMapsApiKey();
@@ -47,7 +51,11 @@ export async function loadGoogleMaps(): Promise<void> {
         configured = true;
       }
 
-      await Promise.all([importLibrary("places"), importLibrary("geocoding")]);
+      await Promise.all([
+        importLibrary("maps"),
+        importLibrary("places"),
+        importLibrary("geocoding"),
+      ]);
     })().catch((error) => {
       // Let the next attempt retry instead of caching a rejected promise.
       loadPromise = null;
