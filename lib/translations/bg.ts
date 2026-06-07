@@ -1101,6 +1101,32 @@ export const phraseTranslations: Record<string, string> = {
   "Loading districts…": "Зареждаме районите…",
   "Your operating regions were saved.": "Работните Ви райони бяха запазени.",
   "Save regions": "Запазете районите",
+  "Active — you cover every Sofia district.":
+    "Активно — покривате всеки район на София.",
+  "The dot shows roughly where each district sits in Sofia.":
+    "Точката показва приблизително къде се намира всеки район в София.",
+  "Could not update the whole-city setting":
+    "Настройката „Цял град“ не можа да бъде обновена",
+  "Could not save your districts": "Районите Ви не можаха да бъдат запазени",
+
+  // Home search — Google Maps address autocomplete
+  "Your address": "Вашият адрес",
+  "Start typing your address in Sofia":
+    "Започнете да въвеждате адреса си в София",
+  "Suggestions are limited to addresses in Bulgaria.":
+    "Предложенията са ограничени до адреси в България.",
+  "Loading address search…": "Зареждаме търсенето по адрес…",
+  "Address search is unavailable right now.":
+    "Търсенето по адрес е недостъпно в момента.",
+  "We currently serve Sofia — please enter a Sofia address":
+    "В момента обслужваме София — моля, въведете адрес в София",
+  "Address search is not configured yet. Add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to .env.local for local development and to the Vercel environment variables for deployment.":
+    "Търсенето по адрес все още не е настроено. Добавете NEXT_PUBLIC_GOOGLE_MAPS_API_KEY в .env.local за локална разработка и в средовите променливи на Vercel за внедряване.",
+  "District": "Район",
+  "Address": "Адрес",
+  "Any Sofia district": "Всеки район на София",
+  "Choose one or more services, your address, and a date range. We’ll show caregivers using the information that is currently available.":
+    "Изберете една или повече услуги, своя адрес и период от дати. Ще покажем помощници според наличната в момента информация.",
 
   // Sofia district names (Cyrillic)
   "Sredets": "Средец",

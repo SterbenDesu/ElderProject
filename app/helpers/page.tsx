@@ -15,7 +15,9 @@ import {
 type HelpersStatus = "loading" | "loaded" | "unconfigured" | "error";
 
 type SearchCriteria = {
-  city: string;
+  address: string;
+  district: string;
+  districtName: string;
   services: string[];
   startDate: string;
   endDate: string;
@@ -56,7 +58,12 @@ function HelpersPageContent() {
 
   const criteria: SearchCriteria = useMemo(
     () => ({
-      city: searchParams.get("city")?.trim() ?? "",
+      // Restored from the home search and preserved across the auth round-trip
+      // (the full query is carried into returnTo). `district` is the matched
+      // Sofia region id; the actual filtering lands in Phase 5.
+      address: searchParams.get("address")?.trim() ?? "",
+      district: searchParams.get("district")?.trim() ?? "",
+      districtName: searchParams.get("districtName")?.trim() ?? "",
       services: (searchParams.get("services") || searchParams.get("service") || "")
         .split(",")
         .map((service) => service.trim())
@@ -128,7 +135,13 @@ function HelpersPageContent() {
   // caregiver. District-based filtering will return with the regions UI.
   const visibleHelperProfiles = helperProfiles;
 
-  const hasSearchCriteria = Boolean(criteria.city || criteria.services.length > 0 || criteria.startDate || criteria.endDate);
+  const hasSearchCriteria = Boolean(
+    criteria.address ||
+      criteria.districtName ||
+      criteria.services.length > 0 ||
+      criteria.startDate ||
+      criteria.endDate,
+  );
 
   // Carry the active filter query onto each caregiver link so the filters
   // survive the click into a caregiver profile (and any auth gate there).
@@ -164,11 +177,17 @@ function HelpersPageContent() {
           </div>
 
           <dl className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-2xl bg-cream p-4"><dt className="text-xs font-bold uppercase tracking-[0.16em] text-stone-500">{t("City")}</dt><dd className="mt-1 font-semibold text-forest">{criteria.city || t("Any listed city")}</dd></div>
+            <div className="rounded-2xl bg-cream p-4"><dt className="text-xs font-bold uppercase tracking-[0.16em] text-stone-500">{t("District")}</dt><dd className="mt-1 font-semibold text-forest">{criteria.districtName || t("Any Sofia district")}</dd></div>
             <div className="rounded-2xl bg-cream p-4"><dt className="text-xs font-bold uppercase tracking-[0.16em] text-stone-500">{t("Service")}</dt><dd className="mt-1 font-semibold text-forest">{criteria.services.length > 0 ? criteria.services.map((service) => formatServiceLabel(service, t)).join(", ") : t("Any service")}</dd></div>
             <div className="rounded-2xl bg-cream p-4"><dt className="text-xs font-bold uppercase tracking-[0.16em] text-stone-500">{t("Start date")}</dt><dd className="mt-1 font-semibold text-forest">{criteria.startDate ? formatDateForDisplay(criteria.startDate, language) : t("Not selected")}</dd></div>
             <div className="rounded-2xl bg-cream p-4"><dt className="text-xs font-bold uppercase tracking-[0.16em] text-stone-500">{t("End date")}</dt><dd className="mt-1 font-semibold text-forest">{criteria.endDate ? formatDateForDisplay(criteria.endDate, language) : t("Not selected")}</dd></div>
           </dl>
+          {criteria.address ? (
+            <p className="mt-3 flex items-start gap-2 text-sm leading-6 text-stone-600">
+              <span className="font-bold uppercase tracking-[0.12em] text-stone-500">{t("Address")}:</span>
+              <span className="font-semibold text-forest">{criteria.address}</span>
+            </p>
+          ) : null}
           <p className="mt-4 rounded-2xl bg-sage px-4 py-3 text-sm font-semibold leading-6 text-stone-700">{t("Showing caregivers matching available profile data. Date and service availability filtering will be added later.")}</p>
         </div>
       ) : null}
@@ -180,7 +199,7 @@ function HelpersPageContent() {
         {status === "loaded" && visibleHelperProfiles.length === 0 ? (
           <div className="rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200">
             <h2 className="text-2xl font-bold text-forest">{t("No certified caregivers to show yet")}</h2>
-            <p className="mt-3 leading-7">{criteria.city ? `${t("No caregivers are available in")} ${criteria.city} ${t("yet. Check back soon.")}` : t("No caregivers are available in your area yet. Check back soon.")}</p>
+            <p className="mt-3 leading-7">{criteria.districtName ? `${t("No caregivers are available in")} ${criteria.districtName} ${t("yet. Check back soon.")}` : t("No caregivers are available in your area yet. Check back soon.")}</p>
             <Link
               href="/"
               className="mt-6 inline-flex min-h-12 items-center rounded-full bg-forest px-5 py-3 font-semibold text-white transition hover:bg-stone-800"

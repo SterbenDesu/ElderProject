@@ -114,6 +114,51 @@ h3 {
   background-position: 0 0;
 }
 
+/* --- Google Places Autocomplete dropdown (.pac-container is appended to
+   <body> by the Maps JS API, so it must be styled globally). Warm theme +
+   a high z-index and comfortable touch targets so it works on mobile. --- */
+.pac-container {
+  z-index: 9999;
+  margin-top: 6px;
+  border: 1px solid #c8ddd8; /* sand */
+  border-radius: 16px;
+  box-shadow: 0 16px 40px -12px rgba(27, 42, 35, 0.25);
+  background: #ffffff;
+  font-family: var(--font-source-sans), ui-sans-serif, system-ui, sans-serif;
+  overflow: hidden;
+}
+
+.pac-item {
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: #1b2a23; /* espresso */
+  border-top: 1px solid #f0f7f4; /* linen */
+  cursor: pointer;
+}
+
+.pac-item:first-child {
+  border-top: none;
+}
+
+.pac-item:hover,
+.pac-item-selected {
+  background: #f0f7f4; /* linen */
+}
+
+.pac-item-query {
+  font-size: 0.95rem;
+  color: #1b2a23;
+}
+
+.pac-matched {
+  font-weight: 700;
+}
+
+.pac-icon {
+  margin-top: 4px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

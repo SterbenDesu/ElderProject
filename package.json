@@ -9,6 +9,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@googlemaps/js-api-loader": "^2.1.0",
     "@supabase/supabase-js": "^2.50.1",
     "lucide-react": "^1.17.0",
     "next": "latest",
@@ -16,6 +17,7 @@
     "react-dom": "latest"
   },
   "devDependencies": {
+    "@types/google.maps": "^3.65.1",
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
