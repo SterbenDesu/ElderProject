@@ -7,7 +7,7 @@
 // NEXT_PUBLIC_ prefix. No server-side / unrestricted key is used anywhere.
 //
 // Libraries:
-//   - "places"    → Places Autocomplete on the home search widget.
+//   - "places"    → PlaceAutocompleteElement on the home search widget.
 //   - "geocoding" → reverse geocoding for district matching (lib/maps/districtMatch)
 //                   and for turning a clicked/dragged pin into a formatted address.
 //   - "maps"      → the interactive map (google.maps.Map / Marker) rendered inside
