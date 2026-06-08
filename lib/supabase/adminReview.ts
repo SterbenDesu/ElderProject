@@ -18,7 +18,7 @@ export async function loadAdminHelperApplications(
   supabase: SupabaseClient,
 ): Promise<{ applications: AdminHelperApplication[]; errorMessage: string | null; emailWarning: string | null }> {
   const { data, error } = await supabase
-    .from("helper_applications")
+    .from("caregiver_applications")
     .select(helperApplicationSelect)
     .order("created_at", { ascending: false });
 
@@ -64,16 +64,22 @@ export async function loadAdminHelperApplications(
   };
 }
 
-export type HelperApplicationReviewRpcResult = {
+// Shape returned by the canonical `review_caregiver_application` RPC
+// (SUPABASE_SETUP.sql §14). Unlike the retired `review_helper_application`, it
+// returns the application id/status as flat fields rather than a nested object.
+export type CaregiverApplicationReviewRpcResult = {
   ok?: boolean;
   action?: AdminApplicationActionStatus;
-  application?: HelperApplication;
+  application_id?: string;
+  application_status?: HelperApplication["status"];
+  caregiver_profile_id?: string | null;
+  caregiver_profile_is_visible?: boolean | null;
   audit_logged?: boolean;
   audit_error?: string | null;
 };
 
-function isReviewRpcResult(value: unknown): value is HelperApplicationReviewRpcResult {
-  return typeof value === "object" && value !== null && "application" in value;
+function isReviewRpcResult(value: unknown): value is CaregiverApplicationReviewRpcResult {
+  return typeof value === "object" && value !== null && "application_id" in value;
 }
 
 export async function changeHelperApplicationStatus(
@@ -82,33 +88,45 @@ export async function changeHelperApplicationStatus(
     applicationId: string;
     newStatus: AdminApplicationActionStatus;
   },
-): Promise<{ application: HelperApplication | null; errorMessage: string | null; auditWarning: string | null }> {
-  const { data, error } = await supabase.rpc("review_helper_application", {
+): Promise<{
+  applicationId: string | null;
+  applicationStatus: HelperApplication["status"] | null;
+  errorMessage: string | null;
+  auditWarning: string | null;
+}> {
+  const { data, error } = await supabase.rpc("review_caregiver_application", {
     p_application_id: input.applicationId,
     p_action: input.newStatus,
   });
 
   if (error) {
     return {
-      application: null,
-      errorMessage: `Could not ${input.newStatus === "approved" ? "approve" : "update"} the helper application: ${error.message}. Confirm the admin helper review RPC migration is applied.`,
+      applicationId: null,
+      applicationStatus: null,
+      errorMessage:
+        input.newStatus === "approved"
+          ? "We couldn't approve this application right now. Please try again in a moment."
+          : "We couldn't update this application right now. Please try again in a moment.",
       auditWarning: null,
     };
   }
 
-  if (!isReviewRpcResult(data) || !data.application) {
+  if (!isReviewRpcResult(data) || !data.application_id) {
     return {
-      application: null,
-      errorMessage: "The helper review RPC returned an unexpected result. The application list was not updated locally.",
+      applicationId: null,
+      applicationStatus: null,
+      errorMessage: "The review did not complete as expected. Please refresh and try again.",
       auditWarning: null,
     };
   }
 
   return {
-    application: data.application,
+    applicationId: data.application_id,
+    applicationStatus: data.application_status ?? null,
     errorMessage: null,
-    auditWarning: data.audit_logged === false
-      ? `Status changed, but audit logging failed: ${data.audit_error ?? "Unknown audit log error"}.`
-      : null,
+    auditWarning:
+      data.audit_logged === false
+        ? "The status was changed, but the action could not be written to the audit log."
+        : null,
   };
 }
