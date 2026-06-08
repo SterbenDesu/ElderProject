@@ -149,7 +149,7 @@ export default function DashboardPage() {
     if (helperApplicationResult.errorMessage) {
       setHelperApplication(null);
       setHelperApplicationMessage(
-        `Could not load caregiver application status: ${helperApplicationResult.errorMessage}. If this is an RLS error, confirm the helper_applications policies are applied.`,
+        "We couldn't load your caregiver application status right now. Please refresh in a moment.",
       );
     } else {
       setHelperApplication(helperApplicationResult.application);

@@ -754,6 +754,29 @@ export const phraseTranslations: Record<string, string> = {
   "Approved helpers remain hidden from `/helpers` until a separate safe visibility control sets `helper_profiles.is_visible = true`.":
     "Одобрените помощници остават скрити от `/helpers`, докато отделна настройка за видимост не зададе `helper_profiles.is_visible = true`.",
 
+  // Admin dashboard — caregiver vocabulary + calm messaging
+  "Approved caregiver visibility": "Видимост на одобрените помощници",
+  "Only admins can make verified caregivers public. Hidden caregivers and unverified applicants do not appear on the caregivers list.":
+    "Само администраторите могат да правят проверените помощници публични. Скритите помощници и непроверените кандидати не се показват в списъка с помощници.",
+  "No approved caregivers are available yet.":
+    "Все още няма одобрени помощници.",
+  "Approved caregiver": "Одобрен помощник",
+  "Selected districts": "Избрани райони",
+  "Hide from caregivers list": "Скрийте от списъка с помощници",
+  "Show on caregivers list": "Покажете в списъка с помощници",
+  "Approving sets the application to approved, unlocks caregiver tools for that account, and publishes a verified caregiver profile on the caregivers list.":
+    "Одобряването задава статус „Одобрена“, отключва инструментите за помощник за този профил и публикува проверен профил на помощник в списъка с помощници.",
+  "An approved caregiver appears on the caregivers list right away. Use the visibility controls to hide or show an approved caregiver at any time.":
+    "Одобреният помощник се появява в списъка веднага. Използвайте контролите за видимост, за да скриете или покажете одобрен помощник по всяко време.",
+  "We couldn't load caregiver applications right now. Please refresh in a moment. If this keeps happening, the admin access policy may need to be reapplied.":
+    "В момента не успяхме да заредим кандидатурите за помощник. Моля, опитайте отново след малко. Ако това продължава, политиката за административен достъп може да трябва да се приложи отново.",
+  "We couldn't load approved caregivers right now. Please refresh in a moment. If this keeps happening, the admin access policy may need to be reapplied.":
+    "В момента не успяхме да заредим одобрените помощници. Моля, опитайте отново след малко. Ако това продължава, политиката за административен достъп може да трябва да се приложи отново.",
+  "We couldn't confirm your admin access right now. Please refresh and try again in a moment.":
+    "В момента не успяхме да потвърдим административния ви достъп. Моля, презаредете и опитайте отново след малко.",
+  "We couldn't load your caregiver application status right now. Please refresh in a moment.":
+    "В момента не успяхме да заредим статуса на вашата кандидатура за помощник. Моля, опитайте отново след малко.",
+
   // Application / verification status labels
   "Draft": "Чернова",
   "Submitted": "Подадена",

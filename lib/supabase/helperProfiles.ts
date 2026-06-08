@@ -32,9 +32,23 @@ export type OwnHelperProfile = {
   updated_at: string | null;
 };
 
-export type AdminHelperProfile = OwnHelperProfile & {
-  helper_email: string | null;
-  helper_display_name: string | null;
+// Admin view of an approved caregiver profile. Mirrors the canonical
+// `caregiver_profiles` columns (no `city`/`service_radius_km` — geography now
+// lives in the regions model) plus the owner account email/name an admin is
+// allowed to read for support purposes.
+export type AdminHelperProfile = {
+  id: string;
+  profile_id: string;
+  verification_status: HelperVerificationStatus;
+  display_name: string;
+  bio: string;
+  experience: string | null;
+  covers_whole_city: boolean;
+  is_visible: boolean;
+  created_at: string | null;
+  updated_at: string | null;
+  account_email: string | null;
+  account_name: string | null;
 };
 
 export type HelperProfileFormInput = {
@@ -46,7 +60,7 @@ export type HelperProfileFormInput = {
 type ProfileSummaryRow = {
   id: string;
   email: string | null;
-  display_name: string | null;
+  first_name: string | null;
 };
 
 // Safe public columns of `caregiver_profiles` only — never `stripe_account_id`
@@ -56,6 +70,10 @@ const publicHelperProfileSelect =
 
 const ownHelperProfileSelect =
   "id,profile_id,verification_status,bio,city,service_radius_km,is_visible,created_at,updated_at";
+
+// Safe, existing columns of `caregiver_profiles` for the admin review surface.
+const adminCaregiverProfileSelect =
+  "id,profile_id,verification_status,display_name,bio,experience,covers_whole_city,is_visible,created_at,updated_at";
 
 export function formatHelperVerificationStatus(
   status: HelperVerificationStatus,
@@ -226,10 +244,10 @@ export async function loadAdminApprovedHelperProfiles(
   emailWarning: string | null;
 }> {
   const { data, error } = await supabase
-    .from("helper_profiles")
-    .select(ownHelperProfileSelect)
+    .from("caregiver_profiles")
+    .select(adminCaregiverProfileSelect)
     .in("verification_status", ["verified_basic", "trusted"])
-    .order("city", { ascending: true });
+    .order("display_name", { ascending: true });
 
   if (error) {
     return {
@@ -239,13 +257,15 @@ export async function loadAdminApprovedHelperProfiles(
     };
   }
 
-  const helperProfiles = ((data as OwnHelperProfile[] | null) ?? []).map(
-    (helperProfile) => ({
-      ...helperProfile,
-      helper_email: null,
-      helper_display_name: null,
-    }),
-  );
+  type AdminCaregiverRow = Omit<AdminHelperProfile, "account_email" | "account_name">;
+
+  const helperProfiles: AdminHelperProfile[] = (
+    (data as AdminCaregiverRow[] | null) ?? []
+  ).map((helperProfile) => ({
+    ...helperProfile,
+    account_email: null,
+    account_name: null,
+  }));
 
   const profileIds = Array.from(
     new Set(helperProfiles.map((helperProfile) => helperProfile.profile_id)),
@@ -257,14 +277,15 @@ export async function loadAdminApprovedHelperProfiles(
 
   const { data: profiles, error: profilesError } = await supabase
     .from("profiles")
-    .select("id,email,display_name")
+    .select("id,email,first_name")
     .in("id", profileIds);
 
   if (profilesError) {
     return {
       helperProfiles,
       errorMessage: null,
-      emailWarning: `Approved helper profiles loaded, but helper account details could not be loaded: ${profilesError.message}. Confirm the admin profiles RLS policy is applied.`,
+      emailWarning:
+        "Approved caregivers loaded, but their account contact details could not be read.",
     };
   }
 
@@ -281,8 +302,8 @@ export async function loadAdminApprovedHelperProfiles(
 
       return {
         ...helperProfile,
-        helper_email: profile?.email ?? null,
-        helper_display_name: profile?.display_name ?? null,
+        account_email: profile?.email ?? null,
+        account_name: profile?.first_name ?? null,
       };
     }),
     errorMessage: null,
@@ -290,41 +311,52 @@ export async function loadAdminApprovedHelperProfiles(
   };
 }
 
+// Shape returned by the canonical `set_caregiver_profile_visibility` RPC
+// (SUPABASE_SETUP.sql §14): flat fields, not a nested profile object.
+type CaregiverVisibilityRpcResult = {
+  ok?: boolean;
+  caregiver_profile_id?: string;
+  old_is_visible?: boolean;
+  new_is_visible?: boolean;
+};
+
+function isVisibilityRpcResult(
+  value: unknown,
+): value is CaregiverVisibilityRpcResult {
+  return (
+    typeof value === "object" && value !== null && "new_is_visible" in value
+  );
+}
+
 export async function changeHelperProfileVisibility(
   supabase: SupabaseClient,
-  input: { helperProfileId: string; isVisible: boolean },
+  input: { caregiverProfileId: string; isVisible: boolean },
 ): Promise<{
-  helperProfile: OwnHelperProfile | null;
+  isVisible: boolean | null;
   errorMessage: string | null;
-  auditWarning: string | null;
 }> {
-  const { data, error } = await supabase.rpc("set_helper_profile_visibility", {
-    p_helper_profile_id: input.helperProfileId,
+  const { data, error } = await supabase.rpc("set_caregiver_profile_visibility", {
+    p_caregiver_profile_id: input.caregiverProfileId,
     p_is_visible: input.isVisible,
   });
 
   if (error) {
     return {
-      helperProfile: null,
-      errorMessage: `Could not change helper visibility: ${error.message}. Confirm the admin helper visibility RPC migration is applied.`,
-      auditWarning: null,
+      isVisible: null,
+      errorMessage:
+        "We couldn't change this caregiver's visibility right now. Please try again in a moment.",
     };
   }
 
-  if (!isHelperProfileRpcResult(data) || !data.helper_profile) {
+  if (!isVisibilityRpcResult(data) || typeof data.new_is_visible !== "boolean") {
     return {
-      helperProfile: null,
-      errorMessage: "The helper visibility RPC returned an unexpected result.",
-      auditWarning: null,
+      isVisible: null,
+      errorMessage: "The visibility change did not complete as expected. Please refresh and try again.",
     };
   }
 
   return {
-    helperProfile: data.helper_profile,
+    isVisible: data.new_is_visible,
     errorMessage: null,
-    auditWarning:
-      data.audit_logged === false
-        ? `Visibility changed, but audit logging failed: ${data.audit_error ?? "Unknown audit log error"}.`
-        : null,
   };
 }

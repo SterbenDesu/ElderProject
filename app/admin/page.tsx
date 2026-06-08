@@ -151,7 +151,7 @@ export default function AdminPage() {
     if (applicationsResult.errorMessage) {
       setStatus("error");
       setMessage(
-        `Could not load helper applications: ${applicationsResult.errorMessage}. Confirm the helper_applications admin select policy is applied.`,
+        "We couldn't load caregiver applications right now. Please refresh in a moment. If this keeps happening, the admin access policy may need to be reapplied.",
       );
       setApplications([]);
       setHelperProfiles([]);
@@ -161,7 +161,7 @@ export default function AdminPage() {
     if (helperProfilesResult.errorMessage) {
       setStatus("error");
       setMessage(
-        `Could not load approved helper profiles: ${helperProfilesResult.errorMessage}. Confirm the helper_profiles admin select policy is applied.`,
+        "We couldn't load approved caregivers right now. Please refresh in a moment. If this keeps happening, the admin access policy may need to be reapplied.",
       );
       setApplications([]);
       setHelperProfiles([]);
@@ -209,7 +209,7 @@ export default function AdminPage() {
       if (profileResult.errorMessage) {
         setStatus("error");
         setMessage(
-          `Could not load your profile for admin access: ${profileResult.errorMessage}. Confirm the profiles RLS policies are applied.`,
+          "We couldn't confirm your admin access right now. Please refresh and try again in a moment.",
         );
         setProfile(null);
         setApplications([]);
@@ -337,10 +337,10 @@ export default function AdminPage() {
       newStatus,
     });
 
-    if (result.errorMessage || !result.application) {
+    if (result.errorMessage || !result.applicationId) {
       setActionError(
         result.errorMessage ??
-          "The status update failed for an unknown reason.",
+          "The status update did not complete. Please refresh and try again.",
       );
       setWorkingApplicationId(null);
       return;
@@ -351,7 +351,7 @@ export default function AdminPage() {
     );
     setAuditWarning(result.auditWarning);
     await loadAdminData();
-    setSelectedApplicationId(result.application.id);
+    setSelectedApplicationId(result.applicationId);
     setWorkingApplicationId(null);
   }
 
@@ -380,23 +380,24 @@ export default function AdminPage() {
     setAuditWarning(null);
 
     const result = await changeHelperProfileVisibility(supabase, {
-      helperProfileId: helperProfile.id,
+      caregiverProfileId: helperProfile.id,
       isVisible,
     });
 
-    if (result.errorMessage || !result.helperProfile) {
+    if (result.errorMessage || result.isVisible === null) {
       setActionError(
         result.errorMessage ??
-          "The visibility update failed for an unknown reason.",
+          "The visibility update did not complete. Please refresh and try again.",
       );
       setWorkingHelperProfileId(null);
       return;
     }
 
     setActionSuccess(
-      `Helper profile visibility changed to ${isVisible ? "visible" : "hidden"}.`,
+      result.isVisible
+        ? `${helperProfile.display_name} is now visible on the caregivers list.`
+        : `${helperProfile.display_name} is now hidden from the caregivers list.`,
     );
-    setAuditWarning(result.auditWarning);
     await loadAdminData();
     setWorkingHelperProfileId(null);
   }
@@ -551,16 +552,17 @@ export default function AdminPage() {
 
             <section className="rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200">
               <h2 className="text-2xl font-bold text-forest">
-                Approved helper visibility
+                Approved caregiver visibility
               </h2>
               <p className="mt-3 text-sm leading-6 text-stone-600">
-                Only admins can make verified helper profiles public. Hidden
-                helpers and unverified applicants do not appear on `/helpers`.
+                Only admins can make verified caregivers public. Hidden
+                caregivers and unverified applicants do not appear on the
+                caregivers list.
               </p>
 
               {helperProfiles.length === 0 ? (
                 <p className="mt-5 rounded-3xl bg-cream p-5 leading-7 text-stone-700">
-                  No approved helper profiles are available yet.
+                  No approved caregivers are available yet.
                 </p>
               ) : (
                 <div className="mt-5 space-y-3">
@@ -572,15 +574,19 @@ export default function AdminPage() {
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <div>
                           <h3 className="font-bold text-forest">
-                            {helperProfile.helper_display_name ??
-                              "Approved helper"}
+                            {helperProfile.display_name ||
+                              helperProfile.account_name ||
+                              "Approved caregiver"}
                           </h3>
                           <p className="mt-1 break-words text-sm text-stone-600">
-                            {helperProfile.helper_email ??
+                            {helperProfile.account_email ??
                               "Email not available"}
                           </p>
                           <p className="mt-1 text-sm font-semibold text-stone-600">
-                            {helperProfile.city} ·{" "}
+                            {helperProfile.covers_whole_city
+                              ? "Whole city"
+                              : "Selected districts"}{" "}
+                            ·{" "}
                             {formatHelperVerificationStatus(
                               helperProfile.verification_status,
                             )}
@@ -595,12 +601,11 @@ export default function AdminPage() {
                       <p className="mt-3 text-sm leading-6 text-stone-600">
                         {previewText(helperProfile.bio, 180)}
                       </p>
-                      <p className="mt-2 text-sm font-semibold text-stone-600">
-                        Service radius:{" "}
-                        {helperProfile.service_radius_km === null
-                          ? "Not listed"
-                          : `${helperProfile.service_radius_km} km`}
-                      </p>
+                      {helperProfile.experience ? (
+                        <p className="mt-2 text-sm leading-6 text-stone-600">
+                          {previewText(helperProfile.experience, 140)}
+                        </p>
+                      ) : null}
                       <button
                         type="button"
                         onClick={() =>
@@ -615,8 +620,8 @@ export default function AdminPage() {
                         {workingHelperProfileId === helperProfile.id
                           ? "Saving..."
                           : helperProfile.is_visible
-                            ? "Hide from /helpers"
-                            : "Show on /helpers"}
+                            ? "Hide from caregivers list"
+                            : "Show on caregivers list"}
                       </button>
                     </article>
                   ))}
@@ -724,9 +729,9 @@ export default function AdminPage() {
                 <div className="mt-6 rounded-3xl border border-clay/30 bg-cream p-5">
                   <h3 className="font-bold text-forest">Admin actions</h3>
                   <p className="mt-2 text-sm leading-6 text-stone-600">
-                    Approving sets the application to approved, updates the
-                    related profile role to verified helper, and creates or
-                    updates a non-public helper profile with basic verification.
+                    Approving sets the application to approved, unlocks caregiver
+                    tools for that account, and publishes a verified caregiver
+                    profile on the caregivers list.
                   </p>
                   <div className="mt-4 flex flex-wrap gap-3">
                     {(
@@ -755,9 +760,9 @@ export default function AdminPage() {
                     ))}
                   </div>
                   <p className="mt-4 text-sm font-semibold leading-6 text-stone-700">
-                    Approved helpers remain hidden from `/helpers` until a
-                    separate safe visibility control sets
-                    `helper_profiles.is_visible = true`.
+                    An approved caregiver appears on the caregivers list right
+                    away. Use the visibility controls to hide or show an approved
+                    caregiver at any time.
                   </p>
                 </div>
               </article>
