@@ -6,37 +6,48 @@ import { useRouter } from "next/navigation";
 import {
   Check,
   Clock,
+  Footprints,
   Heart,
   Home,
   MapPin,
   Plus,
   Search,
   ShoppingCart,
+  Smartphone,
   Sparkles,
   type LucideIcon,
 } from "lucide-react";
 import { AddressAutocomplete, type AddressSelection } from "@/components/AddressAutocomplete";
 import { useI18n } from "@/lib/i18n";
 
+// The `value`s here MUST be real `services.slug` values so the marketplace can
+// resolve them to service ids and actually filter caregivers by service (see
+// supabase/seed.sql + the base service catalogue). The home picker is the single
+// source of truth for the searchable service set, reused by the marketplace
+// filters panel.
 export const serviceOptions = [
-  { value: "stay-at-home", label: "Stay at home", icon: "home" },
-  { value: "quick-visit", label: "Quick visit", icon: "clock" },
-  { value: "shopping", label: "Shopping", icon: "cart" },
-  { value: "house-work", label: "House work", icon: "spark" },
   { value: "companionship", label: "Companionship", icon: "heart" },
+  { value: "shopping", label: "Shopping", icon: "cart" },
+  { value: "walks", label: "Walks", icon: "walk" },
   { value: "accompaniment", label: "Accompaniment", icon: "pin" },
+  { value: "check-ins", label: "Check-ins", icon: "clock" },
+  { value: "technology-help", label: "Technology help", icon: "tech" },
 ] as const;
 
-type ServiceIconName = (typeof serviceOptions)[number]["icon"];
-
-const serviceIconMap: Record<ServiceIconName, LucideIcon> = {
+// Wider than `serviceOptions` on purpose: the homepage marketing cards
+// (app/page.tsx) still pass "home" and "spark", so keep those keys available.
+const serviceIconMap = {
   home: Home,
   clock: Clock,
   cart: ShoppingCart,
   spark: Sparkles,
   heart: Heart,
   pin: MapPin,
-};
+  walk: Footprints,
+  tech: Smartphone,
+} satisfies Record<string, LucideIcon>;
+
+type ServiceIconName = keyof typeof serviceIconMap;
 
 export function ServiceIcon({
   name,
