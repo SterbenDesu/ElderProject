@@ -232,6 +232,41 @@ export const phraseTranslations: Record<string, string> = {
     "В момента не можем да заредим този помощник. Моля, опитайте отново малко по-късно.",
 
   // ---------------------------------------------------------------------------
+  // Marketplace filters + result cards (/helpers, Phase 5)
+  // ---------------------------------------------------------------------------
+  "Your search": "Вашето търсене",
+  "Active filters": "Активни филтри",
+  "All caregivers": "Всички помощници",
+  "Edit filters": "Промяна на филтрите",
+  "Hide filters": "Скриване на филтрите",
+  "Apply filters": "Приложи филтрите",
+  "Clear filters": "Изчисти филтрите",
+  "Clear all": "Изчисти всички",
+  "Remove filter": "Премахни филтъра",
+  "Any district": "Всеки район",
+  "Showing every approved caregiver. Add services or a district to narrow the list.":
+    "Показваме всички одобрени помощници. Добавете услуги или район, за да стесните списъка.",
+  "Showing approved caregivers who offer your selected services in your district. Dates are used as a guide for now — exact time-slot availability is confirmed when you book.":
+    "Показваме одобрени помощници, които предлагат избраните услуги във вашия район. Засега датите служат само за ориентир — точната свободна заетост по часове се потвърждава при резервация.",
+  "caregiver found": "намерен помощник",
+  "caregivers found": "намерени помощници",
+  "No caregivers match your search yet": "Все още няма помощници по вашето търсене",
+  "Try removing a filter or broadening your search to see more caregivers.":
+    "Опитайте да премахнете филтър или да разширите търсенето, за да видите повече помощници.",
+  "No caregivers are available yet. Check back soon.":
+    "Все още няма налични помощници. Заповядайте отново скоро.",
+  "Clear filters and show all caregivers": "Изчистете филтрите и вижте всички помощници",
+  "Verified": "Проверен",
+  "Volunteer": "Доброволец",
+  "Location not set": "Районът не е посочен",
+  "review": "отзив",
+  "reviews": "отзива",
+  "No reviews yet": "Все още няма отзиви",
+  "from": "от",
+  "лв.": "лв.",
+  "Price on request": "Цена при запитване",
+
+  // ---------------------------------------------------------------------------
   // Caregiver profile (/helpers/[id])
   // ---------------------------------------------------------------------------
   "Caregiver profile": "Профил на помощник",
