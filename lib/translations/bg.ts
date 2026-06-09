@@ -1248,4 +1248,122 @@ export const phraseTranslations: Record<string, string> = {
   "Verified only": "Само проверени",
   "Volunteers only": "Само доброволци",
   "up to": "до",
+
+  // ---------------------------------------------------------------------------
+  // Booking flow (book a specific caregiver)
+  // ---------------------------------------------------------------------------
+  "Booking": "Резервация",
+  "Book / Reserve": "Резервирайте",
+  "Book your visit": "Резервирайте посещение",
+  "Back to caregiver profile": "Обратно към профила на помощника",
+  "Back to caregivers": "Обратно към помощниците",
+  "Back": "Назад",
+  "Continue": "Продължете",
+  "Send": "Изпрати",
+  "Time": "Време",
+  "Review": "Преглед",
+  "Confirm": "Потвърдете",
+  "Extras": "Допълнения",
+  "Dates": "Дати",
+  "Total": "Общо",
+  "About": "За помощника",
+  "2h": "2 ч.",
+  "hours": "часа",
+  "hours total": "часа общо",
+  "optional": "по избор",
+  "optional, private": "по избор, лично",
+  "slot": "интервал",
+  "slots": "интервала",
+  "day": "ден",
+  "days": "дни",
+  "Your booking": "Вашата резервация",
+  "Your request has been sent": "Заявката Ви е изпратена",
+  "Services and prices": "Услуги и цени",
+  "Services subtotal": "Междинна сума за услугите",
+  "Time slots": "Времеви интервали",
+  "Time slots selected": "Избрани времеви интервали",
+  "Pending approval": "Очаква одобрение",
+  "None selected yet": "Все още няма избрано",
+  "Select a district": "Изберете квартал",
+  "District for the visit": "Квартал за посещението",
+  "Who is the visit for?": "За кого е посещението?",
+  "Address or directions": "Адрес или упътване",
+  "Carried over from your search:": "Пренесено от Вашето търсене:",
+  "Total (held, not charged)": "Общо (резервирано, не таксувано)",
+  "Go to my account": "Към моя профил",
+  "Browse more caregivers": "Разгледайте още помощници",
+  "How booking works": "Как работи резервацията",
+  "Choose a service": "Изберете услуга",
+  "Add optional extras": "Добавете незадължителни услуги",
+  "Add optional extras and review the price.": "Добавете незадължителни услуги и прегледайте цената.",
+  "Confirm and send": "Потвърдете и изпратете",
+  "Confirm the time you need": "Потвърдете времето, от което се нуждаете",
+  "Review your booking": "Прегледайте резервацията си",
+  "Send booking request": "Изпратете заявка за резервация",
+  "Sign in to send request": "Влезте, за да изпратите заявка",
+  "One quick step: please sign in": "Една бърза стъпка: моля, влезте в профила си",
+  "Sending…": "Изпращане…",
+  "Pick your slots": "Изберете интервали",
+  "Pick your time slots": "Изберете времевите интервали",
+  "Each service is priced per 2-hour visit.": "Всяка услуга се таксува за посещение от 2 часа.",
+  "Each slot is a 2-hour visit. Your price is the number of slots times the service price.":
+    "Всеки интервал е посещение от 2 часа. Цената е броят интервали, умножен по цената на услугата.",
+  "Choose at least one service to continue.": "Изберете поне една услуга, за да продължите.",
+  "Choose at least one time slot to continue.": "Изберете поне един времеви интервал, за да продължите.",
+  "Choose the district where the visit takes place.": "Изберете квартала, в който ще се проведе посещението.",
+  "Check the details below, then add where the visit takes place.":
+    "Проверете данните по-долу и посочете къде ще се проведе посещението.",
+  "Please choose a service, a time slot, and a district before confirming.":
+    "Моля, изберете услуга, времеви интервал и квартал, преди да потвърдите.",
+  "These are the caregiver's open 2-hour slots. Slots already booked are not shown. Pick one or more.":
+    "Това са свободните 2-часови интервали на помощника. Вече заетите интервали не се показват. Изберете един или повече.",
+  "No open time slots for these dates. Try different dates from the search.":
+    "Няма свободни интервали за тези дати. Опитайте с други дати от търсенето.",
+  "No slots selected yet — go back to add at least one.":
+    "Все още няма избрани интервали — върнете се, за да добавите поне един.",
+  "Small add-ons this caregiver offers. The total updates as you choose.":
+    "Малки допълнения, които този помощник предлага. Сумата се обновява, докато избирате.",
+  "This caregiver hasn't added any optional extras. You can continue.":
+    "Този помощник не е добавил незадължителни допълнения. Можете да продължите.",
+  "This caregiver hasn't published any services yet.":
+    "Този помощник все още не е публикувал услуги.",
+  "This caregiver isn't available for booking right now. They may be hidden or not yet verified.":
+    "Този помощник не е достъпен за резервация в момента. Възможно е да е скрит или още непроверен.",
+  "This caregiver profile isn't available publicly. It may be hidden, unverified, or missing.":
+    "Този профил на помощник не е достъпен публично. Възможно е да е скрит, непроверен или липсващ.",
+  "Sending this request reserves the caregiver's time and holds the amount — without charging anything yet. The caregiver then approves or declines.":
+    "Изпращането на тази заявка запазва времето на помощника и резервира сумата — без все още да се таксува. След това помощникът одобрява или отказва.",
+  "To send your request you'll sign in or create a free account. We'll bring you right back to this step with everything you chose still here.":
+    "За да изпратите заявката си, ще влезете или ще създадете безплатен профил. Ще Ви върнем точно на тази стъпка с всичко, което сте избрали.",
+  "All set. The caregiver will see your request and respond. You can track it from your account.":
+    "Готово. Помощникът ще види заявката Ви и ще отговори. Можете да я проследите от своя профил.",
+  "We've sent your booking request to": "Изпратихме Вашата заявка за резервация до",
+  "It is now pending the caregiver's approval. You'll be notified once they respond — no payment has been taken.":
+    "В момента очаква одобрение от помощника. Ще получите известие, щом отговори — не е взето плащане.",
+  "One or more of your chosen time slots was just booked. Please go back and pick another slot.":
+    "Един или повече от избраните интервали току-що бяха заети. Върнете се и изберете друг интервал.",
+  "We couldn't load this booking right now. Please try again in a little while.":
+    "Не успяхме да заредим тази резервация в момента. Моля, опитайте отново след малко.",
+  "We couldn't send your request right now. Please try again in a little while.":
+    "Не успяхме да изпратим заявката Ви в момента. Моля, опитайте отново след малко.",
+  "Loading the booking…": "Зареждане на резервацията…",
+  "Keep it practical and non-medical. Never include card PINs, passwords, or access-to-valuables requests.":
+    "Бъдете практични и без медицински данни. Никога не включвайте ПИН кодове, пароли или искания за достъп до ценности.",
+  "Shared with the caregiver only after they approve.":
+    "Споделя се с помощника само след като одобри.",
+  "You won't be charged now. Your request is sent to the caregiver and the amount is only held once payments go live.":
+    "Сега няма да Ви бъде взета такса. Заявката Ви се изпраща до помощника, а сумата се резервира едва когато плащанията станат активни.",
+  "Pick a service and time, add any extras, and send your request. You won't be charged now — the caregiver approves first.":
+    "Изберете услуга и време, добавете допълнения и изпратете заявката си. Сега няма да Ви бъде взета такса — първо помощникът одобрява.",
+  "Review this caregiver's profile and prices, then book a visit. Private contact details are never shown publicly.":
+    "Прегледайте профила и цените на помощника и резервирайте посещение. Личните данни за контакт никога не се показват публично.",
+  "Choose your time slots on the next screen. You won't be charged now — the caregiver approves your request first.":
+    "Ще изберете времевите интервали на следващия екран. Сега няма да Ви бъде взета такса — първо помощникът одобрява заявката Ви.",
+  "Pick a service, dates, and 2-hour time slots.": "Изберете услуга, дати и 2-часови интервали.",
+  "Send your request — it's saved as pending.": "Изпратете заявката си — запазва се като чакаща.",
+  "The caregiver approves before anything is charged.": "Помощникът одобрява, преди да бъде таксувано каквото и да е.",
+  "This page shows only safe caregiver details: public name, bio, experience, and prices. It never shows email addresses, phone numbers, private user details, or application answers.":
+    "Тази страница показва само безопасни данни за помощника: публично име, описание, опит и цени. Никога не показва имейл адреси, телефонни номера, лични данни или отговори от заявления.",
+  "Caregivers may be booked for companionship, errands, shopping, walks, check-ins, technology help, and accompaniment. Please don't request medical care, medication management, clinical tasks, card PINs, passwords, cash handling, or access to valuables. Caregivers are independent marketplace participants, not Vnuk Pod Naem employees, and the platform does not guarantee absolute safety.":
+    "Помощниците могат да бъдат резервирани за компания, дребни задачи, пазаруване, разходки, посещения, помощ с технологии и придружаване. Моля, не заявявайте медицински грижи, управление на лекарства, клинични задачи, ПИН кодове на карти, пароли, боравене с пари в брой или достъп до ценности. Помощниците са независими участници в платформата, а не служители на Внук под наем, и платформата не гарантира абсолютна безопасност.",
 };

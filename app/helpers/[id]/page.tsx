@@ -1,356 +1,142 @@
 "use client";
 
+// Public caregiver profile + entry point into the booking flow.
+//
+// Shows only safe, public caregiver fields (display name, bio, experience) and
+// the caregiver's per-service prices. The prominent "Book / Reserve" button
+// carries the elder's marketplace filters (service + district + dates) into the
+// multi-step booking flow at /helpers/[id]/book. Login is requested later, when
+// the elder confirms — so the button is always available here.
+//
+// Privacy: never shows email, phone, last name, application data, or any
+// owner-private/admin-only field. All reads are RLS-limited to visible+verified
+// caregivers, and the one-way rule means no elder data is touched.
+
 import { PageIntro } from "@/components/PageIntro";
-import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
-import { withReturnTo } from "@/lib/auth/returnTo";
-import {
-  createOwnBookingRequest,
-  loadAllowedServiceCategories,
-  type ServiceCategory,
-} from "@/lib/supabase/bookings";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { BadgeCheck, CalendarCheck, ShieldCheck } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
-import { loadOwnElderlyProfiles, type ElderlyProfile } from "@/lib/supabase/elderlyProfiles";
+import { formatLevaAmount } from "@/lib/supabase/caregiverDashboard";
 import {
   loadVisibleVerifiedHelperProfileById,
   type PublicHelperProfile,
 } from "@/lib/supabase/helperProfiles";
-import { loadProfile, type Profile, type ProfileRole } from "@/lib/supabase/profiles";
+import { loadBookableServices, type BookableService } from "@/lib/supabase/booking";
+import { toPublicDisplayName } from "@/lib/marketplace/publicName";
 
 type PageStatus = "loading" | "loaded" | "unavailable" | "unconfigured" | "error";
-type AuthStatus = "checking" | "signed-out" | "signed-in";
-type FormState = {
-  elderlyProfileId: string;
-  serviceCategoryId: string;
-  city: string;
-  requestedStartAt: string;
-  requestedDurationMinutes: string;
-  notes: string;
-};
 
-const emptyForm: FormState = {
-  elderlyProfileId: "",
-  serviceCategoryId: "",
-  city: "",
-  requestedStartAt: "",
-  requestedDurationMinutes: "120",
-  notes: "",
-};
-
-function formatRole(role: ProfileRole) {
-  const labels: Record<ProfileRole, string> = {
-    client: "Client/caregiver",
-    helper_applicant: "Helper applicant",
-    verified_helper: "Verified helper",
-    admin: "Admin",
-  };
-
-  return labels[role];
-}
-
-function buildDatabaseErrorMessage(action: string, errorMessage: string) {
-  return `${action}: ${errorMessage}. If this mentions row-level security or permission denied, confirm the profiles, helper_profiles, elderly_profiles, service_categories, and bookings RLS policies are applied for the signed-in account.`;
-}
-
-export default function HelperDetailPage() {
+function HelperDetailContent() {
   const params = useParams<{ id: string }>();
-  const helperProfileId = params.id;
-  // Preserve any marketplace filter query (carried into this URL from the
-  // listing) through the auth flow, so signup/login returns the elder here
-  // with their filters intact.
+  const caregiverProfileId = params.id;
+  // Preserve the marketplace filters through the booking flow + auth round-trip.
   const searchParams = useSearchParams();
   const filterQuery = searchParams.toString();
+  const { t } = useI18n();
+
   const marketplaceHref = filterQuery ? `/helpers?${filterQuery}` : "/helpers";
-  const returnTo = filterQuery
-    ? `/helpers/${helperProfileId}?${filterQuery}`
-    : `/helpers/${helperProfileId}`;
-  const [pageStatus, setPageStatus] = useState<PageStatus>("loading");
-  const [authStatus, setAuthStatus] = useState<AuthStatus>("checking");
-  const [helperProfile, setHelperProfile] = useState<PublicHelperProfile | null>(null);
-  const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [elderlyProfiles, setElderlyProfiles] = useState<ElderlyProfile[]>([]);
-  const [serviceCategories, setServiceCategories] = useState<ServiceCategory[]>([]);
-  const [form, setForm] = useState<FormState>(emptyForm);
+  const bookHref = filterQuery
+    ? `/helpers/${caregiverProfileId}/book?${filterQuery}`
+    : `/helpers/${caregiverProfileId}/book`;
+
+  const [status, setStatus] = useState<PageStatus>("loading");
   const [message, setMessage] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
-
-  const isClient = profile?.role === "client";
-
-  const loadClientFormData = useCallback(async (currentProfile: Profile, fallbackCity: string) => {
-    const { supabase, envError } = getSupabaseBrowserClient();
-
-    if (envError || !supabase) {
-      setMessage(envError);
-      return;
-    }
-
-    const [elderlyResult, categoriesResult] = await Promise.all([
-      loadOwnElderlyProfiles(supabase, currentProfile.id),
-      loadAllowedServiceCategories(supabase),
-    ]);
-
-    if (elderlyResult.errorMessage) {
-      setElderlyProfiles([]);
-      setMessage(buildDatabaseErrorMessage("Could not load your elderly profiles", elderlyResult.errorMessage));
-    } else {
-      setElderlyProfiles(elderlyResult.profiles);
-      setForm((current) => ({
-        ...current,
-        elderlyProfileId: current.elderlyProfileId || elderlyResult.profiles[0]?.id || "",
-        city: current.city || elderlyResult.profiles[0]?.city || fallbackCity,
-      }));
-    }
-
-    if (categoriesResult.errorMessage) {
-      setServiceCategories([]);
-      setMessage(buildDatabaseErrorMessage("Could not load allowed service categories", categoriesResult.errorMessage));
-    } else {
-      setServiceCategories(categoriesResult.categories);
-      setForm((current) => ({
-        ...current,
-        serviceCategoryId: current.serviceCategoryId || categoriesResult.categories[0]?.id || "",
-      }));
-    }
-  }, []);
+  const [caregiver, setCaregiver] = useState<PublicHelperProfile | null>(null);
+  const [services, setServices] = useState<BookableService[]>([]);
 
   useEffect(() => {
     const { supabase, envError } = getSupabaseBrowserClient();
-
     if (envError || !supabase) {
-      setPageStatus("unconfigured");
-      setAuthStatus("signed-out");
+      setStatus("unconfigured");
       setMessage(envError);
       return;
     }
 
-    const activeSupabase = supabase;
     let isMounted = true;
+    setStatus("loading");
 
-    async function loadPage() {
-      setPageStatus("loading");
-      setAuthStatus("checking");
-      setMessage(null);
-      setSuccessMessage(null);
-
-      const helperResult = await loadVisibleVerifiedHelperProfileById(activeSupabase, helperProfileId);
-
-      if (!isMounted) {
-        return;
-      }
-
-      if (helperResult.errorMessage) {
-        // Log the technical reason for developers; show families a calm message.
-        console.error("Could not load caregiver profile:", helperResult.errorMessage);
-        setPageStatus("error");
-        setMessage("We couldn't load this caregiver right now. Please try again in a little while.");
-        return;
-      }
-
-      if (!helperResult.helperProfile) {
-        setPageStatus("unavailable");
-        setHelperProfile(null);
-        setMessage("This helper profile is not available publicly. It may be hidden, unverified, or missing.");
-        return;
-      }
-
-      setHelperProfile(helperResult.helperProfile);
-      setPageStatus("loaded");
-
-      const { data: userData, error: userError } = await activeSupabase.auth.getUser();
-
-      if (!isMounted) {
-        return;
-      }
-
-      if (userError || !userData.user) {
-        setAuthStatus("signed-out");
-        setUser(null);
-        setProfile(null);
-        if (userError) {
-          setMessage(`Could not confirm your login session: ${userError.message}`);
-        }
-        return;
-      }
-
-      setAuthStatus("signed-in");
-      setUser(userData.user);
-
-      const profileResult = await loadProfile(activeSupabase, userData.user.id);
-
-      if (!isMounted) {
-        return;
-      }
+    async function load() {
+      const profileResult = await loadVisibleVerifiedHelperProfileById(
+        supabase!,
+        caregiverProfileId,
+      );
+      if (!isMounted) return;
 
       if (profileResult.errorMessage) {
-        setProfile(null);
-        setMessage(`Could not load your profile from the profiles table: ${profileResult.errorMessage}. Confirm the profiles table and RLS policies are applied.`);
+        console.error("Could not load caregiver profile:", profileResult.errorMessage);
+        setStatus("error");
+        return;
+      }
+      if (!profileResult.helperProfile) {
+        setStatus("unavailable");
         return;
       }
 
-      if (!profileResult.profile) {
-        setProfile(null);
-        setMessage("Your auth account is signed in, but the profiles table row is missing. Open the dashboard to complete profile setup before requesting a helper.");
-        return;
-      }
+      setCaregiver(profileResult.helperProfile);
+      setStatus("loaded");
 
-      setProfile(profileResult.profile);
-
-      if (profileResult.profile.role === "client") {
-        await loadClientFormData(profileResult.profile, "");
+      const servicesResult = await loadBookableServices(supabase!, caregiverProfileId);
+      if (isMounted && !servicesResult.errorMessage) {
+        setServices(servicesResult.services);
       }
     }
 
-    void loadPage();
-
+    void load();
     return () => {
       isMounted = false;
     };
-  }, [helperProfileId, loadClientFormData]);
+  }, [caregiverProfileId]);
 
-  function updateField(field: keyof FormState, value: string) {
-    setForm((current) => ({ ...current, [field]: value }));
-  }
+  const lowestPriceMinor = useMemo(
+    () => (services.length > 0 ? Math.min(...services.map((s) => s.priceMinor)) : null),
+    [services],
+  );
 
-  function handleElderlyProfileChange(elderlyProfileId: string) {
-    const selectedProfile = elderlyProfiles.find((item) => item.id === elderlyProfileId);
-    setForm((current) => ({
-      ...current,
-      elderlyProfileId,
-      city: selectedProfile?.city || current.city,
-    }));
-  }
-
-  async function handleCreateRequest() {
-    if (!helperProfile) {
-      setMessage("This helper profile is not available publicly, so a request cannot be created.");
-      return;
-    }
-
-    if (!profile || profile.role !== "client") {
-      setMessage("Booking requests for a specific helper are only available to client/caregiver accounts.");
-      return;
-    }
-
-    if (elderlyProfiles.length === 0) {
-      setMessage("Create at least one elderly profile before requesting this helper.");
-      return;
-    }
-
-    if (serviceCategories.length === 0) {
-      setMessage("No allowed service categories are available. Confirm the service_categories seed data and RLS policy are applied.");
-      return;
-    }
-
-    if (!form.elderlyProfileId || !form.serviceCategoryId || !form.city.trim() || !form.requestedStartAt) {
-      setMessage("Elderly profile, service category, city, and requested start date/time are required.");
-      return;
-    }
-
-    const duration = Number(form.requestedDurationMinutes);
-
-    if (!Number.isInteger(duration) || duration <= 0) {
-      setMessage("Requested duration must be a positive number of minutes.");
-      return;
-    }
-
-    const requestedStartAt = new Date(form.requestedStartAt);
-
-    if (Number.isNaN(requestedStartAt.getTime())) {
-      setMessage("Requested start date/time is not valid. Please choose a date and time from the picker.");
-      return;
-    }
-
-    const { supabase, envError } = getSupabaseBrowserClient();
-
-    if (envError || !supabase) {
-      setMessage(envError);
-      return;
-    }
-
-    setIsSaving(true);
-    setMessage(null);
-    setSuccessMessage(null);
-
-    const latestHelperResult = await loadVisibleVerifiedHelperProfileById(supabase, helperProfile.id);
-
-    if (latestHelperResult.errorMessage) {
-      setMessage(buildDatabaseErrorMessage("Could not re-check helper visibility", latestHelperResult.errorMessage));
-      setIsSaving(false);
-      return;
-    }
-
-    if (!latestHelperResult.helperProfile) {
-      setHelperProfile(null);
-      setPageStatus("unavailable");
-      setMessage("This helper is no longer visible or verified publicly, so the request was not created.");
-      setIsSaving(false);
-      return;
-    }
-
-    const result = await createOwnBookingRequest(supabase, {
-      clientId: profile.id,
-      elderlyProfileId: form.elderlyProfileId,
-      helperProfileId: latestHelperResult.helperProfile.id,
-      serviceCategoryId: form.serviceCategoryId,
-      city: form.city,
-      requestedStartAt: requestedStartAt.toISOString(),
-      requestedDurationMinutes: duration,
-      notes: form.notes,
-    });
-
-    if (result.errorMessage) {
-      setMessage(buildDatabaseErrorMessage("Could not create booking request for this helper", result.errorMessage));
-      setIsSaving(false);
-      return;
-    }
-
-    setSuccessMessage("Request saved with status Requested for this visible helper. Helper acceptance, final confirmation, and payment are not implemented yet.");
-    setForm((current) => ({
-      ...emptyForm,
-      elderlyProfileId: current.elderlyProfileId,
-      serviceCategoryId: current.serviceCategoryId,
-      city: current.city,
-    }));
-    setIsSaving(false);
-  }
+  const publicName = caregiver ? toPublicDisplayName(caregiver.display_name) : "";
 
   return (
     <section className="mx-auto max-w-6xl px-5 py-12 lg:px-8 lg:py-16">
       <PageIntro
-        eyebrow="Caregiver profile"
-        title="Certified caregiver"
-        description="Review the caregiver profile details. Private contact information, applications, and admin-only fields are not shown publicly."
+        eyebrow={t("Caregiver profile")}
+        title={t("Certified caregiver")}
+        description={t("Review this caregiver's profile and prices, then book a visit. Private contact details are never shown publicly.")}
       />
 
-      {pageStatus === "loading" ? (
+      {status === "loading" ? (
         <div className="mt-8 rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200" role="status">
-          Loading caregiver profile…
+          {t("Loading caregiver profile…")}
         </div>
       ) : null}
 
-      {pageStatus === "unconfigured" ? (
+      {status === "unconfigured" ? (
         <div className="mt-8 rounded-[2rem] border border-amber-200 bg-amber-50 p-6 text-amber-900" role="alert">
-          <h2 className="text-2xl font-bold">Supabase configuration needed</h2>
+          <h2 className="text-2xl font-bold">{t("Supabase configuration needed")}</h2>
           <p className="mt-4 leading-7">{message}</p>
         </div>
       ) : null}
 
-      {(pageStatus === "error" || pageStatus === "unavailable") ? (
-        <div className="mt-8 rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200" role={pageStatus === "error" ? "alert" : undefined}>
-          <h2 className="text-2xl font-bold text-forest">Caregiver unavailable</h2>
-          <p className="mt-4 leading-7">{message}</p>
-          <Link href={marketplaceHref} className="mt-6 inline-flex min-h-12 items-center rounded-full bg-forest px-5 py-3 font-semibold text-white transition hover:bg-stone-800">
-            Back to certified caregivers
+      {status === "error" || status === "unavailable" ? (
+        <div className="mt-8 rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200">
+          <h2 className="text-2xl font-bold text-forest">{t("Caregiver unavailable")}</h2>
+          <p className="mt-4 leading-7">
+            {status === "unavailable"
+              ? t("This caregiver profile isn't available publicly. It may be hidden, unverified, or missing.")
+              : t("We couldn't load this caregiver right now. Please try again in a little while.")}
+          </p>
+          <Link
+            href={marketplaceHref}
+            className="mt-6 inline-flex min-h-12 items-center rounded-full bg-forest px-5 py-3 font-semibold text-white transition hover:bg-stone-800"
+          >
+            {t("Back to caregivers")}
           </Link>
         </div>
       ) : null}
 
-      {pageStatus === "loaded" && helperProfile ? (
-        <div className="mt-8 grid gap-5 lg:grid-cols-[1fr_0.8fr]">
+      {status === "loaded" && caregiver ? (
+        <div className="mt-8 grid gap-5 lg:grid-cols-[1fr_0.8fr] lg:items-start">
           <div className="space-y-5">
             <article className="rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200">
               <div className="grid gap-6 md:grid-cols-[12rem_1fr] md:items-start">
@@ -360,165 +146,114 @@ export default function HelperDetailPage() {
                   </div>
                 </div>
                 <div>
-              <p className="inline-flex rounded-full bg-sage px-3 py-1 text-xs font-extrabold uppercase tracking-[0.14em] text-forest">
-                Certified caregiver
-              </p>
-              <h2 className="mt-3 text-3xl font-bold text-forest">{helperProfile.display_name}</h2>
-              <dl className="mt-6 grid gap-4 text-sm sm:grid-cols-2">
-                <div className="sm:col-span-2">
-                  <dt className="font-bold text-forest">Experience</dt>
-                  <dd className="mt-1 whitespace-pre-wrap leading-7">{helperProfile.experience ?? "Not listed"}</dd>
-                </div>
-                <div className="sm:col-span-2">
-                  <dt className="font-bold text-forest">Full profile</dt>
-                  <dd className="mt-1 whitespace-pre-wrap leading-7">{helperProfile.bio}</dd>
-                </div>
-              </dl>
+                  <p className="inline-flex items-center gap-1.5 rounded-full bg-sage px-3 py-1 text-xs font-extrabold uppercase tracking-[0.14em] text-forest">
+                    <BadgeCheck className="size-3.5" aria-hidden="true" />
+                    {t("Certified caregiver")}
+                  </p>
+                  <h2 className="mt-3 text-3xl font-bold text-forest">{publicName}</h2>
+                  <dl className="mt-6 grid gap-4 text-sm">
+                    <div>
+                      <dt className="font-bold text-forest">{t("Experience")}</dt>
+                      <dd className="mt-1 whitespace-pre-wrap leading-7">{caregiver.experience ?? t("Not listed")}</dd>
+                    </div>
+                    <div>
+                      <dt className="font-bold text-forest">{t("About")}</dt>
+                      <dd className="mt-1 whitespace-pre-wrap leading-7">{caregiver.bio}</dd>
+                    </div>
+                  </dl>
                 </div>
               </div>
+
               <div className="mt-6 rounded-3xl bg-cream p-5 text-sm leading-6 text-stone-700">
-                <h3 className="font-bold text-forest">Non-medical service boundary</h3>
+                <h3 className="font-bold text-forest">{t("Non-medical service boundary")}</h3>
                 <p className="mt-2">
-                  Vnuk Pod Naem helpers may be requested for companionship, errands, shopping, walks, check-ins, technology help, and accompaniment. Do not request medical care, medication management, clinical tasks, card PINs, passwords, cash handling, or access to valuables. Helpers are independent marketplace participants, not Vnuk Pod Naem employees, and the platform does not guarantee absolute safety.
+                  {t("Caregivers may be booked for companionship, errands, shopping, walks, check-ins, technology help, and accompaniment. Please don't request medical care, medication management, clinical tasks, card PINs, passwords, cash handling, or access to valuables. Caregivers are independent marketplace participants, not Vnuk Pod Naem employees, and the platform does not guarantee absolute safety.")}
                 </p>
               </div>
             </article>
 
-            <div className="rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200">
-              <h2 className="text-2xl font-bold text-forest">Request this caregiver</h2>
-              <p className="mt-2 text-sm leading-6 text-stone-600">
-                A request saves this caregiver profile with status Requested. No payment is collected, and caregiver acceptance is not implemented yet.
-              </p>
-
-              {authStatus === "checking" ? <p className="mt-5 rounded-3xl bg-cream p-5 text-sm font-semibold" role="status">Checking your login session…</p> : null}
-
-              {authStatus === "signed-out" ? (
-                <div className="mt-5 rounded-3xl border border-amber-200 bg-amber-50 p-5 text-amber-900">
-                  <h3 className="font-bold">Login required</h3>
-                  <p className="mt-2 text-sm leading-6">Sign in with a normal account before requesting a caregiver.</p>
-                  <div className="mt-4 flex flex-wrap gap-3">
-                    <Link href={withReturnTo("/login", returnTo)} className="inline-flex min-h-11 items-center rounded-full bg-forest px-5 py-2 text-sm font-semibold text-white transition hover:bg-stone-800">Login</Link>
-                    <Link href={withReturnTo("/signup", returnTo)} className="inline-flex min-h-11 items-center rounded-full border border-stone-200 bg-white px-5 py-2 text-sm font-semibold text-forest transition hover:bg-sage">Create account</Link>
-                  </div>
-                </div>
-              ) : null}
-
-              {authStatus === "signed-in" && !profile ? (
-                <div className="mt-5 rounded-3xl border border-amber-200 bg-amber-50 p-5 text-amber-900" role="alert">
-                  <h3 className="font-bold">Profile setup needed</h3>
-                  <p className="mt-2 text-sm leading-6">{message}</p>
-                  <Link href="/dashboard" className="mt-4 inline-flex min-h-11 items-center rounded-full bg-forest px-5 py-2 text-sm font-semibold text-white transition hover:bg-stone-800">Open dashboard</Link>
-                </div>
-              ) : null}
-
-              {profile && profile.role !== "client" ? (
-                <div className="mt-5 rounded-3xl border border-amber-200 bg-amber-50 p-5 text-amber-900" role="alert">
-                  <h3 className="font-bold">Client/caregiver access only</h3>
-                  <p className="mt-2 text-sm leading-6">
-                    Booking requests are for client/caregiver accounts. Your current role is {formatRole(profile.role)}.
-                  </p>
-                  <Link href="/dashboard" className="mt-4 inline-flex min-h-11 items-center rounded-full bg-forest px-5 py-2 text-sm font-semibold text-white transition hover:bg-stone-800">Return to dashboard</Link>
-                </div>
-              ) : null}
-
-              {message && isClient ? (
-                <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-800" role="alert">
-                  {message}
-                </div>
-              ) : null}
-
-              {successMessage ? (
-                <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800" role="status">
-                  {successMessage} <Link href="/dashboard/bookings" className="underline">View your booking requests</Link>.
-                </div>
-              ) : null}
-
-              {isClient ? (
-                <>
-                  {elderlyProfiles.length === 0 ? (
-                    <div className="mt-5 rounded-3xl border border-amber-200 bg-amber-50 p-5 text-amber-900">
-                      <h3 className="font-bold">Elderly profile required</h3>
-                      <p className="mt-2 text-sm leading-6">Create an elderly profile before requesting this helper.</p>
-                      <Link href="/dashboard/elderly-profiles" className="mt-4 inline-flex min-h-11 items-center rounded-full bg-forest px-5 py-2 text-sm font-semibold text-white transition hover:bg-stone-800">Manage elderly profiles</Link>
-                    </div>
-                  ) : null}
-
-                  {serviceCategories.length === 0 ? (
-                    <div className="mt-5 rounded-3xl border border-amber-200 bg-amber-50 p-5 text-amber-900">
-                      <h3 className="font-bold">No allowed service categories</h3>
-                      <p className="mt-2 text-sm leading-6">Booking requests need an allowed service category. Confirm the database seed data and service_categories RLS policy are applied.</p>
-                    </div>
-                  ) : null}
-
-                  <div className="mt-6 grid gap-5">
-                    <label className="block">
-                      <span className="font-semibold text-forest">Elderly profile</span>
-                      <select value={form.elderlyProfileId} onChange={(event) => handleElderlyProfileChange(event.target.value)} required className="mt-2 w-full rounded-2xl border border-stone-300 px-4 py-3 text-stone-900 outline-none transition focus:border-forest">
-                        <option value="">Select an elderly profile</option>
-                        {elderlyProfiles.map((elderlyProfile) => (
-                          <option key={elderlyProfile.id} value={elderlyProfile.id}>{elderlyProfile.full_name} · {elderlyProfile.city}</option>
-                        ))}
-                      </select>
-                    </label>
-                    <label className="block">
-                      <span className="font-semibold text-forest">Allowed service category</span>
-                      <select value={form.serviceCategoryId} onChange={(event) => updateField("serviceCategoryId", event.target.value)} required className="mt-2 w-full rounded-2xl border border-stone-300 px-4 py-3 text-stone-900 outline-none transition focus:border-forest">
-                        <option value="">Select a non-medical service category</option>
-                        {serviceCategories.map((category) => (
-                          <option key={category.id} value={category.id}>{category.name}</option>
-                        ))}
-                      </select>
-                    </label>
-                    <label className="block">
-                      <span className="font-semibold text-forest">City</span>
-                      <input value={form.city} onChange={(event) => updateField("city", event.target.value)} required className="mt-2 w-full rounded-2xl border border-stone-300 px-4 py-3 text-stone-900 outline-none transition focus:border-forest" />
-                    </label>
-                    <div className="grid gap-5 sm:grid-cols-2">
-                      <label className="block">
-                        <span className="font-semibold text-forest">Requested start date and time</span>
-                        <input type="datetime-local" value={form.requestedStartAt} onChange={(event) => updateField("requestedStartAt", event.target.value)} required className="mt-2 w-full rounded-2xl border border-stone-300 px-4 py-3 text-stone-900 outline-none transition focus:border-forest" />
-                      </label>
-                      <label className="block">
-                        <span className="font-semibold text-forest">Requested duration in minutes</span>
-                        <input type="number" min="1" step="15" value={form.requestedDurationMinutes} onChange={(event) => updateField("requestedDurationMinutes", event.target.value)} required className="mt-2 w-full rounded-2xl border border-stone-300 px-4 py-3 text-stone-900 outline-none transition focus:border-forest" />
-                      </label>
-                    </div>
-                    <label className="block">
-                      <span className="font-semibold text-forest">Notes for non-medical support</span>
-                      <textarea value={form.notes} onChange={(event) => updateField("notes", event.target.value)} rows={5} className="mt-2 w-full rounded-2xl border border-stone-300 px-4 py-3 text-stone-900 outline-none transition focus:border-forest" />
-                      <span className="mt-2 block text-sm leading-6 text-stone-600">
-                        Keep notes practical and non-medical, such as timing, communication preferences, routine errands, or companionship context. Do not enter medical details, diagnoses, medication instructions, card PINs, passwords, cash-handling requests, or access-to-valuables requests.
+            {services.length > 0 ? (
+              <div className="rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200">
+                <h2 className="text-2xl font-bold text-forest">{t("Services and prices")}</h2>
+                <p className="mt-2 text-sm text-stone-600">{t("Each service is priced per 2-hour visit.")}</p>
+                <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+                  {services.map((service) => (
+                    <li
+                      key={service.serviceId}
+                      className="flex items-center justify-between gap-3 rounded-2xl border border-moss/20 bg-cream/60 px-4 py-3"
+                    >
+                      <span className="font-bold text-forest">{t(service.name)}</span>
+                      <span className="shrink-0 text-sm font-semibold text-stone-600">
+                        {formatLevaAmount(service.priceMinor)} {t("лв.")} / {t("2h")}
                       </span>
-                    </label>
-                  </div>
-
-                  <button type="button" onClick={() => void handleCreateRequest()} disabled={isSaving || elderlyProfiles.length === 0 || serviceCategories.length === 0} className="mt-6 inline-flex min-h-12 items-center rounded-full bg-forest px-5 py-3 font-semibold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-60">
-                    {isSaving ? "Creating request…" : "Request this caregiver"}
-                  </button>
-                </>
-              ) : null}
-            </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
           </div>
 
-          <aside className="space-y-5">
+          <aside className="space-y-5 lg:sticky lg:top-24">
+            <div className="rounded-[2rem] border border-moss/20 bg-white p-6 shadow-sm">
+              {lowestPriceMinor != null ? (
+                <p className="text-sm text-stone-600">
+                  {t("from")}{" "}
+                  <span className="text-2xl font-bold text-forest">
+                    {formatLevaAmount(lowestPriceMinor)} {t("лв.")}
+                  </span>{" "}
+                  / {t("2h")}
+                </p>
+              ) : (
+                <p className="text-sm font-semibold text-stone-600">{t("Price on request")}</p>
+              )}
+
+              <Link
+                href={bookHref}
+                className="mt-4 inline-flex min-h-13 w-full items-center justify-center gap-2 rounded-full bg-forest px-6 py-3.5 text-base font-bold text-white shadow-lg shadow-forest/20 transition hover:-translate-y-0.5 hover:bg-stone-800"
+              >
+                <CalendarCheck className="size-5" aria-hidden="true" />
+                {t("Book / Reserve")}
+              </Link>
+
+              <p className="mt-4 flex items-start gap-2 text-xs leading-5 text-stone-600">
+                <ShieldCheck className="mt-0.5 size-4 shrink-0 text-moss" aria-hidden="true" />
+                {t("Choose your time slots on the next screen. You won't be charged now — the caregiver approves your request first.")}
+              </p>
+            </div>
+
             <div className="rounded-[2rem] bg-sage p-6 text-stone-700">
-              <h2 className="text-xl font-bold text-forest">What happens next</h2>
-              <ul className="mt-4 space-y-3 leading-7">
-                <li>• The booking is saved with status Requested.</li>
-                <li>• The selected visible helper profile is stored on the booking.</li>
-                <li>• Helper acceptance, final confirmation, and payment are later phases.</li>
-                <li>• No card details or payment information are collected here.</li>
+              <h2 className="text-xl font-bold text-forest">{t("How booking works")}</h2>
+              <ul className="mt-4 space-y-3 leading-7 text-sm">
+                <li>• {t("Pick a service, dates, and 2-hour time slots.")}</li>
+                <li>• {t("Add optional extras and review the price.")}</li>
+                <li>• {t("Send your request — it's saved as pending.")}</li>
+                <li>• {t("The caregiver approves before anything is charged.")}</li>
               </ul>
             </div>
+
             <div className="rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200">
-              <h2 className="text-xl font-bold text-forest">Public data only</h2>
-              <p className="mt-4 leading-7">
-                This page uses safe caregiver profile fields only: display name, bio, experience, and verification label. It does not show email addresses, private user details, profile ownership IDs, application answers, or hidden/admin-only fields.
+              <h2 className="text-xl font-bold text-forest">{t("Public data only")}</h2>
+              <p className="mt-4 leading-7 text-sm">
+                {t("This page shows only safe caregiver details: public name, bio, experience, and prices. It never shows email addresses, phone numbers, private user details, or application answers.")}
               </p>
             </div>
           </aside>
         </div>
       ) : null}
     </section>
+  );
+}
+
+export default function HelperDetailPage() {
+  return (
+    <Suspense
+      fallback={
+        <section className="mx-auto max-w-6xl px-5 py-12 lg:px-8 lg:py-16">
+          <p className="text-lg font-semibold text-stone-700">Loading caregiver profile…</p>
+        </section>
+      }
+    >
+      <HelperDetailContent />
+    </Suspense>
   );
 }
