@@ -507,3 +507,44 @@ Known follow-ups (out of scope here):
 - Editing the sign-in email from `/account` is intentionally deferred (shown
   read-only with a note) because changing the Supabase Auth email requires a
   re-confirmation flow; revisit as a dedicated task.
+
+## Phase 8 — notification center + caregiver approval flow
+
+Database setup step (run once, idempotent):
+
+- In the Supabase SQL Editor, run `SUPABASE_FIX_NOTIFICATIONS.sql` (identical to
+  the migration `supabase/migrations/20260610120000_notification_center_rpcs.sql`).
+  It adds four SECURITY DEFINER read RPCs — `get_my_notifications`,
+  `mark_notifications_read`, `get_caregiver_requests`, `get_elder_reservations` —
+  and adds `public.notifications` to the `supabase_realtime` publication. It
+  creates no tables and drops nothing; safe to re-run.
+- The `notifications` / `chat_threads` / `reservations` tables, their RLS, and
+  the `create_reservation` / `transition_reservation` state-machine RPCs already
+  ship in earlier migrations — no change needed there.
+
+Required services / env vars: unchanged
+(`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`). Supabase
+Realtime must be enabled for the project (default on); the notifications bell
+falls back to a refresh-on-open if the realtime channel can't connect.
+
+Verification steps:
+
+1. As an elder, book a visible+verified caregiver (`/helpers/[id]/book`) and send
+   the request. Confirm the booking shows under `/dashboard/reservations` with
+   status **Pending** and the copy "Waiting for the caregiver to approve".
+2. As that caregiver, confirm the nav bell shows an unread badge in real time
+   (no refresh) and the panel reads "New booking request from <elder first name>"
+   — never a phone number. Open `/dashboard/requests` and confirm the request
+   shows services, dates/time slots, total duration, district, and total price,
+   but NOT the elder's phone or exact address (address appears only after
+   approval).
+3. Click **Approve**. Confirm: the reservation moves to **Approved**, the elder
+   gets a "Your booking with <caregiver> was approved" notification, the booked
+   slots disappear from that caregiver's public availability, and a `chat_threads`
+   row now exists for the reservation (Phase 9 builds the chat UI on it).
+4. On a second request click **Decline**. Confirm the elder is notified
+   "Your booking request was declined", the reservation is **Declined**, and the
+   slots return to open/available.
+5. Confirm the elder is only ever confirmed on approval (a pending request is
+   never an auto-confirmation), and that each side sees only their own
+   reservations.

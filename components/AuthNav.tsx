@@ -126,10 +126,16 @@ export function AuthNav({
             <div className="mt-2 grid gap-1">
               <DropdownLink href="/account">{t("My profile")}</DropdownLink>
               <DropdownLink href="/helpers">{t("Browse caregivers")}</DropdownLink>
+              <DropdownLink href="/dashboard/reservations">{t("My bookings")}</DropdownLink>
               {isCaregiver ? (
-                <DropdownLink href="/dashboard/caregiver">
-                  {t("Caregiver dashboard")}
-                </DropdownLink>
+                <>
+                  <DropdownLink href="/dashboard/requests">
+                    {t("Requests")}
+                  </DropdownLink>
+                  <DropdownLink href="/dashboard/caregiver">
+                    {t("Caregiver dashboard")}
+                  </DropdownLink>
+                </>
               ) : (
                 <DropdownLink href="/helper/apply">{t("Become a caregiver")}</DropdownLink>
               )}
