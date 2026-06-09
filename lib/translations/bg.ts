@@ -1439,4 +1439,67 @@ export const phraseTranslations: Record<string, string> = {
   "The caregiver wasn't able to take this booking.":
     "Помощникът не успя да поеме тази резервация.",
   "This booking was cancelled.": "Тази резервация беше отменена.",
+
+  // ---------------------------------------------------------------------------
+  // Internal chat (Messages inbox + conversation)
+  // ---------------------------------------------------------------------------
+  "Messages": "Съобщения",
+  "Open chat": "Отворете чата",
+  "Conversation": "Разговор",
+  "You": "Вие",
+  "Close": "Затваряне",
+  "Photo": "Снимка",
+  "Voice message": "Гласово съобщение",
+  "Voice message unavailable": "Гласовото съобщение не е достъпно",
+  "Photo unavailable": "Снимката не е достъпна",
+  "Open photo": "Отворете снимката",
+  "Shared photo": "Споделена снимка",
+  "Say hello to start the conversation":
+    "Поздравете, за да започнете разговора",
+  "Only the two of you can see these messages.":
+    "Само двамата виждате тези съобщения.",
+  "Write a message…": "Напишете съобщение…",
+  "Write a message": "Напишете съобщение",
+  "Send a message": "Изпратете съобщение",
+  "Send message": "Изпратете съобщението",
+  "Send voice message": "Изпратете гласовото съобщение",
+  "Attach a photo": "Прикачете снимка",
+  "Record a voice message": "Запишете гласово съобщение",
+  "Recording…": "Записване…",
+  "Cancel recording": "Отмяна на записа",
+  "Voice recording isn't supported on this device.":
+    "Записът на глас не се поддържа на това устройство.",
+  "Please choose a JPG, PNG, or WebP image.":
+    "Моля, изберете изображение във формат JPG, PNG или WebP.",
+  "That image is too large. Please choose one under 10 MB.":
+    "Това изображение е твърде голямо. Моля, изберете под 10 МБ.",
+  "We couldn't access the microphone. Please allow microphone access.":
+    "Нямаме достъп до микрофона. Моля, разрешете достъпа до микрофона.",
+  "This conversation is closed. Messages are read-only.":
+    "Този разговор е затворен. Съобщенията са само за четене.",
+  "Loading conversation…": "Зареждане на разговора…",
+  "Conversation not available": "Разговорът не е достъпен",
+  "This conversation doesn't exist or you're not part of it. Chats open only after a booking is approved.":
+    "Този разговор не съществува или не сте част от него. Чатовете се отварят само след одобрена резервация.",
+  "Back to messages": "Обратно към съобщенията",
+  "We couldn't load this conversation": "Не успяхме да заредим този разговор",
+  "Please check your connection and try again.":
+    "Моля, проверете връзката си и опитайте отново.",
+  "Your caregiver": "Вашият помощник",
+  "The family": "Семейството",
+  "View booking": "Вижте резервацията",
+  "For your safety, keep messages here. Phone numbers are never shared.":
+    "За Вашата безопасност пишете тук. Телефонни номера не се споделят.",
+  "Your message couldn't be sent. Please try again.":
+    "Съобщението Ви не можа да бъде изпратено. Моля, опитайте отново.",
+  "Your private conversations with caregivers and families. A chat opens automatically once a booking is approved.":
+    "Вашите лични разговори с помощници и семейства. Чат се отваря автоматично след одобрена резервация.",
+  "You need to sign in to view your messages.":
+    "Трябва да влезете, за да видите съобщенията си.",
+  "We couldn't load your messages right now. Please try again.":
+    "В момента не успяхме да заредим съобщенията Ви. Моля, опитайте отново.",
+  "Loading your messages…": "Зареждане на съобщенията Ви…",
+  "No conversations yet": "Все още няма разговори",
+  "When a booking is approved, a private chat opens here automatically.":
+    "Когато резервация бъде одобрена, тук автоматично се отваря личен чат.",
 };

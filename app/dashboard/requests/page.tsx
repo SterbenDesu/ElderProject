@@ -13,7 +13,7 @@
 
 import { PageIntro } from "@/components/PageIntro";
 import Link from "next/link";
-import { Check, Clock, MapPin, User, X } from "lucide-react";
+import { Check, Clock, MapPin, MessageCircle, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useCurrentUser } from "@/lib/auth/useCurrentUser";
@@ -24,6 +24,7 @@ import {
   transitionReservation,
   type CaregiverRequest,
 } from "@/lib/supabase/reservations";
+import { loadMyChatThreads } from "@/lib/supabase/chat";
 import {
   reservationStatusClasses,
   reservationStatusLabel,
@@ -35,10 +36,12 @@ function RequestCard({
   request,
   onAction,
   pendingAction,
+  chatThreadId,
 }: {
   request: CaregiverRequest;
   onAction: (id: string, action: "approve" | "reject") => void;
   pendingAction: { id: string; action: "approve" | "reject" } | null;
+  chatThreadId: string | null;
 }) {
   const { t, language } = useI18n();
   const locale = language === "bg" ? "bg" : "en";
@@ -165,11 +168,14 @@ function RequestCard({
                 : t("Approve")}
             </button>
           </div>
-        ) : request.status === "approved" ? (
-          <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700">
-            <User className="size-4" aria-hidden="true" />
-            {t("Approved — chat is open")}
-          </span>
+        ) : request.hasChat ? (
+          <Link
+            href={chatThreadId ? `/messages/${chatThreadId}` : "/messages"}
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-terracotta px-5 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-terracotta-dark"
+          >
+            <MessageCircle className="size-4" aria-hidden="true" />
+            {t("Open chat")}
+          </Link>
         ) : null}
       </div>
     </article>
@@ -180,6 +186,9 @@ export default function CaregiverRequestsPage() {
   const { t } = useI18n();
   const { status, isCaregiver, envError } = useCurrentUser();
   const [requests, setRequests] = useState<CaregiverRequest[]>([]);
+  const [threadByReservation, setThreadByReservation] = useState<
+    Map<string, string>
+  >(new Map());
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -194,9 +203,16 @@ export default function CaregiverRequestsPage() {
       return;
     }
     setLoading(true);
-    const { requests: rows, errorMessage: error } =
-      await loadCaregiverRequests(supabase);
+    // Requests + chat threads together, so each approved booking links to chat.
+    const [{ requests: rows, errorMessage: error }, { threads }] =
+      await Promise.all([
+        loadCaregiverRequests(supabase),
+        loadMyChatThreads(supabase),
+      ]);
     setLoading(false);
+    setThreadByReservation(
+      new Map(threads.map((thread) => [thread.reservationId, thread.threadId])),
+    );
     if (error) {
       setErrorMessage(error);
       return;
@@ -368,6 +384,9 @@ export default function CaregiverRequestsPage() {
                     request={request}
                     onAction={handleAction}
                     pendingAction={pendingAction}
+                    chatThreadId={
+                      threadByReservation.get(request.reservationId) ?? null
+                    }
                   />
                 ))}
               </div>
@@ -389,6 +408,9 @@ export default function CaregiverRequestsPage() {
                     request={request}
                     onAction={handleAction}
                     pendingAction={pendingAction}
+                    chatThreadId={
+                      threadByReservation.get(request.reservationId) ?? null
+                    }
                   />
                 ))}
               </div>
@@ -405,6 +427,9 @@ export default function CaregiverRequestsPage() {
                     request={request}
                     onAction={handleAction}
                     pendingAction={pendingAction}
+                    chatThreadId={
+                      threadByReservation.get(request.reservationId) ?? null
+                    }
                   />
                 ))}
               </div>

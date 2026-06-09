@@ -579,3 +579,53 @@ Note: a caregiver account may itself book another caregiver as a client
 auth.uid()` (the booker), so the booker sees it in My bookings and the target
 caregiver sees it in Requests, with the one-way rule intact (no policy lets a
 caregiver browse the elder population).
+
+## Phase 9 — internal elder <-> caregiver chat
+
+Database + storage setup step (run once, idempotent):
+
+- In the Supabase SQL Editor, run `SUPABASE_FIX_CHAT.sql` (identical RPC bodies to
+  the migration `supabase/migrations/20260611120000_chat_messaging.sql`). It:
+  1. adds four SECURITY DEFINER RPCs — `get_my_chat_threads`, `get_chat_thread`,
+     `mark_thread_read`, `send_chat_message`;
+  2. **creates the PRIVATE `chat-media` Storage bucket** (`public = false`) and
+     its two participant-only `storage.objects` policies
+     (`chat_media_participant_read`, `chat_media_participant_insert`);
+  3. adds `public.chat_messages` to the `supabase_realtime` publication.
+  It creates no tables and drops nothing; safe to re-run. A preflight stops with
+  an actionable message if the chat tables / `is_chat_participant()` are missing
+  (apply `20260605124000_notifications_chat_reviews_disputes.sql` or
+  `SUPABASE_SETUP.sql` first).
+- The `chat_threads` / `chat_messages` tables, their RLS, `is_chat_participant()`,
+  and the approval trigger that opens a thread already ship in earlier migrations —
+  no change needed there.
+
+Storage bucket (if you prefer the dashboard over SQL): Storage -> New bucket ->
+name **`chat-media`**, **Public = OFF**. The policies above are still installed by
+the SQL file. Files are stored at `{thread_id}/{sender_uid}/{file}` and are served
+only through short-lived **signed URLs** whose access is re-checked against the
+participant SELECT policy — they are never publicly readable.
+
+Required services / env vars: unchanged
+(`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`). Supabase
+Realtime must be enabled (default on); the chat window degrades gracefully to a
+load-on-open if the realtime channel can't connect, and is wrapped in an
+ErrorBoundary so a failure can never blank the app.
+
+Verification steps:
+
+1. As an elder, book a caregiver and have the caregiver **Approve** it. Confirm a
+   "Open chat" button now appears on both `/dashboard/reservations` (elder) and
+   `/dashboard/requests` (caregiver), and a "Messages" item shows in the account
+   menu and at `/messages`.
+2. Open the thread from each side. Send a **text** message and confirm it appears
+   on the other side in real time (no refresh), right-aligned for the sender.
+3. Tap the microphone, record a **voice** note, send it, and confirm it plays back
+   inline on both sides. Tap the paperclip, attach a **JPG/PNG/WebP image**, and
+   confirm it shows as a thumbnail that opens full-size.
+4. Confirm the bell shows a "New message" notification that links to the thread,
+   and that opening the thread clears it.
+5. Negative checks: a third signed-in user opening `/messages/<thread_id>` directly
+   sees "Conversation not available"; copying an attachment's signed URL and opening
+   it while signed out (or as a non-participant) fails. No phone number appears
+   anywhere in the chat.

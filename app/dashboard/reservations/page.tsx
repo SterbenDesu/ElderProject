@@ -20,6 +20,7 @@ import {
   loadElderReservations,
   type ElderReservation,
 } from "@/lib/supabase/reservations";
+import { loadMyChatThreads } from "@/lib/supabase/chat";
 import {
   reservationStatusClasses,
   reservationStatusLabel,
@@ -45,7 +46,13 @@ function statusHint(
   }
 }
 
-function ReservationCard({ reservation }: { reservation: ElderReservation }) {
+function ReservationCard({
+  reservation,
+  chatThreadId,
+}: {
+  reservation: ElderReservation;
+  chatThreadId: string | null;
+}) {
   const { t, language } = useI18n();
   const locale = language === "bg" ? "bg" : "en";
   const dateFmt = new Intl.DateTimeFormat(locale, {
@@ -143,10 +150,13 @@ function ReservationCard({ reservation }: { reservation: ElderReservation }) {
           </span>
         </p>
         {reservation.hasChat ? (
-          <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700">
+          <Link
+            href={chatThreadId ? `/messages/${chatThreadId}` : "/messages"}
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-terracotta px-5 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-terracotta-dark"
+          >
             <MessageCircle className="size-4" aria-hidden="true" />
-            {t("Chat open")}
-          </span>
+            {t("Open chat")}
+          </Link>
         ) : null}
       </div>
     </article>
@@ -157,6 +167,9 @@ export default function ElderReservationsPage() {
   const { t } = useI18n();
   const { status, envError } = useCurrentUser();
   const [reservations, setReservations] = useState<ElderReservation[]>([]);
+  const [threadByReservation, setThreadByReservation] = useState<
+    Map<string, string>
+  >(new Map());
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -166,9 +179,17 @@ export default function ElderReservationsPage() {
       return;
     }
     setLoading(true);
-    const { reservations: rows, errorMessage: error } =
-      await loadElderReservations(supabase);
+    // Load reservations and the user's chat threads together so each approved
+    // booking can deep-link to its conversation.
+    const [{ reservations: rows, errorMessage: error }, { threads }] =
+      await Promise.all([
+        loadElderReservations(supabase),
+        loadMyChatThreads(supabase),
+      ]);
     setLoading(false);
+    setThreadByReservation(
+      new Map(threads.map((thread) => [thread.reservationId, thread.threadId])),
+    );
     if (error) {
       setErrorMessage(error);
       return;
@@ -296,6 +317,9 @@ export default function ElderReservationsPage() {
                   <ReservationCard
                     key={reservation.reservationId}
                     reservation={reservation}
+                    chatThreadId={
+                      threadByReservation.get(reservation.reservationId) ?? null
+                    }
                   />
                 ))}
               </div>
@@ -310,6 +334,9 @@ export default function ElderReservationsPage() {
                   <ReservationCard
                     key={reservation.reservationId}
                     reservation={reservation}
+                    chatThreadId={
+                      threadByReservation.get(reservation.reservationId) ?? null
+                    }
                   />
                 ))}
               </div>

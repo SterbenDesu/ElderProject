@@ -125,6 +125,7 @@ export function AuthNav({
             </div>
             <div className="mt-2 grid gap-1">
               <DropdownLink href="/account">{t("My profile")}</DropdownLink>
+              <DropdownLink href="/messages">{t("Messages")}</DropdownLink>
               <DropdownLink href="/helpers">{t("Browse caregivers")}</DropdownLink>
               <DropdownLink href="/dashboard/reservations">{t("My bookings")}</DropdownLink>
               {isCaregiver ? (

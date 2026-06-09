@@ -425,6 +425,12 @@ export default function AccountPage() {
               >
                 Browse caregivers
               </Link>
+              <Link
+                href="/messages"
+                className="inline-flex min-h-12 items-center rounded-full border border-sand bg-white px-6 py-3 font-bold text-terracotta transition hover:bg-linen"
+              >
+                Messages
+              </Link>
               {isCaregiver ? (
                 <Link
                   href="/dashboard/caregiver"
