@@ -3,9 +3,22 @@
 -- Idempotent patch for the Phase 8 notification center + reservation reads.
 -- ---------------------------------------------------------------------
 -- WHY THIS FILE EXISTS
---   The notifications / chat_threads / reservations tables, their RLS, and the
---   state-machine RPCs (create_reservation / transition_reservation) already
---   ship in supabase/migrations. Phase 8 only ADDS read paths the UI needs:
+--   Three signed-in data loads fail in production with
+--     "We couldn't load your notifications / requests / bookings right now":
+--       * the notification bell           -> calls get_my_notifications()
+--       * the caregiver "Requests" page    -> calls get_caregiver_requests()
+--       * the elder "My bookings" page     -> calls get_elder_reservations()
+--   All three call SECURITY DEFINER read RPCs that ship in the migration
+--   supabase/migrations/20260610120000_notification_center_rpcs.sql. When those
+--   functions are MISSING from the live database, supabase.rpc() returns
+--   PostgREST error PGRST202 (HTTP 404, "Could not find the function
+--   public.get_my_notifications in the schema cache"). The pages surface that as
+--   the banner above. This is a DEPLOYMENT gap (the migration was never applied
+--   to the live project), not an application bug — the reservation row and the
+--   caregiver notification row created by create_reservation() already exist;
+--   they are simply unreadable until these read paths are installed.
+--
+--   This patch ADDS only the read paths the UI needs:
 --     * get_my_notifications(p_limit)   — the bell panel (recipient-scoped)
 --     * mark_notifications_read(p_ids)   — flip read flag on own rows only
 --     * get_caregiver_requests()         — incoming requests for a caregiver
@@ -16,16 +29,79 @@
 --   Supabase Dashboard -> SQL Editor -> New query -> paste this whole file
 --   -> Run. Safe to run more than once (create-or-replace + guarded ADD TABLE).
 --
+-- PREREQUISITES
+--   The reservation/notification TABLES and the state-machine RPCs
+--   (create_reservation / transition_reservation) must already exist — they ship
+--   in the earlier migrations 20260605122000..125000. The preflight block below
+--   verifies them and STOPS with a precise message if any are missing, so you get
+--   an actionable error ("run migrations 2026060512xx / SUPABASE_FIX.sql first")
+--   instead of a cryptic "relation public.reservations does not exist".
+--
 -- SAFETY (AGENTS.md / DATABASE_SCHEMA.md)
 --   * No DROP. Only CREATE OR REPLACE FUNCTION and a guarded publication add.
 --   * RLS stays ON. Every function is SECURITY DEFINER and re-scopes each row to
 --     auth.uid(): a caregiver reads elder data ONLY through a reservation it
 --     owns, and only the elder's FIRST NAME + district — never phone/email.
---   * This file is identical to the migration
+--   * The one-way rule is intact: there is no "browse elders" surface here.
+--   * This file is kept identical (RPC bodies) to the migration
 --     supabase/migrations/20260610120000_notification_center_rpcs.sql.
 -- =====================================================================
 
 begin;
+
+-- ---------------------------------------------------------------------------
+-- 0. PREFLIGHT — fail fast with an actionable message if the schema the read
+--    RPCs depend on has not been applied to this database yet. (A `language sql`
+--    function body is parsed at CREATE time, so a missing table would otherwise
+--    abort with an opaque "relation does not exist".)
+-- ---------------------------------------------------------------------------
+do $$
+declare
+  v_missing text[] := array[]::text[];
+  v_tbl text;
+begin
+  -- Tables the four read RPCs reference.
+  foreach v_tbl in array array[
+    'profiles', 'caregiver_profiles', 'regions', 'notifications',
+    'reservations', 'reservation_services', 'reservation_slots',
+    'availability_slots', 'chat_threads'
+  ] loop
+    if not exists (
+      select 1 from information_schema.tables
+      where table_schema = 'public' and table_name = v_tbl
+    ) then
+      v_missing := v_missing || v_tbl;
+    end if;
+  end loop;
+
+  if array_length(v_missing, 1) is not null then
+    raise exception
+      'Cannot install the Phase 8 read RPCs: missing table(s): %. Apply the reservation/notification schema first (supabase/migrations/20260605122000_availability_reservations.sql .. 20260605125000_reservation_state_machine_rpcs.sql, or the consolidated SUPABASE_SETUP.sql), then re-run this file.',
+      array_to_string(v_missing, ', ')
+      using errcode = '42P01';
+  end if;
+
+  -- Columns the reservation reads rely on (catch a half-migrated `bookings`).
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'reservations'
+      and column_name = 'elder_id'
+  ) then
+    raise exception
+      'public.reservations is missing the elder_id column — the bookings->reservations migration (20260605122000) has not been applied. Apply it before running this file.'
+      using errcode = '42703';
+  end if;
+
+  -- The notification rows are written by create_reservation(); warn (do not fail)
+  -- if that RPC is absent, since the reads can still be installed.
+  if not exists (
+    select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+    where n.nspname = 'public' and p.proname = 'create_reservation'
+  ) then
+    raise warning
+      'public.create_reservation() is not present. The read RPCs will install, but no reservations or notifications can be CREATED until you also apply 20260605125000_reservation_state_machine_rpcs.sql.';
+  end if;
+end $$;
 
 -- ---------------------------------------------------------------------------
 -- 1. get_my_notifications — the bell panel, recipient-scoped + name-enriched
@@ -194,6 +270,10 @@ comment on function public.get_caregiver_requests() is
 -- ---------------------------------------------------------------------------
 -- 4. get_elder_reservations — the elder's own reservations + caregiver name
 -- ---------------------------------------------------------------------------
+-- NOTE on the one-way rule: this is scoped to elder_id = auth.uid(), i.e. the
+-- BOOKER. A caregiver account is itself an elder-type account (PRODUCT_SPEC §1.2)
+-- and may book others as a client, so a caregiver who books appears here as the
+-- booker — that is intended and does NOT let anyone browse the elder population.
 create or replace function public.get_elder_reservations()
 returns table (
   reservation_id  uuid,
@@ -281,3 +361,37 @@ begin
 end $$;
 
 commit;
+
+-- =====================================================================
+-- VERIFY (run these SELECTs after the patch; they are not part of the txn).
+--
+-- 1) All four RPCs now exist (expect 4 rows):
+--   select proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+--    where n.nspname = 'public'
+--      and proname in ('get_my_notifications','mark_notifications_read',
+--                      'get_caregiver_requests','get_elder_reservations');
+--
+-- 2) Confirm the reported Jovani -> Kura reservation actually exists, and that a
+--    caregiver notification was written for it (expect the reservation row, and
+--    a 'reservation_requested' notification addressed to Kura's profile):
+--   select r.id, r.status, r.created_at,
+--          booker.email  as booker_email,
+--          cg.display_name as caregiver
+--     from public.reservations r
+--     join public.profiles booker on booker.id = r.elder_id
+--     join public.caregiver_profiles cg on cg.id = r.caregiver_profile_id
+--    where booker.email = 'ivanzhelyazov+client2@gmail.com'
+--    order by r.created_at desc;
+--
+--   select n.type, n.is_read, n.created_at, p.email as recipient
+--     from public.notifications n
+--     join public.profiles p on p.id = n.recipient_id
+--    where n.type = 'reservation_requested'
+--    order by n.created_at desc
+--    limit 10;
+--
+-- After this patch:
+--   * Jovani's "My bookings" loads the reservation as `pending`.
+--   * Kura's bell shows "New booking request from Jovani" and her Requests page
+--     lists it; Approve/Reject drive transition_reservation as before.
+-- =====================================================================

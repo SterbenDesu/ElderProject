@@ -548,3 +548,34 @@ Verification steps:
 5. Confirm the elder is only ever confirmed on approval (a pending request is
    never an auto-confirmation), and that each side sees only their own
    reservations.
+
+### Troubleshooting — "We couldn't load your notifications / requests / bookings"
+
+If, after the app loads, all three of these signed-in data loads fail at once:
+
+- the notification bell shows "We couldn't load your notifications right now",
+- `/dashboard/requests` shows "We couldn't load your requests right now",
+- `/dashboard/reservations` shows "We couldn't load your bookings right now",
+
+the cause is that the **Phase 8 read RPCs were never applied to the live
+database**. Each page calls one SECURITY DEFINER RPC
+(`get_my_notifications` / `get_caregiver_requests` / `get_elder_reservations`);
+when the function is absent, `supabase.rpc()` returns PostgREST **PGRST202**
+(HTTP 404, "Could not find the function … in the schema cache"), which the pages
+render as the banner above. The underlying reservation/notification **rows are
+not lost** — `create_reservation()` already wrote them; they are just unreadable
+until the read paths exist.
+
+Fix: run `SUPABASE_FIX_NOTIFICATIONS.sql` in the Supabase SQL Editor. It now
+begins with a **preflight** that stops with an actionable message if the
+prerequisite tables (or the `create_reservation` RPC) are also missing — in that
+case apply migrations `20260605122000`..`20260605125000` (or `SUPABASE_SETUP.sql`)
+first, then re-run it. The file ends with VERIFY queries that confirm the four
+RPCs exist and that a specific reservation + its caregiver notification are
+present and readable.
+
+Note: a caregiver account may itself book another caregiver as a client
+(PRODUCT_SPEC §1.2) — `get_elder_reservations` is scoped to `elder_id =
+auth.uid()` (the booker), so the booker sees it in My bookings and the target
+caregiver sees it in Requests, with the one-way rule intact (no policy lets a
+caregiver browse the elder population).
