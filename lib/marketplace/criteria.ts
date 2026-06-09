@@ -14,6 +14,19 @@
 //   lat, lng      chosen coordinates (kept for later proximity sorting)
 //   startDate     "YYYY-MM-DD"
 //   endDate       "YYYY-MM-DD"  (single-date searches set startDate only)
+//   sort          "reviews" | "price-asc" | "price-desc" | "proximity"
+//   priceMax      max "from" price in лв. (whole number), e.g. "30"
+//   verified      "1" when the verified-only toggle is on
+//   volunteer     "1" when the volunteer-only toggle is on
+//
+// The refinement filters (priceMax / verified / volunteer) and the sort are
+// applied CLIENT-SIDE over the already-RLS-filtered result set. The marketplace
+// list is small enough per district that this needs no extra DB column or index;
+// it keeps every query reading only safe, public caregiver columns.
+
+export type MarketplaceSort = "reviews" | "price-asc" | "price-desc" | "proximity";
+
+export const defaultSort: MarketplaceSort = "reviews";
 
 export type MarketplaceCriteria = {
   services: string[];
@@ -26,6 +39,11 @@ export type MarketplaceCriteria = {
   lng: string;
   startDate: string;
   endDate: string;
+  sort: MarketplaceSort;
+  /** Max "from" price in лв. (whole leva). Empty = no cap. */
+  priceMax: string;
+  verifiedOnly: boolean;
+  volunteerOnly: boolean;
 };
 
 export const emptyCriteria: MarketplaceCriteria = {
@@ -38,7 +56,20 @@ export const emptyCriteria: MarketplaceCriteria = {
   lng: "",
   startDate: "",
   endDate: "",
+  sort: defaultSort,
+  priceMax: "",
+  verifiedOnly: false,
+  volunteerOnly: false,
 };
+
+function parseSort(value: string | null): MarketplaceSort {
+  return value === "price-asc" ||
+    value === "price-desc" ||
+    value === "proximity" ||
+    value === "reviews"
+    ? value
+    : defaultSort;
+}
 
 type ReadableParams = { get: (key: string) => string | null };
 
@@ -57,6 +88,10 @@ export function parseCriteria(params: ReadableParams): MarketplaceCriteria {
     lng: params.get("lng")?.trim() ?? "",
     startDate: params.get("startDate")?.trim() ?? "",
     endDate: params.get("endDate")?.trim() ?? "",
+    sort: parseSort(params.get("sort")),
+    priceMax: params.get("priceMax")?.trim() ?? "",
+    verifiedOnly: params.get("verified") === "1",
+    volunteerOnly: params.get("volunteer") === "1",
   };
 }
 
@@ -91,6 +126,19 @@ export function buildCriteriaQuery(criteria: MarketplaceCriteria): string {
   if (criteria.endDate) {
     query.set("endDate", criteria.endDate);
   }
+  // Only persist a non-default sort so default URLs stay clean and shareable.
+  if (criteria.sort && criteria.sort !== defaultSort) {
+    query.set("sort", criteria.sort);
+  }
+  if (criteria.priceMax) {
+    query.set("priceMax", criteria.priceMax);
+  }
+  if (criteria.verifiedOnly) {
+    query.set("verified", "1");
+  }
+  if (criteria.volunteerOnly) {
+    query.set("volunteer", "1");
+  }
 
   return query.toString();
 }
@@ -102,11 +150,20 @@ export function hasAnyCriteria(criteria: MarketplaceCriteria): boolean {
       criteria.districtName ||
       criteria.address ||
       criteria.startDate ||
-      criteria.endDate,
+      criteria.endDate ||
+      criteria.priceMax ||
+      criteria.verifiedOnly ||
+      criteria.volunteerOnly,
   );
 }
 
 /** True when something that actually narrows the result list is set. */
 export function hasActiveFilters(criteria: MarketplaceCriteria): boolean {
-  return Boolean(criteria.services.length > 0 || criteria.district);
+  return Boolean(
+    criteria.services.length > 0 ||
+      criteria.district ||
+      criteria.priceMax ||
+      criteria.verifiedOnly ||
+      criteria.volunteerOnly,
+  );
 }

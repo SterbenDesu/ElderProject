@@ -1225,4 +1225,27 @@ export const phraseTranslations: Record<string, string> = {
   "You are approved as a caregiver. Set up your services and prices, schedule, and operating regions. Admins still control public visibility.":
     "Одобрени сте като помощник. Настройте услугите и цените си, графика и работните райони. Администраторите все още контролират публичната видимост.",
   "Open caregiver dashboard": "Отворете таблото за помощник",
+
+  // Marketplace results page (list + map)
+  "Find a caregiver near you": "Намерете помощник близо до Вас",
+  "Browse approved caregivers for everyday support. Hover a card to find them on the map, and open any profile for full details.":
+    "Разгледайте одобрени помощници за ежедневна подкрепа. Посочете карта, за да видите помощника на картата, и отворете профил за пълни подробности.",
+  "Finding caregivers…": "Търсим помощници…",
+  "Sort by": "Подреди по",
+  "Most reviews": "Най-много отзиви",
+  "Price: low to high": "Цена: от ниска към висока",
+  "Price: high to low": "Цена: от висока към ниска",
+  "Nearest first": "Първо най-близките",
+  "Limited availability for your dates": "Ограничена наличност за избраните дати",
+  "Map": "Карта",
+  "Show list": "Покажи списъка",
+  "Ask": "Запитване",
+  "Map of caregivers in Sofia": "Карта на помощниците в София",
+  "The map is unavailable right now. You can still browse the list of caregivers.":
+    "Картата не е достъпна в момента. Можете да разгледате списъка с помощници.",
+  "Maximum price (лв.)": "Максимална цена (лв.)",
+  "Any price": "Без ограничение",
+  "Verified only": "Само проверени",
+  "Volunteers only": "Само доброволци",
+  "up to": "до",
 };

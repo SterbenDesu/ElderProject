@@ -38,6 +38,7 @@ No real Supabase credentials are committed. Configure these names locally and in
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=
+NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID=   # optional — see below
 ```
 
 These are public browser variables. Do not commit `.env.local`, service role keys, or secret values. Do not use service role keys in browser code.
@@ -54,6 +55,18 @@ These are public browser variables. Do not commit `.env.local`, service role key
   and to the two APIs above, so the exposed key cannot be abused elsewhere.
 - No additional/server Maps key is required — the geocoding runs client-side through
   the same JS API.
+
+### Google Maps Map ID (`NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID`) — optional
+
+- The marketplace results map (`/helpers`) renders caregiver **price pins** with
+  `AdvancedMarkerElement`, which requires a vector map and therefore a **Map ID**.
+- This variable is **optional**. When it is unset, the app falls back to Google's
+  public `DEMO_MAP_ID`, which renders advanced markers without any extra Cloud
+  setup — fine for development and preview.
+- For production, create a Map ID in Google Cloud Console → Google Maps Platform →
+  **Map Management** (type: *JavaScript / Vector*) and set it here, so you control
+  styling and are not relying on the shared demo id.
+- It is a public, non-secret identifier (hence the `NEXT_PUBLIC_` prefix).
 
 ## Development command
 
