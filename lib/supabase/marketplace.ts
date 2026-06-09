@@ -42,6 +42,8 @@ export type MarketplaceCaregiver = {
   rating_count: number;
   /** District names this caregiver serves (empty when they cover the whole city). */
   regionNames: string[];
+  /** District slugs this caregiver serves — used to anchor their map pin. */
+  regionSlugs: string[];
   /** The selected services this caregiver offers (or all of them when unfiltered). */
   matchedServices: MatchedService[];
   /** Lowest price among the matching services, in minor units (стотинки). */
@@ -142,20 +144,25 @@ export async function searchCaregivers(
     servicesByCaregiver.set(row.caregiver_profile_id, list);
   }
 
-  // Group served regions by caregiver (ids for matching, names for display).
+  // Group served regions by caregiver (ids for matching, names + slugs for
+  // display and for anchoring the caregiver's map pin to a district centroid).
   const regionsByCaregiver = new Map<
     string,
-    { ids: Set<string>; names: string[] }
+    { ids: Set<string>; names: string[]; slugs: string[] }
   >();
   for (const row of (regionsResult.data as unknown as RegionRow[] | null) ?? []) {
     const entry = regionsByCaregiver.get(row.caregiver_profile_id) ?? {
       ids: new Set<string>(),
       names: [],
+      slugs: [],
     };
     entry.ids.add(row.region_id);
     const region = Array.isArray(row.regions) ? row.regions[0] : row.regions;
     if (region?.name) {
       entry.names.push(region.name);
+    }
+    if (region?.slug) {
+      entry.slugs.push(region.slug);
     }
     regionsByCaregiver.set(row.caregiver_profile_id, entry);
   }
@@ -208,6 +215,7 @@ export async function searchCaregivers(
       rating_avg: profile.rating_avg ?? null,
       rating_count: profile.rating_count ?? 0,
       regionNames: ownRegions?.names ?? [],
+      regionSlugs: ownRegions?.slugs ?? [],
       matchedServices,
       lowestPriceMinor,
       currency: matchingServiceRows[0]?.currency ?? null,
@@ -215,4 +223,37 @@ export async function searchCaregivers(
   }
 
   return { caregivers, errorMessage: null };
+}
+
+// Availability awareness (soft, this phase).
+//
+// Returns the set of caregiver_profile_ids that have at least one OPEN published
+// 2-hour slot inside [fromDate, toDate]. RLS already restricts availability_slots
+// public select to OPEN slots of visible+verified caregivers, so this never
+// leaks held/booked slots or hidden caregivers. Callers use this only to show a
+// gentle "limited availability" note — exact slot-by-slot availability is
+// enforced in the booking phase (PRODUCT_SPEC §4.4). Failures degrade silently:
+// we return null so the UI simply omits the note rather than showing an error.
+export async function loadAvailableCaregiverIds(
+  supabase: SupabaseClient,
+  fromDate: string,
+  toDate: string,
+): Promise<Set<string> | null> {
+  const { data, error } = await supabase
+    .from("availability_slots")
+    .select("caregiver_profile_id")
+    .eq("status", "open")
+    .gte("slot_date", fromDate)
+    .lte("slot_date", toDate);
+
+  if (error) {
+    console.error("Could not load caregiver availability:", error.message);
+    return null;
+  }
+
+  return new Set(
+    ((data as { caregiver_profile_id: string }[] | null) ?? []).map(
+      (row) => row.caregiver_profile_id,
+    ),
+  );
 }

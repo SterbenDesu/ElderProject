@@ -9,7 +9,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { MapPin, SlidersHorizontal, X } from "lucide-react";
+import { BadgeCheck, Heart, MapPin, SlidersHorizontal, Tag, X } from "lucide-react";
 import {
   formatServiceLabel,
   serviceOptions,
@@ -81,6 +81,18 @@ export function MarketplaceFilters({
 
   function removeDates() {
     applyCriteria({ ...criteria, startDate: "", endDate: "" });
+  }
+
+  function removePriceMax() {
+    applyCriteria({ ...criteria, priceMax: "" });
+  }
+
+  function removeVerifiedOnly() {
+    applyCriteria({ ...criteria, verifiedOnly: false });
+  }
+
+  function removeVolunteerOnly() {
+    applyCriteria({ ...criteria, volunteerOnly: false });
   }
 
   function toggleDraftService(slug: string) {
@@ -186,6 +198,48 @@ export function MarketplaceFilters({
               </button>
             </li>
           ) : null}
+          {criteria.priceMax ? (
+            <li>
+              <button
+                type="button"
+                onClick={removePriceMax}
+                className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-moss/30 bg-sage px-3 py-1.5 text-sm font-semibold text-forest transition hover:bg-cream"
+              >
+                <Tag className="size-3.5" aria-hidden="true" />
+                {t("up to")} {criteria.priceMax} {t("лв.")}
+                <X className="size-3.5" aria-hidden="true" />
+                <span className="sr-only">{t("Remove filter")}</span>
+              </button>
+            </li>
+          ) : null}
+          {criteria.verifiedOnly ? (
+            <li>
+              <button
+                type="button"
+                onClick={removeVerifiedOnly}
+                className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-moss/30 bg-sage px-3 py-1.5 text-sm font-semibold text-forest transition hover:bg-cream"
+              >
+                <BadgeCheck className="size-3.5" aria-hidden="true" />
+                {t("Verified only")}
+                <X className="size-3.5" aria-hidden="true" />
+                <span className="sr-only">{t("Remove filter")}</span>
+              </button>
+            </li>
+          ) : null}
+          {criteria.volunteerOnly ? (
+            <li>
+              <button
+                type="button"
+                onClick={removeVolunteerOnly}
+                className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-moss/30 bg-sage px-3 py-1.5 text-sm font-semibold text-forest transition hover:bg-cream"
+              >
+                <Heart className="size-3.5" aria-hidden="true" />
+                {t("Volunteers only")}
+                <X className="size-3.5" aria-hidden="true" />
+                <span className="sr-only">{t("Remove filter")}</span>
+              </button>
+            </li>
+          ) : null}
           <li>
             <button
               type="button"
@@ -272,6 +326,53 @@ export function MarketplaceFilters({
                 onChange={(event) => changeDraftEndDate(event.target.value)}
                 className="min-h-[3rem] rounded-2xl border border-sand bg-white px-3 py-2.5 text-base font-normal text-forest transition focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20"
               />
+            </label>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-3 sm:items-end">
+            <label className="grid gap-2 text-sm font-bold text-forest">
+              {t("Maximum price (лв.)")}
+              <input
+                type="number"
+                min={0}
+                step={1}
+                inputMode="numeric"
+                placeholder={t("Any price")}
+                value={draft.priceMax}
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    priceMax: event.target.value.replace(/[^0-9]/g, ""),
+                  }))
+                }
+                className="min-h-[3rem] rounded-2xl border border-sand bg-white px-3 py-2.5 text-base font-normal text-forest transition focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20"
+              />
+            </label>
+
+            <label className="flex min-h-[3rem] cursor-pointer items-center gap-2.5 rounded-2xl border border-sand bg-white px-3 py-2.5 text-sm font-semibold text-forest transition hover:bg-sage">
+              <input
+                type="checkbox"
+                checked={draft.verifiedOnly}
+                onChange={(event) =>
+                  setDraft((current) => ({ ...current, verifiedOnly: event.target.checked }))
+                }
+                className="size-4 accent-forest"
+              />
+              <BadgeCheck className="size-4 text-forest" aria-hidden="true" />
+              {t("Verified only")}
+            </label>
+
+            <label className="flex min-h-[3rem] cursor-pointer items-center gap-2.5 rounded-2xl border border-sand bg-white px-3 py-2.5 text-sm font-semibold text-forest transition hover:bg-sage">
+              <input
+                type="checkbox"
+                checked={draft.volunteerOnly}
+                onChange={(event) =>
+                  setDraft((current) => ({ ...current, volunteerOnly: event.target.checked }))
+                }
+                className="size-4 accent-clay"
+              />
+              <Heart className="size-4 text-clay" aria-hidden="true" />
+              {t("Volunteers only")}
             </label>
           </div>
 
