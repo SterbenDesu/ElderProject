@@ -60,28 +60,39 @@ export async function loadNotifications(
   supabase: SupabaseClient,
   limit = 30,
 ): Promise<{ notifications: AppNotification[]; errorMessage: string | null }> {
-  const { data, error } = await supabase.rpc("get_my_notifications", {
-    p_limit: limit,
-  });
+  try {
+    const { data, error } = await supabase.rpc("get_my_notifications", {
+      p_limit: limit,
+    });
 
-  if (error) {
-    return { notifications: [], errorMessage: error.message };
+    if (error) {
+      return { notifications: [], errorMessage: error.message };
+    }
+
+    const notifications: AppNotification[] = (
+      (data as NotificationRpcRow[] | null) ?? []
+    ).map((row) => ({
+      id: row.id,
+      type: toNotificationType(row.type),
+      reservationId: row.reservation_id,
+      chatThreadId: row.chat_thread_id,
+      isRead: row.is_read,
+      createdAt: row.created_at,
+      counterpartyName: row.counterparty_name,
+      reservationStatus: row.reservation_status,
+    }));
+
+    return { notifications, errorMessage: null };
+  } catch (error) {
+    // A network/transport failure rejects the promise; catch it here so the
+    // caller gets a clean error message instead of an unhandled rejection.
+    console.error("[notifications] failed to load notifications", error);
+    return {
+      notifications: [],
+      errorMessage:
+        error instanceof Error ? error.message : "Failed to load notifications.",
+    };
   }
-
-  const notifications: AppNotification[] = (
-    (data as NotificationRpcRow[] | null) ?? []
-  ).map((row) => ({
-    id: row.id,
-    type: toNotificationType(row.type),
-    reservationId: row.reservation_id,
-    chatThreadId: row.chat_thread_id,
-    isRead: row.is_read,
-    createdAt: row.created_at,
-    counterpartyName: row.counterparty_name,
-    reservationStatus: row.reservation_status,
-  }));
-
-  return { notifications, errorMessage: null };
 }
 
 // Marks the caller's own notifications read. Pass specific ids, or omit to mark
@@ -90,39 +101,69 @@ export async function markNotificationsRead(
   supabase: SupabaseClient,
   ids?: string[],
 ): Promise<{ updated: number; errorMessage: string | null }> {
-  const { data, error } = await supabase.rpc("mark_notifications_read", {
-    p_ids: ids && ids.length > 0 ? ids : null,
-  });
+  try {
+    const { data, error } = await supabase.rpc("mark_notifications_read", {
+      p_ids: ids && ids.length > 0 ? ids : null,
+    });
 
-  if (error) {
-    return { updated: 0, errorMessage: error.message };
+    if (error) {
+      return { updated: 0, errorMessage: error.message };
+    }
+
+    return { updated: typeof data === "number" ? data : 0, errorMessage: null };
+  } catch (error) {
+    console.error("[notifications] failed to mark notifications read", error);
+    return {
+      updated: 0,
+      errorMessage:
+        error instanceof Error
+          ? error.message
+          : "Failed to update notifications.",
+    };
   }
-
-  return { updated: typeof data === "number" ? data : 0, errorMessage: null };
 }
 
 // Subscribe to the signed-in user's notification stream. RLS scopes the stream
 // to rows where recipient_id = the user, so the filter is a fast-path, not the
 // security boundary. `onChange` fires on insert/update/delete; the caller should
 // re-fetch via loadNotifications to get the name-enriched rows.
+//
+// CORRECT SUPABASE REALTIME ORDER (do not reorder):
+//   1. create the channel
+//   2. attach EVERY .on('postgres_changes', …) handler FIRST
+//   3. call .subscribe() exactly ONCE, LAST
+// Supabase throws "cannot add postgres_changes callbacks … after subscribe()"
+// if any .on() is attached after .subscribe(). We also wrap the whole setup in
+// try/catch and log any subscribe-status error, so a realtime failure degrades
+// silently (the panel still refreshes on open) instead of crashing the app.
 export function subscribeToNotifications(
   supabase: SupabaseClient,
   recipientId: string,
   onChange: () => void,
-): RealtimeChannel {
-  const channel = supabase
-    .channel(`notifications:${recipientId}`)
-    .on(
-      "postgres_changes",
-      {
-        event: "*",
-        schema: "public",
-        table: "notifications",
-        filter: `recipient_id=eq.${recipientId}`,
-      },
-      () => onChange(),
-    )
-    .subscribe();
+): RealtimeChannel | null {
+  try {
+    const channel = supabase
+      .channel(`notifications:${recipientId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "notifications",
+          filter: `recipient_id=eq.${recipientId}`,
+        },
+        () => onChange(),
+      )
+      .subscribe((status, err) => {
+        if (err) {
+          console.error("[notifications] realtime subscription error", err);
+        }
+      });
 
-  return channel;
+    return channel;
+  } catch (error) {
+    // e.g. a re-subscribe/order error — log and fall back to refresh-on-open.
+    console.error("[notifications] failed to set up realtime channel", error);
+    return null;
+  }
 }

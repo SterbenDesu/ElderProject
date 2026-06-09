@@ -5,6 +5,7 @@ import { Menu, X } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { AuthNav } from "@/components/AuthNav";
 import { NotificationBell } from "@/components/NotificationBell";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { I18nProvider, translations, useI18n } from "@/lib/i18n";
 
@@ -125,11 +126,17 @@ function SiteShellContent({ children }: { children: ReactNode }) {
             <AuthNav variant="links" loggedOutLinks={loggedOutOnlyLinks} />
           </div>
 
-          {/* Desktop right — language + notifications + auth */}
+          {/* Desktop right — language + notifications + auth.
+              Auth-only widgets are wrapped in error boundaries so a Supabase
+              realtime/query failure can never blank the whole app. */}
           <div className="hidden items-center gap-2 md:flex">
             <LanguageSelector />
-            <NotificationBell />
-            <AuthNav />
+            <ErrorBoundary label="NotificationBell">
+              <NotificationBell />
+            </ErrorBoundary>
+            <ErrorBoundary label="AuthNav">
+              <AuthNav />
+            </ErrorBoundary>
           </div>
 
           {/* Mobile hamburger */}
@@ -165,9 +172,13 @@ function SiteShellContent({ children }: { children: ReactNode }) {
             <div className="mt-3 grid gap-3 border-t border-sand/60 pt-3">
               <div className="flex items-center justify-between gap-3">
                 <LanguageSelector compact />
-                <NotificationBell variant="mobile" />
+                <ErrorBoundary label="NotificationBell">
+                  <NotificationBell variant="mobile" />
+                </ErrorBoundary>
               </div>
-              <AuthNav variant="mobile" />
+              <ErrorBoundary label="AuthNav">
+                <AuthNav variant="mobile" />
+              </ErrorBoundary>
             </div>
           </div>
         </div>
