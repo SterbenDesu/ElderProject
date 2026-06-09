@@ -87,41 +87,60 @@ export function NotificationBell({
       return;
     }
     setLoading(true);
-    const { notifications: rows, errorMessage: error } =
-      await loadNotifications(supabase);
-    setLoading(false);
-    if (error) {
-      setErrorMessage(error);
-      return;
+    // loadNotifications never throws (it catches transport errors internally),
+    // but guard anyway so a refresh can never bubble an uncaught rejection.
+    try {
+      const { notifications: rows, errorMessage: error } =
+        await loadNotifications(supabase);
+      if (error) {
+        setErrorMessage(error);
+        return;
+      }
+      setErrorMessage(null);
+      setNotifications(rows);
+    } catch (error) {
+      console.error("[NotificationBell] refresh failed", error);
+      setErrorMessage("Failed to load notifications.");
+    } finally {
+      setLoading(false);
     }
-    setErrorMessage(null);
-    setNotifications(rows);
   }, []);
+
+  // Key the effect on the stable user id (not the whole user object, whose
+  // reference can change on auth events) so we don't needlessly tear down and
+  // recreate the channel — which is what risks the duplicate-subscription error.
+  const userId = user?.id ?? null;
 
   // Initial load + realtime subscription, tied to the signed-in user.
   useEffect(() => {
-    if (status !== "signed-in" || !user) {
+    if (status !== "signed-in" || !userId) {
       setNotifications([]);
       return;
     }
 
+    let active = true;
     void refresh();
 
     const { supabase } = getSupabaseBrowserClient();
-    if (supabase) {
-      channelRef.current = subscribeToNotifications(supabase, user.id, () => {
-        void refresh();
+    // Subscribe-once guard: only ever hold a single live channel. If one already
+    // exists (e.g. a fast re-render), reuse it rather than opening a second.
+    if (supabase && !channelRef.current) {
+      channelRef.current = subscribeToNotifications(supabase, userId, () => {
+        if (active) {
+          void refresh();
+        }
       });
     }
 
     return () => {
+      active = false;
       const { supabase: client } = getSupabaseBrowserClient();
       if (channelRef.current && client) {
         void client.removeChannel(channelRef.current);
         channelRef.current = null;
       }
     };
-  }, [status, user, refresh]);
+  }, [status, userId, refresh]);
 
   // Close the panel when clicking outside it.
   useEffect(() => {
