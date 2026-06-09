@@ -1366,4 +1366,77 @@ export const phraseTranslations: Record<string, string> = {
     "Тази страница показва само безопасни данни за помощника: публично име, описание, опит и цени. Никога не показва имейл адреси, телефонни номера, лични данни или отговори от заявления.",
   "Caregivers may be booked for companionship, errands, shopping, walks, check-ins, technology help, and accompaniment. Please don't request medical care, medication management, clinical tasks, card PINs, passwords, cash handling, or access to valuables. Caregivers are independent marketplace participants, not Vnuk Pod Naem employees, and the platform does not guarantee absolute safety.":
     "Помощниците могат да бъдат резервирани за компания, дребни задачи, пазаруване, разходки, посещения, помощ с технологии и придружаване. Моля, не заявявайте медицински грижи, управление на лекарства, клинични задачи, ПИН кодове на карти, пароли, боравене с пари в брой или достъп до ценности. Помощниците са независими участници в платформата, а не служители на Внук под наем, и платформата не гарантира абсолютна безопасност.",
+
+  // --- Phase 8: notification center, caregiver requests, elder bookings ---
+  "New booking request from {name}": "Нова заявка за резервация от {name}",
+  "New booking request": "Нова заявка за резервация",
+  "Your booking with {name} was approved": "Резервацията Ви с {name} беше одобрена",
+  "Your booking was approved": "Резервацията Ви беше одобрена",
+  "Your booking request was declined": "Заявката Ви за резервация беше отказана",
+  "A booking was cancelled": "Резервация беше отменена",
+  "A booking is ready to confirm": "Резервация е готова за потвърждение",
+  "New message": "Ново съобщение",
+  "Update on a booking": "Актуализация по резервация",
+  "Notifications, {count} unread": "Известия, {count} непрочетени",
+  "Notifications": "Известия",
+  "My bookings": "Моите резервации",
+  "We couldn't load your notifications right now.":
+    "В момента не успяхме да заредим известията Ви.",
+  "No notifications yet": "Все още няма известия",
+  "You'll see booking updates here.":
+    "Тук ще виждате актуализации по резервациите.",
+  "Requests": "Заявки",
+  "Review incoming booking requests and approve or decline them. Approving opens a private chat with the family and reserves your time slots.":
+    "Прегледайте входящите заявки за резервация и ги одобрете или откажете. Одобрението отваря личен чат със семейството и запазва Вашите времеви интервали.",
+  "You need to sign in to view your incoming requests.":
+    "Трябва да влезете, за да видите входящите си заявки.",
+  "Incoming requests appear once an admin approves your caregiver application.":
+    "Входящите заявки се появяват, след като администратор одобри заявлението Ви за помощник.",
+  "We couldn't update that request right now. Please try again.":
+    "В момента не успяхме да обновим тази заявка. Моля, опитайте отново.",
+  "We couldn't load your requests right now. Please try again.":
+    "В момента не успяхме да заредим заявките Ви. Моля, опитайте отново.",
+  "Loading your requests…": "Зареждане на заявките Ви…",
+  "New requests": "Нови заявки",
+  "No new requests right now. We'll notify you when one arrives.":
+    "В момента няма нови заявки. Ще Ви уведомим, щом пристигне нова.",
+  "Approved bookings": "Одобрени резервации",
+  "Past requests": "Минали заявки",
+  "Request from {name}": "Заявка от {name}",
+  "District not set": "Районът не е посочен",
+  "Extra": "Допълнение",
+  "No services listed": "Няма посочени услуги",
+  "Dates & time slots": "Дати и времеви интервали",
+  "Total {hours}h": "Общо {hours} ч",
+  "Declining…": "Отказване…",
+  "Approving…": "Одобряване…",
+  "Approved — chat is open": "Одобрено — чатът е отворен",
+  "Pending": "Чакаща",
+  "Declined": "Отказана",
+  "In progress": "В процес",
+  "Awaiting confirmation": "Очаква потвърждение",
+  "Completed": "Завършена",
+  "Reported": "Сигнализирана",
+  "Cancelled": "Отменена",
+  "Track your requests and their status. You're only confirmed once a caregiver approves — nothing is charged before that.":
+    "Следете заявките си и техния статус. Потвърждавате се едва когато помощник одобри — преди това нищо не се таксува.",
+  "You need to sign in to view your bookings.":
+    "Трябва да влезете, за да видите резервациите си.",
+  "We couldn't load your bookings right now. Please try again.":
+    "В момента не успяхме да заредим резервациите Ви. Моля, опитайте отново.",
+  "Loading your bookings…": "Зареждане на резервациите Ви…",
+  "No bookings yet": "Все още няма резервации",
+  "Browse caregivers and send your first request.":
+    "Разгледайте помощниците и изпратете първата си заявка.",
+  "Active": "Активни",
+  "Past": "Минали",
+  "Booking with {name}": "Резервация с {name}",
+  "Chat open": "Чатът е отворен",
+  "Waiting for the caregiver to approve. No payment has been taken.":
+    "Изчаква одобрение от помощника. Не е взето плащане.",
+  "Confirmed — your caregiver approved this booking.":
+    "Потвърдено — помощникът одобри тази резервация.",
+  "The caregiver wasn't able to take this booking.":
+    "Помощникът не успя да поеме тази резервация.",
+  "This booking was cancelled.": "Тази резервация беше отменена.",
 };

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { AuthNav } from "@/components/AuthNav";
+import { NotificationBell } from "@/components/NotificationBell";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { I18nProvider, translations, useI18n } from "@/lib/i18n";
 
@@ -124,9 +125,10 @@ function SiteShellContent({ children }: { children: ReactNode }) {
             <AuthNav variant="links" loggedOutLinks={loggedOutOnlyLinks} />
           </div>
 
-          {/* Desktop right — language + auth */}
+          {/* Desktop right — language + notifications + auth */}
           <div className="hidden items-center gap-2 md:flex">
             <LanguageSelector />
+            <NotificationBell />
             <AuthNav />
           </div>
 
@@ -161,7 +163,10 @@ function SiteShellContent({ children }: { children: ReactNode }) {
               <AuthNav variant="links" loggedOutLinks={loggedOutOnlyLinks} />
             </div>
             <div className="mt-3 grid gap-3 border-t border-sand/60 pt-3">
-              <LanguageSelector compact />
+              <div className="flex items-center justify-between gap-3">
+                <LanguageSelector compact />
+                <NotificationBell variant="mobile" />
+              </div>
               <AuthNav variant="mobile" />
             </div>
           </div>
