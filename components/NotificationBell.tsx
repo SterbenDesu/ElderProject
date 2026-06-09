@@ -24,15 +24,19 @@ import {
   type AppNotification,
 } from "@/lib/supabase/notifications";
 
-function notificationHref(type: AppNotification["type"]): string {
-  switch (type) {
+function notificationHref(n: AppNotification): string {
+  // A new chat message links straight to its conversation.
+  if (n.type === "chat_message" && n.chatThreadId) {
+    return `/messages/${n.chatThreadId}`;
+  }
+  switch (n.type) {
     case "reservation_requested":
     case "reservation_cancelled":
     case "dispute_update":
       // Caregiver-facing events live in the Requests area.
       return "/dashboard/requests";
     default:
-      // Elder-facing events (approved/rejected/ready/message) live in My bookings.
+      // Elder-facing events (approved/rejected/ready) live in My bookings.
       return "/dashboard/reservations";
   }
 }
@@ -265,7 +269,7 @@ export function NotificationBell({
                 {notifications.map((n) => (
                   <li key={n.id}>
                     <Link
-                      href={notificationHref(n.type)}
+                      href={notificationHref(n)}
                       onClick={() => setOpen(false)}
                       className="flex gap-3 px-4 py-3 transition hover:bg-sage"
                     >
