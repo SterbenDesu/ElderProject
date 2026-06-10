@@ -1502,4 +1502,53 @@ export const phraseTranslations: Record<string, string> = {
   "No conversations yet": "Все още няма разговори",
   "When a booking is approved, a private chat opens here automatically.":
     "Когато резервация бъде одобрена, тук автоматично се отваря личен чат.",
+
+  // ---------------------------------------------------------------------------
+  // Phase 10 — completion & dispute close-out (elder + caregiver)
+  // ---------------------------------------------------------------------------
+  "This booking is happening now.": "Тази резервация се случва в момента.",
+  "This booking's time has passed. Let us know how it went to close it out.":
+    "Времето на тази резервация изтече. Споделете как мина, за да я приключите.",
+  "Completed. Thank you — payment to the caregiver is being arranged.":
+    "Приключена. Благодарим Ви — плащането към помощника се организира.",
+  "You reported an issue. Our team is reviewing it and your payment stays on hold until it's resolved.":
+    "Подадохте сигнал за проблем. Екипът ни го преглежда, а плащането Ви остава задържано до решаването му.",
+  "How did this booking go?": "Как мина тази резервация?",
+  "Only you can close out this booking. Confirm it went well, or tell us about a problem.":
+    "Само Вие можете да приключите тази резервация. Потвърдете, че всичко мина добре, или ни съобщете за проблем.",
+  "Mark as complete": "Отбележи като приключена",
+  "Report an issue": "Подайте сигнал за проблем",
+  "What went wrong?": "Какво се обърка?",
+  "Describe the problem so our team can review it. Please don't include medical details, PINs, or passwords.":
+    "Опишете проблема, за да може екипът ни да го прегледа. Моля, не включвайте медицински данни, ПИН кодове или пароли.",
+  "Submit report": "Изпрати сигнала",
+  "We couldn't update that booking right now. Please try again.":
+    "В момента не успяхме да обновим тази резервация. Моля, опитайте отново.",
+  "The time has passed. Waiting for the family to confirm it went well.":
+    "Времето изтече. Изчаква се семейството да потвърди, че всичко е минало добре.",
+  "The family marked this complete. Payout will be released by our team.":
+    "Семейството отбеляза това като приключено. Изплащането ще бъде освободено от нашия екип.",
+  "The family reported an issue. Our team is reviewing it; payout is on hold.":
+    "Семейството подаде сигнал за проблем. Екипът ни го преглежда; изплащането е задържано.",
+
+  // ---------------------------------------------------------------------------
+  // Phase 10 — admin dispute review queue
+  // ---------------------------------------------------------------------------
+  "Dispute review queue": "Опашка за преглед на спорове",
+  "Reported bookings only. Funds stay held until you resolve each one. Releasing or refunding sets the state for Phase 11 — no money moves here. Only admins can see this queue.":
+    "Само сигнализирани резервации. Средствата остават задържани, докато не разрешите всяка от тях. Освобождаването или възстановяването задава състоянието за Фаза 11 — тук не се местят пари. Само администратори виждат тази опашка.",
+  "No bookings are under dispute right now.":
+    "В момента няма резервации в спор.",
+  "We couldn't load the dispute review queue right now. Please refresh in a moment.":
+    "В момента не успяхме да заредим опашката със спорове. Моля, опреснете след малко.",
+  "Release to caregiver": "Освободи към помощника",
+  "Refund to family": "Възстанови на семейството",
+  "The family's reported issue": "Подаденият от семейството проблем",
+  "No description was provided.": "Не е предоставено описание.",
+  "Held — under review": "Задържано — в преглед",
+  "Ready for release": "Готово за освобождаване",
+  "Payout reversed": "Изплащането е върнато",
+  "Family": "Семейство",
+  "Review reported bookings in the dispute review queue below. Release the booking to the caregiver or refund the family — no money moves until Phase 11.":
+    "Прегледайте сигнализираните резервации в опашката със спорове по-долу. Освободете резервацията към помощника или възстановете на семейството — пари не се местят до Фаза 11.",
 };

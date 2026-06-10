@@ -195,14 +195,20 @@ export type ReservationAction =
 // point. The DB re-checks that the caller is the right party for the action,
 // validates it against the state machine, moves slots + escrow status, opens the
 // chat thread on approval, and writes the notification + audit log.
+//
+// `detail` carries the elder's free-text issue description for the "report"
+// action; it is stored on the dispute record and ignored for other actions. No
+// money ever moves here — only STATUS fields (Phase 11 acts on those).
 export async function transitionReservation(
   supabase: SupabaseClient,
   reservationId: string,
   action: ReservationAction,
+  detail?: string,
 ): Promise<{ status: ReservationStatus | null; errorMessage: string | null }> {
   const { data, error } = await supabase.rpc("transition_reservation", {
     p_reservation_id: reservationId,
     p_action: action,
+    p_detail: detail ?? null,
   });
 
   if (error) {
@@ -211,4 +217,21 @@ export async function transitionReservation(
 
   const result = (data as { status?: string } | null) ?? null;
   return { status: (result?.status as ReservationStatus) ?? null, errorMessage: null };
+}
+
+// MVP completion detection (no background job): advance the caller's own
+// reservations approved -> in_progress -> awaiting_confirmation by comparing the
+// booked window to the clock. Call this on page load BEFORE listing reservations
+// so a booking whose end time has passed surfaces the elder's close-out buttons.
+// Failure is non-fatal — the list still renders with the stored statuses.
+export async function refreshReservationProgress(
+  supabase: SupabaseClient,
+): Promise<{ promoted: number; errorMessage: string | null }> {
+  const { data, error } = await supabase.rpc("refresh_reservation_progress");
+
+  if (error) {
+    return { promoted: 0, errorMessage: error.message };
+  }
+
+  return { promoted: (data as number | null) ?? 0, errorMessage: null };
 }

@@ -19,6 +19,14 @@ import {
   type AdminHelperProfile,
 } from "@/lib/supabase/helperProfiles";
 import { loadProfile, type Profile } from "@/lib/supabase/profiles";
+import {
+  loadAdminDisputes,
+  resolveDispute,
+  type AdminDispute,
+  type DisputeResolution,
+} from "@/lib/supabase/disputes";
+import { formatLevaAmount } from "@/lib/supabase/caregiverDashboard";
+import { slotsByDate } from "@/lib/reservationFormat";
 
 type AdminPageStatus =
   | "loading"
@@ -59,7 +67,7 @@ const adminSections: DashboardSection[] = [
   {
     title: "Disputes",
     description:
-      "Placeholder for future complaint and dispute review workflows.",
+      "Review reported bookings in the dispute review queue below. Release the booking to the caregiver or refund the family — no money moves until Phase 11.",
   },
   {
     title: "Audit logs",
@@ -102,6 +110,131 @@ function actionLabel(status: AdminApplicationActionStatus) {
   return labels[status];
 }
 
+function heldStateLabel(payoutStatus: string | null): string {
+  switch (payoutStatus) {
+    case "held_review":
+      return "Held — under review";
+    case "ready_for_release":
+      return "Ready for release";
+    case "reversed":
+      return "Payout reversed";
+    default:
+      return payoutStatus ?? "Held";
+  }
+}
+
+function DisputeReviewCard({
+  dispute,
+  onResolve,
+  isWorking,
+}: {
+  dispute: AdminDispute;
+  onResolve: (dispute: AdminDispute, resolution: DisputeResolution) => void;
+  isWorking: boolean;
+}) {
+  const dates = slotsByDate(dispute.slots);
+  const reportedLabel = dispute.reportedAt
+    ? new Intl.DateTimeFormat("en", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      }).format(new Date(dispute.reportedAt))
+    : "Not available";
+
+  return (
+    <article className="rounded-3xl border border-amber-200 bg-amber-50/40 p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h3 className="text-lg font-bold text-forest">
+            {dispute.elderName || "Family"} ↔ {dispute.caregiverName || "Caregiver"}
+          </h3>
+          <p className="mt-1 text-sm font-semibold text-stone-600">
+            {dispute.regionName ?? "District not set"} · Reported {reportedLabel}
+          </p>
+        </div>
+        <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-amber-800">
+          {heldStateLabel(dispute.payoutStatus)}
+        </span>
+      </div>
+
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <div>
+          <h4 className="text-xs font-bold uppercase tracking-[0.12em] text-stone-500">
+            Services
+          </h4>
+          <ul className="mt-2 space-y-1.5">
+            {dispute.services.map((item, index) => (
+              <li
+                key={`${item.label}-${index}`}
+                className="flex items-center justify-between gap-3 text-sm"
+              >
+                <span className="text-stone-700">{item.label}</span>
+                <span className="font-semibold text-forest">
+                  {formatLevaAmount(item.unitPriceMinor * item.quantity)} лв.
+                </span>
+              </li>
+            ))}
+            {dispute.services.length === 0 ? (
+              <li className="text-sm text-stone-500">No services listed</li>
+            ) : null}
+          </ul>
+        </div>
+        <div>
+          <h4 className="text-xs font-bold uppercase tracking-[0.12em] text-stone-500">
+            Dates &amp; time slots
+          </h4>
+          <ul className="mt-2 space-y-1.5">
+            {dates.map((day) => (
+              <li key={day.date} className="text-sm text-stone-700">
+                <span className="font-semibold text-forest">{day.date}</span>
+                <span className="ml-1.5">{day.ranges.join(", ")}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-2xl border border-stone-200 bg-white p-4">
+        <h4 className="text-xs font-bold uppercase tracking-[0.12em] text-stone-500">
+          The family&apos;s reported issue
+        </h4>
+        <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-stone-700">
+          {dispute.issueDetails || "No description was provided."}
+        </p>
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-amber-200/70 pt-4">
+        <p className="text-sm text-stone-600">
+          Total{" "}
+          <span className="text-lg font-bold text-forest">
+            {formatLevaAmount(dispute.totalAmountMinor)} лв.
+          </span>
+        </p>
+        <div className="flex flex-wrap gap-2.5">
+          <button
+            type="button"
+            onClick={() => onResolve(dispute, "refund")}
+            disabled={isWorking}
+            className="inline-flex min-h-11 items-center justify-center rounded-full border border-stone-300 px-5 py-2 text-sm font-semibold text-stone-700 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isWorking ? "Saving…" : "Refund to family"}
+          </button>
+          <button
+            type="button"
+            onClick={() => onResolve(dispute, "release")}
+            disabled={isWorking}
+            className="inline-flex min-h-11 items-center justify-center rounded-full bg-forest px-5 py-2 text-sm font-semibold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isWorking ? "Saving…" : "Release to caregiver"}
+          </button>
+        </div>
+      </div>
+    </article>
+  );
+}
+
 export default function AdminPage() {
   const [status, setStatus] = useState<AdminPageStatus>("loading");
   const [user, setUser] = useState<User | null>(null);
@@ -112,6 +245,9 @@ export default function AdminPage() {
   const [helperProfiles, setHelperProfiles] = useState<AdminHelperProfile[]>(
     [],
   );
+  const [disputes, setDisputes] = useState<AdminDispute[]>([]);
+  const [disputesWarning, setDisputesWarning] = useState<string | null>(null);
+  const [workingDisputeId, setWorkingDisputeId] = useState<string | null>(null);
   const [selectedApplicationId, setSelectedApplicationId] = useState<
     string | null
   >(null);
@@ -143,10 +279,24 @@ export default function AdminPage() {
       return;
     }
 
-    const [applicationsResult, helperProfilesResult] = await Promise.all([
-      loadAdminHelperApplications(supabase),
-      loadAdminApprovedHelperProfiles(supabase),
-    ]);
+    const [applicationsResult, helperProfilesResult, disputesResult] =
+      await Promise.all([
+        loadAdminHelperApplications(supabase),
+        loadAdminApprovedHelperProfiles(supabase),
+        loadAdminDisputes(supabase),
+      ]);
+
+    // The dispute queue is non-blocking: a failure here shouldn't hide the rest
+    // of the admin panel. Surface a warning and keep going.
+    if (disputesResult.errorMessage) {
+      setDisputes([]);
+      setDisputesWarning(
+        "We couldn't load the dispute review queue right now. Please refresh in a moment.",
+      );
+    } else {
+      setDisputes(disputesResult.disputes);
+      setDisputesWarning(null);
+    }
 
     if (applicationsResult.errorMessage) {
       setStatus("error");
@@ -400,6 +550,59 @@ export default function AdminPage() {
     );
     await loadAdminData();
     setWorkingHelperProfileId(null);
+  }
+
+  async function handleResolveDispute(
+    dispute: AdminDispute,
+    resolution: DisputeResolution,
+  ) {
+    const { supabase, envError } = getSupabaseBrowserClient();
+
+    if (envError || !supabase) {
+      setStatus("unconfigured");
+      setMessage(envError);
+      return;
+    }
+
+    if (!user || !profile || profile.role !== "admin") {
+      setActionError("Only signed-in admin users can resolve disputes.");
+      return;
+    }
+
+    // resolve_dispute only sets STATES — release marks the booking completed with
+    // payout "ready for release"; refund marks it cancelled with payment "to be
+    // refunded". Phase 11's Stripe logic moves the actual money.
+    const confirmed = window.confirm(
+      resolution === "release"
+        ? "Release this booking to the caregiver? It will be marked completed and queued for payout. No money moves yet."
+        : "Refund the family? The booking will be cancelled and queued for a refund. No money moves yet.",
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setWorkingDisputeId(dispute.reservationId);
+    setActionSuccess(null);
+    setActionError(null);
+
+    const result = await resolveDispute(supabase, dispute.reservationId, resolution);
+
+    if (result.errorMessage) {
+      setActionError(
+        "The dispute resolution did not complete. Please refresh and try again.",
+      );
+      setWorkingDisputeId(null);
+      return;
+    }
+
+    setActionSuccess(
+      resolution === "release"
+        ? "Dispute resolved. The booking was released to the caregiver and queued for payout."
+        : "Dispute resolved. A refund to the family was queued.",
+    );
+    await loadAdminData();
+    setWorkingDisputeId(null);
   }
 
   return (
@@ -769,6 +972,56 @@ export default function AdminPage() {
             )}
           </section>
         </div>
+      ) : null}
+
+      {status === "admin" ? (
+        <section className="mt-5 rounded-[2rem] bg-white p-6 text-stone-700 shadow-sm ring-1 ring-stone-200">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-2xl font-bold text-forest">
+                Dispute review queue
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-stone-600">
+                Reported bookings only. Funds stay held until you resolve each one.
+                Releasing or refunding sets the state for Phase 11 — no money moves
+                here. Only admins can see this queue.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={loadAdminData}
+              className="inline-flex min-h-10 items-center rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-semibold text-forest transition hover:bg-sage"
+            >
+              Refresh
+            </button>
+          </div>
+
+          {disputesWarning ? (
+            <p
+              className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm font-semibold leading-6 text-amber-900"
+              role="alert"
+            >
+              {disputesWarning}
+            </p>
+          ) : null}
+
+          {disputes.length === 0 ? (
+            <p className="mt-5 rounded-3xl bg-cream p-5 leading-7 text-stone-700">
+              No bookings are under dispute right now.
+            </p>
+          ) : (
+            <div className="mt-5 space-y-4">
+              {disputes.map((dispute) => (
+                <DisputeReviewCard
+                  key={dispute.reservationId}
+                  dispute={dispute}
+                  onResolve={handleResolveDispute}
+                  isWorking={workingDisputeId === dispute.reservationId}
+                />
+              ))}
+            </div>
+          )}
+        </section>
       ) : null}
     </section>
   );

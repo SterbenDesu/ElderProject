@@ -10,7 +10,13 @@
 
 import { PageIntro } from "@/components/PageIntro";
 import Link from "next/link";
-import { Clock, MapPin, MessageCircle } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  MapPin,
+  MessageCircle,
+} from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useCurrentUser } from "@/lib/auth/useCurrentUser";
@@ -18,6 +24,8 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { formatLevaAmount } from "@/lib/supabase/caregiverDashboard";
 import {
   loadElderReservations,
+  refreshReservationProgress,
+  transitionReservation,
   type ElderReservation,
 } from "@/lib/supabase/reservations";
 import { loadMyChatThreads } from "@/lib/supabase/chat";
@@ -37,6 +45,18 @@ function statusHint(
       return t("Waiting for the caregiver to approve. No payment has been taken.");
     case "approved":
       return t("Confirmed — your caregiver approved this booking.");
+    case "in_progress":
+      return t("This booking is happening now.");
+    case "awaiting_confirmation":
+      return t(
+        "This booking's time has passed. Let us know how it went to close it out.",
+      );
+    case "completed":
+      return t("Completed. Thank you — payment to the caregiver is being arranged.");
+    case "disputed":
+      return t(
+        "You reported an issue. Our team is reviewing it and your payment stays on hold until it's resolved.",
+      );
     case "rejected":
       return t("The caregiver wasn't able to take this booking.");
     case "cancelled":
@@ -46,12 +66,20 @@ function statusHint(
   }
 }
 
+type CloseOutAction = "complete" | "report";
+
 function ReservationCard({
   reservation,
   chatThreadId,
+  onComplete,
+  onReport,
+  pendingAction,
 }: {
   reservation: ElderReservation;
   chatThreadId: string | null;
+  onComplete: (id: string) => void;
+  onReport: (id: string, detail: string) => void;
+  pendingAction: { id: string; action: CloseOutAction } | null;
 }) {
   const { t, language } = useI18n();
   const locale = language === "bg" ? "bg" : "en";
@@ -62,6 +90,13 @@ function ReservationCard({
   });
   const dates = slotsByDate(reservation.slots);
   const hint = statusHint(reservation.status, t);
+  const [showReportForm, setShowReportForm] = useState(false);
+  const [issueText, setIssueText] = useState("");
+
+  // The elder closes out only once the booked time has passed (state machine:
+  // awaiting_confirmation). The caregiver never sees these buttons.
+  const canCloseOut = reservation.status === "awaiting_confirmation";
+  const isActing = pendingAction?.id === reservation.reservationId;
 
   return (
     <article className="rounded-[2rem] border border-stone-200 bg-white p-6 shadow-sm">
@@ -159,6 +194,87 @@ function ReservationCard({
           </Link>
         ) : null}
       </div>
+
+      {canCloseOut ? (
+        <div className="mt-4 rounded-3xl bg-cream p-5">
+          <h4 className="text-sm font-bold text-forest">
+            {t("How did this booking go?")}
+          </h4>
+          <p className="mt-1 text-sm leading-6 text-stone-600">
+            {t(
+              "Only you can close out this booking. Confirm it went well, or tell us about a problem.",
+            )}
+          </p>
+
+          {!showReportForm ? (
+            <div className="mt-4 flex flex-col gap-2.5 sm:flex-row">
+              <button
+                type="button"
+                onClick={() => onComplete(reservation.reservationId)}
+                disabled={isActing}
+                className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-full bg-forest px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <CheckCircle2 className="size-4" aria-hidden="true" />
+                {isActing && pendingAction?.action === "complete"
+                  ? t("Saving…")
+                  : t("Mark as complete")}
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowReportForm(true)}
+                disabled={isActing}
+                className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-full border border-clay/40 bg-white px-5 py-3 text-sm font-bold text-clay transition hover:bg-clay/5 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <AlertTriangle className="size-4" aria-hidden="true" />
+                {t("Report an issue")}
+              </button>
+            </div>
+          ) : (
+            <div className="mt-4">
+              <label className="block">
+                <span className="text-sm font-semibold text-forest">
+                  {t("What went wrong?")}
+                </span>
+                <textarea
+                  value={issueText}
+                  onChange={(event) => setIssueText(event.target.value)}
+                  rows={4}
+                  placeholder={t(
+                    "Describe the problem so our team can review it. Please don't include medical details, PINs, or passwords.",
+                  )}
+                  className="mt-2 w-full rounded-2xl border border-stone-300 px-4 py-3 text-stone-900 outline-none transition focus:border-clay"
+                />
+              </label>
+              <div className="mt-3 flex flex-col gap-2.5 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={() =>
+                    onReport(reservation.reservationId, issueText.trim())
+                  }
+                  disabled={isActing || issueText.trim().length === 0}
+                  className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-full bg-clay px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-clay/90 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <AlertTriangle className="size-4" aria-hidden="true" />
+                  {isActing && pendingAction?.action === "report"
+                    ? t("Sending…")
+                    : t("Submit report")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowReportForm(false);
+                    setIssueText("");
+                  }}
+                  disabled={isActing}
+                  className="inline-flex min-h-12 items-center justify-center rounded-full border border-stone-300 px-5 py-3 text-sm font-semibold text-stone-700 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {t("Cancel")}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      ) : null}
     </article>
   );
 }
@@ -172,6 +288,11 @@ export default function ElderReservationsPage() {
   >(new Map());
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [pendingAction, setPendingAction] = useState<{
+    id: string;
+    action: CloseOutAction;
+  } | null>(null);
 
   const refresh = useCallback(async () => {
     const { supabase } = getSupabaseBrowserClient();
@@ -179,6 +300,10 @@ export default function ElderReservationsPage() {
       return;
     }
     setLoading(true);
+    // Completion detection (no cron): promote our own reservations by the clock
+    // BEFORE listing them, so a booking whose end time has passed shows up as
+    // awaiting_confirmation with the close-out buttons. Non-fatal on failure.
+    await refreshReservationProgress(supabase);
     // Load reservations and the user's chat threads together so each approved
     // booking can deep-link to its conversation.
     const [{ reservations: rows, errorMessage: error }, { threads }] =
@@ -203,6 +328,53 @@ export default function ElderReservationsPage() {
       void refresh();
     }
   }, [status, refresh]);
+
+  const handleComplete = useCallback(
+    async (id: string) => {
+      const { supabase } = getSupabaseBrowserClient();
+      if (!supabase) {
+        return;
+      }
+      setPendingAction({ id, action: "complete" });
+      setActionError(null);
+      const { errorMessage: error } = await transitionReservation(
+        supabase,
+        id,
+        "complete",
+      );
+      setPendingAction(null);
+      if (error) {
+        setActionError(error);
+        return;
+      }
+      await refresh();
+    },
+    [refresh],
+  );
+
+  const handleReport = useCallback(
+    async (id: string, detail: string) => {
+      const { supabase } = getSupabaseBrowserClient();
+      if (!supabase) {
+        return;
+      }
+      setPendingAction({ id, action: "report" });
+      setActionError(null);
+      const { errorMessage: error } = await transitionReservation(
+        supabase,
+        id,
+        "report",
+        detail,
+      );
+      setPendingAction(null);
+      if (error) {
+        setActionError(error);
+        return;
+      }
+      await refresh();
+    },
+    [refresh],
+  );
 
   const active = useMemo(
     () =>
@@ -283,6 +455,15 @@ export default function ElderReservationsPage() {
             </div>
           ) : null}
 
+          {actionError ? (
+            <div
+              className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-800"
+              role="alert"
+            >
+              {t("We couldn't update that booking right now. Please try again.")}
+            </div>
+          ) : null}
+
           {loading && reservations.length === 0 ? (
             <div
               className="rounded-[2rem] border border-stone-200 bg-white p-6 text-stone-700 shadow-sm"
@@ -320,6 +501,9 @@ export default function ElderReservationsPage() {
                     chatThreadId={
                       threadByReservation.get(reservation.reservationId) ?? null
                     }
+                    onComplete={handleComplete}
+                    onReport={handleReport}
+                    pendingAction={pendingAction}
                   />
                 ))}
               </div>
@@ -337,6 +521,9 @@ export default function ElderReservationsPage() {
                     chatThreadId={
                       threadByReservation.get(reservation.reservationId) ?? null
                     }
+                    onComplete={handleComplete}
+                    onReport={handleReport}
+                    pendingAction={pendingAction}
                   />
                 ))}
               </div>
