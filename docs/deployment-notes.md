@@ -2,6 +2,47 @@
 
 Use this file as the source of truth for deployment setup and deployment status.
 
+## Phase 10 — completion & dispute flow (DB migration required)
+
+Code ships with the frontend, but the database needs the new migration applied.
+
+- Apply `supabase/migrations/20260612120000_completion_and_disputes.sql` (or, on a
+  running database, run the identical idempotent patch `SUPABASE_FIX_COMPLETION.sql`
+  in the Supabase SQL Editor — safe to run more than once).
+- What it adds (STATUS only — **no money moves; Stripe is Phase 11**):
+  - `reservations.completed_at` / `reservations.disputed_at` timestamps.
+  - New escrow states: `payments.payout_status` gains `ready_for_release` and
+    `held_review`; `payments.payment_status` gains `to_be_refunded`.
+  - `notifications.type` gains `reservation_completed`.
+  - `refresh_reservation_progress()` — time-based promotion on page load
+    (`approved → in_progress → awaiting_confirmation`), no cron/background job.
+  - `transition_reservation(uuid, text, text)` — replaces the 2-arg version;
+    `complete` now sets `payout_status = 'ready_for_release'` (funds stay held,
+    NOT released/paid), and `report` stores the elder's issue text on a `disputes`
+    row + notifies the admin queue.
+  - `resolve_dispute(uuid, text, text)` — **admin-only** (release | refund).
+  - `get_admin_disputes()` — **admin-only** review-queue read.
+- Required services / env vars: unchanged
+  (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`).
+- Verify:
+  1. As an elder, book + have the caregiver approve a reservation whose slots are
+     in the past (or wait until end time). Open `/dashboard/reservations`: the
+     booking shows **Awaiting confirmation** with **Mark as complete** and
+     **Report an issue** buttons.
+  2. **Mark as complete** → status `completed`; in `payments`, `payout_status`
+     becomes `ready_for_release` while `payment_status` stays `authorized_held`
+     (no capture/release). The caregiver gets a "marked complete" notification.
+  3. **Report an issue** with text → status `disputed`; `payout_status` becomes
+     `held_review`; a `disputes` row stores the text; the admin bell lights up.
+  4. As an admin, open `/admin` → **Dispute review queue**. Resolve with
+     **Release to caregiver** (→ completed + `ready_for_release`) or **Refund to
+     family** (→ cancelled + `payment_status = to_be_refunded`). Both parties are
+     notified. No money moves.
+  5. Negative checks: a caregiver never sees close-out buttons and cannot call
+     `transition_reservation(..., 'complete'|'report')` (RPC raises "Only the
+     family…"); a non-admin calling `get_admin_disputes()` / `resolve_dispute()`
+     is rejected by the `is_admin()` guard.
+
 ## Deployment provider
 
 Recommended provider: **Vercel** for the Next.js web app.

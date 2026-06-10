@@ -21,8 +21,10 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { formatLevaAmount } from "@/lib/supabase/caregiverDashboard";
 import {
   loadCaregiverRequests,
+  refreshReservationProgress,
   transitionReservation,
   type CaregiverRequest,
+  type ReservationStatus,
 } from "@/lib/supabase/reservations";
 import { loadMyChatThreads } from "@/lib/supabase/chat";
 import {
@@ -31,6 +33,27 @@ import {
   slotsByDate,
   totalDurationHours,
 } from "@/lib/reservationFormat";
+
+// Caregiver-facing hint for the post-approval lifecycle. The caregiver cannot act
+// on any of these — only the family closes a booking out — so the copy is purely
+// informational and makes clear who acts next.
+function caregiverStatusHint(
+  status: ReservationStatus,
+  t: (text: string) => string,
+): string | null {
+  switch (status) {
+    case "in_progress":
+      return t("This booking is happening now.");
+    case "awaiting_confirmation":
+      return t("The time has passed. Waiting for the family to confirm it went well.");
+    case "completed":
+      return t("The family marked this complete. Payout will be released by our team.");
+    case "disputed":
+      return t("The family reported an issue. Our team is reviewing it; payout is on hold.");
+    default:
+      return null;
+  }
+}
 
 function RequestCard({
   request,
@@ -52,6 +75,7 @@ function RequestCard({
   });
   const dates = slotsByDate(request.slots);
   const isActing = pendingAction?.id === request.reservationId;
+  const hint = caregiverStatusHint(request.status, t);
 
   return (
     <article className="rounded-[2rem] border border-stone-200 bg-white p-6 shadow-sm">
@@ -80,6 +104,10 @@ function RequestCard({
           {t(reservationStatusLabel(request.status))}
         </span>
       </div>
+
+      {hint ? (
+        <p className="mt-3 text-sm leading-6 text-stone-600">{hint}</p>
+      ) : null}
 
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
         <div>
@@ -203,6 +231,11 @@ export default function CaregiverRequestsPage() {
       return;
     }
     setLoading(true);
+    // Advance our own reservations by the clock first, so a booking whose time
+    // has passed shows the right label (awaiting confirmation / completed). The
+    // caregiver can NEVER close out — only the family does — but they should see
+    // the accurate status.
+    await refreshReservationProgress(supabase);
     // Requests + chat threads together, so each approved booking links to chat.
     const [{ requests: rows, errorMessage: error }, { threads }] =
       await Promise.all([
