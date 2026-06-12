@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { getAccountInitials } from "@/lib/auth/account";
 import { useCurrentUser } from "@/lib/auth/useCurrentUser";
@@ -36,6 +36,18 @@ export function AuthNav({
     useCurrentUser();
   const [message, setMessage] = useState<string | null>(null);
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDetailsElement>(null);
+
+  useEffect(() => {
+    function handleMouseDown(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleMouseDown);
+    return () => document.removeEventListener("mousedown", handleMouseDown);
+  }, []);
 
   const initials = useMemo(
     () =>
@@ -107,14 +119,17 @@ export function AuthNav({
 
     return (
       <div className={variant === "mobile" ? "grid gap-2" : "relative"}>
-        <details className="group relative">
-          <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 rounded-full border border-stone-200 bg-white px-2 py-2 text-sm font-semibold text-forest shadow-sm transition hover:border-moss/40 hover:bg-sage [&::-webkit-details-marker]:hidden">
+        <details ref={dropdownRef} open={dropdownOpen} className="group relative">
+          <summary
+            onClick={(e) => { e.preventDefault(); setDropdownOpen((v) => !v); }}
+            className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 rounded-full border border-stone-200 bg-white px-2 py-2 text-sm font-semibold text-forest shadow-sm transition hover:border-moss/40 hover:bg-sage [&::-webkit-details-marker]:hidden"
+          >
             <span className="grid size-9 place-items-center rounded-full bg-forest text-sm font-bold text-white">
               {initials}
             </span>
             <span className="pr-2">{t("Account")}</span>
           </summary>
-          <div className={`absolute right-0 mt-3 ${menuWidth} rounded-3xl border border-stone-200 bg-white p-3 shadow-xl shadow-stone-300/40`}>
+          <div onClick={() => setDropdownOpen(false)} className={`absolute right-0 mt-3 ${menuWidth} rounded-3xl border border-stone-200 bg-white p-3 shadow-xl shadow-stone-300/40`}>
             <div className="border-b border-stone-100 px-3 pb-3">
               <p className="text-sm font-bold text-forest">
                 {displayName || t("My profile")}
