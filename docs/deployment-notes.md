@@ -2,6 +2,51 @@
 
 Use this file as the source of truth for deployment setup and deployment status.
 
+## Phase 11 prep — Stripe Connect escrow scaffolding (NO live payments)
+
+Prerequisites-only phase: the codebase and data model are made ready for the
+future Stripe Connect escrow integration. **No Stripe SDK is installed, no API
+is called, no webhook exists, and no money can move.** The app behaves exactly
+as before.
+
+- Database (optional now, required before the live phase): apply
+  `supabase/migrations/20260612130000_payments_stripe_scaffold.sql` (or run the
+  identical idempotent patch `SUPABASE_FIX_PAYMENTS.sql` in the Supabase SQL
+  Editor — safe to run more than once). Additive only:
+  - `payments.refund_id` / `payments.refunded_amount` — Stripe Refund reference
+    + amount for cancel/dispute-refund outcomes.
+  - `profiles.stripe_customer_id` — the booker's Stripe Customer reference
+    (PRIVATE; covered by the existing owner+admin-only profiles RLS).
+  - Documentation comments on the escrow columns.
+- Code: new `lib/payments/` module — documented safe no-op stubs
+  (`authorizeHold`, `capturePayment`, `refundPayment`,
+  `createOrGetCaregiverConnectAccount`) wired into the existing transitions
+  (approve / complete / reject / cancel in `transitionReservation`,
+  release / refund in `resolveDispute`, caregiver approval in
+  `changeHelperApplicationStatus`). Stubs log a console note and return
+  `{ ok: true, implemented: false }`; they never throw and never block a flow.
+- Required services / env vars **for this phase: unchanged**
+  (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`).
+- Env vars the **live phase** will need (names only; referenced defensively —
+  their absence never crashes the app). Setup guide: `STRIPE_SETUP.md` at the
+  repo root.
+
+  ```bash
+  STRIPE_SECRET_KEY=                    # server-only secret (sk_test_/sk_live_)
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=   # browser-safe publishable key (pk_)
+  STRIPE_WEBHOOK_SECRET=                # server-only webhook signing secret (whsec_)
+  STRIPE_CONNECT_CLIENT_ID=             # optional — only for Standard/OAuth Connect
+  ```
+
+  Only the publishable key may use the `NEXT_PUBLIC_` prefix; the secret key
+  and webhook secret are server-only (same rule as the Supabase service-role
+  key — never in browser code).
+- Verify: run the existing no-money flows (book → approve → complete; book →
+  reject; report issue → admin release/refund; approve a caregiver
+  application). All behave exactly as before; the browser console shows a
+  one-time `[payments] …: placeholder only — Stripe is not integrated yet`
+  note per stub, and no network call to Stripe appears in the network tab.
+
 ## Phase 10 — completion & dispute flow (DB migration required)
 
 Code ships with the frontend, but the database needs the new migration applied.

@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { createOrGetCaregiverConnectAccount } from "@/lib/payments";
 import type { HelperApplication } from "@/lib/supabase/helperApplications";
 
 export type AdminHelperApplication = HelperApplication & {
@@ -118,6 +119,20 @@ export async function changeHelperApplicationStatus(
       errorMessage: "The review did not complete as expected. Please refresh and try again.",
       auditWarning: null,
     };
+  }
+
+  // Phase 11 wiring point: an approved caregiver will need a Stripe Connect
+  // (Express) account before they can receive payouts. Today this is a safe
+  // no-op stub (lib/payments) — no Stripe account is created and approval
+  // behaves exactly as before. Stubs don't throw; the guard is defence-in-depth.
+  if (input.newStatus === "approved" && data.caregiver_profile_id) {
+    try {
+      await createOrGetCaregiverConnectAccount({
+        caregiverProfileId: data.caregiver_profile_id,
+      });
+    } catch {
+      // Never block an approval that already succeeded.
+    }
   }
 
   return {
