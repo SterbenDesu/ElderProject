@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { capturePayment, refundPayment } from "@/lib/payments";
 import type {
   ReservationLineItem,
   ReservationSlot,
@@ -129,5 +130,22 @@ export async function resolveDispute(
   }
 
   const result = (data as { status?: string } | null) ?? null;
+
+  // Phase 11 wiring points: the admin's decision is where the future Stripe
+  // call attaches — release captures + transfers to the caregiver, refund
+  // returns the held funds to the elder. Today these are safe no-op stubs
+  // (lib/payments): no money moves; the DB states set by resolve_dispute
+  // (ready_for_release / to_be_refunded) are the live phase's work queue.
+  try {
+    if (resolution === "release") {
+      await capturePayment({ reservationId });
+    } else {
+      await refundPayment({ reservationId });
+    }
+  } catch {
+    // The payment scaffold must never block a resolution that already
+    // succeeded. Stubs don't throw; this is defence-in-depth.
+  }
+
   return { status: result?.status ?? null, errorMessage: null };
 }

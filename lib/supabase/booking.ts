@@ -198,6 +198,12 @@ type ReservationRpcResult = {
   total_amount?: number;
 };
 
+// ESCROW TIMING (Phase 11 note): the DB currently RECORDS the hold at submit
+// (create_reservation sets payments.payment_status = 'authorized_held'), per
+// DATABASE_SCHEMA.md open decision #5. The live-integration direction is to
+// place the REAL Stripe hold at caregiver APPROVAL instead (authorizeHold in
+// lib/payments, wired in transitionReservation), so no Stripe stub is called
+// here. Phase 11 must reconcile the recorded status with the real hold moment.
 export async function createReservation(
   supabase: SupabaseClient,
   input: CreateReservationInput,

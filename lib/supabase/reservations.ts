@@ -1,4 +1,9 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import {
+  authorizeHold,
+  capturePayment,
+  refundPayment,
+} from "@/lib/payments";
 
 // Data layer for the elder + caregiver reservation views (Phase 8).
 //
@@ -216,7 +221,30 @@ export async function transitionReservation(
   }
 
   const result = (data as { status?: string } | null) ?? null;
-  return { status: (result?.status as ReservationStatus) ?? null, errorMessage: null };
+  const status = (result?.status as ReservationStatus) ?? null;
+
+  // Phase 11 wiring points: the future Stripe calls attach to the transition
+  // that just succeeded. Today these are documented safe no-op stubs
+  // (lib/payments) — no network call, no money moves — so the existing
+  // no-money flows behave exactly as before. Hold on APPROVE, capture+release
+  // on COMPLETE, void/refund on REJECT/CANCEL; "report" keeps funds held, so
+  // nothing is called for it (the admin's resolveDispute decides later).
+  if (status) {
+    try {
+      if (action === "approve") {
+        await authorizeHold({ reservationId });
+      } else if (action === "complete") {
+        await capturePayment({ reservationId });
+      } else if (action === "reject" || action === "cancel") {
+        await refundPayment({ reservationId });
+      }
+    } catch {
+      // The payment scaffold must never block a reservation transition that
+      // already succeeded. Stubs don't throw; this is defence-in-depth.
+    }
+  }
+
+  return { status, errorMessage: null };
 }
 
 // MVP completion detection (no background job): advance the caller's own
